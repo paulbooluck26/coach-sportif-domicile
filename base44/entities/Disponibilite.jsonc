@@ -1,0 +1,30 @@
+{
+  "name": "Disponibilite",
+  "type": "object",
+  "properties": {
+    "day_of_week": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 6,
+      "title": "Jour (0=Dim)"
+    },
+    "start_time": {
+      "type": "string",
+      "title": "D\u00e9but"
+    },
+    "end_time": {
+      "type": "string",
+      "title": "Fin"
+    },
+    "is_available": {
+      "type": "boolean",
+      "default": true,
+      "title": "Disponible"
+    }
+  },
+  "required": [
+    "day_of_week",
+    "start_time",
+    "end_time"
+  ]
+}

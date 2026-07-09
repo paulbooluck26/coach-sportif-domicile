@@ -1,0 +1,311 @@
+import { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
+import { Check, ChevronLeft, ChevronRight, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, Clock, MapPin } from "lucide-react";
+
+const TYPES = [
+  { id: "seance_individuelle", nom: "Séance individuelle", desc: "60 min à domicile", prix: 70, duree: 60 },
+  { id: "programme_personnalise", nom: "Programme complet", desc: "8 semaines + 8 séances", prix: 450, duree: 60 },
+  { id: "evaluation", nom: "Séance d'évaluation", desc: "Bilan initial 45 min", prix: 50, duree: 45 },
+];
+
+const CRENEAUX = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
+
+export default function Reservation() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
+  const [type, setType] = useState(null);
+  const [date, setDate] = useState(null);
+  const [heure, setHeure] = useState(null);
+  const [adresse, setAdresse] = useState("");
+  const [card, setCard] = useState({ number: "", expiry: "", cvc: "", name: "" });
+  const [paying, setPaying] = useState(false);
+  const [confirmed, setConfirmed] = useState(null);
+
+  // Calendar state
+  const [calMonth, setCalMonth] = useState(() => {
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  });
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-6">
+        <div className="text-center max-w-md">
+          <h1 className="font-heading text-2xl font-bold text-foreground mb-3">Connexion requise</h1>
+          <p className="text-muted-foreground mb-8">Vous devez créer un compte ou vous connecter pour réserver une séance.</p>
+          <div className="flex gap-3 justify-center">
+            <Link to="/login" className="bg-primary text-primary-foreground px-6 py-3 rounded-md font-semibold text-sm">Se connecter</Link>
+            <Link to="/register" className="border border-border px-6 py-3 rounded-md font-semibold text-sm text-foreground">Créer un compte</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const handlePay = async () => {
+    setPaying(true);
+    try {
+      const typeData = TYPES.find(t => t.id === type);
+      const seance = await base44.entities.Seance.create({
+        client_user_id: user.id,
+        client_nom: user.full_name || user.email,
+        type_seance: type,
+        date,
+        heure,
+        duree: typeData.duree,
+        statut: "confirmee",
+        montant: typeData.prix,
+        paiement_statut: "paye",
+        lieu: adresse || "Domicile",
+      });
+      await base44.entities.Paiement.create({
+        seance_id: seance.id,
+        client_user_id: user.id,
+        client_nom: user.full_name || user.email,
+        montant: typeData.prix,
+        date_paiement: new Date().toISOString(),
+        methode: "carte",
+        statut: "reussi",
+        reference: "SIM-" + Date.now(),
+      });
+      // ensure client profile exists
+      const profiles = await base44.entities.ClientProfile.filter({ user_id: user.id });
+      if (profiles.length === 0) {
+        await base44.entities.ClientProfile.create({ user_id: user.id, nom: user.full_name || "", email: user.email, adresse });
+      } else if (adresse) {
+        await base44.entities.ClientProfile.update(profiles[0].id, { adresse });
+      }
+      setConfirmed({ seance, typeData });
+    } catch (err) {
+      alert("Erreur lors du paiement. Veuillez réessayer.");
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  if (confirmed) {
+    const { seance, typeData } = confirmed;
+    return (
+      <div className="min-h-screen bg-secondary/20 flex items-center justify-center px-6 py-20">
+        <div className="max-w-lg w-full bg-card border border-border rounded-lg p-10 text-center">
+          <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-8 h-8 text-accent" />
+          </div>
+          <h1 className="font-heading text-3xl font-bold text-foreground mb-3">Réservation confirmée</h1>
+          <p className="text-foreground/60 mb-8">Votre paiement de <strong className="text-foreground">{typeData.prix}€</strong> a été validé. Un email de confirmation vous a été envoyé.</p>
+          <div className="bg-secondary/40 rounded-md p-6 text-left mb-8 space-y-3">
+            <p className="flex items-center gap-3 text-sm text-foreground/80"><CalendarDays className="w-4 h-4 text-accent" /> {formatDate(seance.date)}</p>
+            <p className="flex items-center gap-3 text-sm text-foreground/80"><Clock className="w-4 h-4 text-accent" /> {seance.heure} · {seance.duree} min</p>
+            <p className="flex items-center gap-3 text-sm text-foreground/80"><MapPin className="w-4 h-4 text-accent" /> {seance.lieu}</p>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => navigate("/espace-client/seances")} className="flex-1 bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm">Voir mes séances</button>
+            <button onClick={() => navigate("/espace-client")} className="flex-1 border border-border py-3 rounded-md font-semibold text-sm text-foreground">Tableau de bord</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const steps = ["Séance", "Date & heure", "Détails", "Paiement"];
+  const selectedType = TYPES.find(t => t.id === type);
+
+  return (
+    <div className="min-h-screen bg-secondary/20">
+      <header className="glass-nav px-6 py-4">
+        <div className="mx-auto max-w-3xl flex items-center justify-between">
+          <Link to="/" className="font-heading text-xl font-bold text-primary-foreground">ELAN</Link>
+          <p className="text-sm text-primary-foreground/70">Réservation</p>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-3xl px-6 py-12">
+        {/* Stepper */}
+        <div className="flex items-center justify-between mb-12">
+          {steps.map((s, i) => (
+            <div key={s} className="flex items-center flex-1 last:flex-none">
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${i + 1 < step ? "bg-accent text-accent-foreground" : i + 1 === step ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
+                  {i + 1 < step ? <Check className="w-4 h-4" /> : i + 1}
+                </div>
+                <span className={`text-sm font-medium hidden sm:inline ${i + 1 <= step ? "text-foreground" : "text-muted-foreground"}`}>{s}</span>
+              </div>
+              {i < steps.length - 1 && <div className={`flex-1 h-px mx-3 ${i + 1 < step ? "bg-accent" : "bg-border"}`} />}
+            </div>
+          ))}
+        </div>
+
+        {/* Step 1: Type */}
+        {step === 1 && (
+          <div className="space-y-4">
+            <h2 className="font-heading text-2xl font-bold text-foreground mb-6">Choisissez votre formule</h2>
+            {TYPES.map(t => (
+              <button key={t.id} onClick={() => { setType(t.id); setStep(2); }} className={`w-full text-left bg-card border rounded-lg p-6 hover:border-accent transition-colors ${type === t.id ? "border-accent ring-1 ring-accent" : "border-border"}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-heading font-semibold text-lg text-foreground">{t.nom}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{t.desc}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-heading text-2xl font-bold text-foreground">{t.prix}€</p>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground ml-auto mt-1" />
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Step 2: Date & time */}
+        {step === 2 && (
+          <div className="space-y-6">
+            <h2 className="font-heading text-2xl font-bold text-foreground">Choisissez un créneau</h2>
+            <Calendar calMonth={calMonth} setCalMonth={setCalMonth} date={date} setDate={setDate} />
+            {date && (
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-3">Créneaux disponibles le {formatDate(date)}</p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {CRENEAUX.map(h => (
+                    <button key={h} onClick={() => { setHeure(h); setStep(3); }} className={`py-3 rounded-md text-sm font-medium border transition-colors ${heure === h ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-accent text-foreground"}`}>
+                      {h}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <button onClick={() => setStep(1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="w-4 h-4" /> Retour</button>
+          </div>
+        )}
+
+        {/* Step 3: Details */}
+        {step === 3 && (
+          <div className="space-y-6">
+            <h2 className="font-heading text-2xl font-bold text-foreground">Détails de la séance</h2>
+            <div className="bg-card border border-border rounded-lg p-6 space-y-3">
+              <p className="flex items-center gap-3 text-sm"><CalendarDays className="w-4 h-4 text-accent" /> {formatDate(date)}</p>
+              <p className="flex items-center gap-3 text-sm"><Clock className="w-4 h-4 text-accent" /> {heure} · {selectedType.duree} min</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Adresse de la séance</label>
+              <input value={adresse} onChange={e => setAdresse(e.target.value)} placeholder="123 rue de Paris, 75001 Paris" className="w-full bg-card border border-border rounded-md px-4 py-3 text-foreground focus:outline-none focus:border-accent" />
+              <p className="text-xs text-muted-foreground mt-2">Si vide, l'adresse enregistrée sur votre compte sera utilisée.</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setStep(2)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground px-4 py-3"><ChevronLeft className="w-4 h-4" /> Retour</button>
+              <button onClick={() => setStep(4)} className="flex-1 bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm">Continuer vers le paiement</button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Payment */}
+        {step === 4 && (
+          <div className="space-y-6">
+            <h2 className="font-heading text-2xl font-bold text-foreground">Paiement sécurisé</h2>
+            <div className="bg-card border border-border rounded-lg p-6">
+              <div className="flex items-center justify-between pb-4 border-b border-border mb-4">
+                <div>
+                  <p className="font-heading font-semibold text-foreground">{selectedType.nom}</p>
+                  <p className="text-sm text-muted-foreground">{formatDate(date)} · {heure}</p>
+                </div>
+                <p className="font-heading text-2xl font-bold text-foreground">{selectedType.prix}€</p>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Nom sur la carte</label>
+                  <input value={card.name} onChange={e => setCard({ ...card, name: e.target.value })} placeholder="Jean Dupont" className="w-full border border-border rounded-md px-4 py-3 focus:outline-none focus:border-accent" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Numéro de carte</label>
+                  <div className="relative">
+                    <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <input value={card.number} onChange={e => setCard({ ...card, number: e.target.value })} placeholder="4242 4242 4242 4242" className="w-full border border-border rounded-md pl-10 pr-4 py-3 focus:outline-none focus:border-accent" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Expiration</label>
+                    <input value={card.expiry} onChange={e => setCard({ ...card, expiry: e.target.value })} placeholder="MM/AA" className="w-full border border-border rounded-md px-4 py-3 focus:outline-none focus:border-accent" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">CVC</label>
+                    <input value={card.cvc} onChange={e => setCard({ ...card, cvc: e.target.value })} placeholder="123" className="w-full border border-border rounded-md px-4 py-3 focus:outline-none focus:border-accent" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lock className="w-3.5 h-3.5" /> Paiement chiffré · Annulation gratuite jusqu'à 24h avant</div>
+            <div className="flex gap-3">
+              <button onClick={() => setStep(3)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground px-4 py-3"><ChevronLeft className="w-4 h-4" /> Retour</button>
+              <button onClick={handlePay} disabled={paying} className="flex-1 bg-accent text-accent-foreground py-3.5 rounded-md font-semibold text-sm hover:bg-accent/90 disabled:opacity-50 flex items-center justify-center gap-2">
+                {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Traitement...</> : <><Lock className="w-4 h-4" /> Payer {selectedType.prix}€</>}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Calendar({ calMonth, setCalMonth, date, setDate }) {
+  const year = calMonth.getFullYear();
+  const month = calMonth.getMonth();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startWeekday = (firstDay.getDay() + 6) % 7; // Monday = 0
+  const daysInMonth = lastDay.getDate();
+
+  const monthName = calMonth.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+  const weekdays = ["L", "M", "M", "J", "V", "S", "D"];
+
+  const cells = [];
+  for (let i = 0; i < startWeekday; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cellDate = new Date(year, month, d);
+    cells.push({ d, date: cellDate.toISOString().slice(0, 10), past: cellDate < today, sunday: cellDate.getDay() === 0 });
+  }
+
+  const selectedDateStr = date;
+
+  return (
+    <div className="bg-card border border-border rounded-lg p-6">
+      <div className="flex items-center justify-between mb-6">
+        <button onClick={() => setCalMonth(new Date(year, month - 1, 1))} className="p-2 hover:bg-secondary rounded-md"><ChevronLeft className="w-5 h-5 text-foreground" /></button>
+        <p className="font-heading font-semibold text-foreground capitalize">{monthName}</p>
+        <button onClick={() => setCalMonth(new Date(year, month + 1, 1))} className="p-2 hover:bg-secondary rounded-md"><ChevronRight className="w-5 h-5 text-foreground" /></button>
+      </div>
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {weekdays.map((w, i) => <div key={i} className="text-center text-xs font-semibold text-muted-foreground py-2">{w}</div>)}
+      </div>
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map((cell, i) => {
+          if (!cell) return <div key={i} />;
+          const isSelected = cell.date === selectedDateStr;
+          const isDisabled = cell.past || cell.sunday;
+          return (
+            <button
+              key={i}
+              disabled={isDisabled}
+              onClick={() => setDate(cell.date)}
+              className={`aspect-square rounded-md text-sm font-medium transition-colors ${
+                isSelected ? "cal-day-selected" : isDisabled ? "cal-day-disabled" : "hover:bg-secondary text-foreground"
+              }`}
+            >
+              {cell.d}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function formatDate(d) {
+  return new Date(d).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+}

@@ -1,0 +1,42 @@
+{
+  "name": "DemandeContact",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Nom"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email"
+    },
+    "phone": {
+      "type": "string",
+      "title": "T\u00e9l\u00e9phone"
+    },
+    "goal": {
+      "type": "string",
+      "title": "Objectif"
+    },
+    "message": {
+      "type": "string",
+      "title": "Message"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "nouveau",
+        "en_cours",
+        "traite"
+      ],
+      "default": "nouveau",
+      "title": "Statut"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "message"
+  ]
+}

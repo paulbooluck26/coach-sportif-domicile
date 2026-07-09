@@ -1,0 +1,41 @@
+{
+  "name": "ClientProfile",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID du User associ\u00e9"
+    },
+    "nom": {
+      "type": "string",
+      "description": "Nom complet du client"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "telephone": {
+      "type": "string"
+    },
+    "adresse": {
+      "type": "string",
+      "description": "Adresse d'intervention \u00e0 domicile"
+    },
+    "objectif": {
+      "type": "string",
+      "description": "Objectif principal du client"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notes internes du coach"
+    },
+    "date_naissance": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "nom",
+    "email"
+  ]
+}

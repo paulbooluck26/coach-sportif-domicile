@@ -1,0 +1,47 @@
+{
+  "name": "Paiement",
+  "type": "object",
+  "properties": {
+    "seance_id": {
+      "type": "string",
+      "title": "S\u00e9ance"
+    },
+    "client_id": {
+      "type": "string",
+      "title": "Client"
+    },
+    "client_name": {
+      "type": "string",
+      "title": "Nom du client"
+    },
+    "amount": {
+      "type": "number",
+      "title": "Montant (\u20ac)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "refunded",
+        "failed"
+      ],
+      "default": "pending",
+      "title": "Statut"
+    },
+    "method": {
+      "type": "string",
+      "default": "stripe",
+      "title": "M\u00e9thode"
+    },
+    "stripe_ref": {
+      "type": "string",
+      "title": "R\u00e9f\u00e9rence paiement"
+    }
+  },
+  "required": [
+    "seance_id",
+    "client_id",
+    "amount"
+  ]
+}

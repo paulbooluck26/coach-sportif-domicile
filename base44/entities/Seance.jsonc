@@ -1,0 +1,72 @@
+{
+  "name": "Seance",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Client"
+    },
+    "client_name": {
+      "type": "string",
+      "title": "Nom du client"
+    },
+    "session_type": {
+      "type": "string",
+      "enum": [
+        "seance_individuelle",
+        "programme_personnalise",
+        "evaluation"
+      ],
+      "default": "seance_individuelle",
+      "title": "Type de s\u00e9ance"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "time": {
+      "type": "string",
+      "title": "Heure"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "default": 60,
+      "title": "Dur\u00e9e (min)"
+    },
+    "price": {
+      "type": "number",
+      "title": "Prix (\u20ac)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "booked",
+        "completed",
+        "cancelled",
+        "rescheduled",
+        "no_show"
+      ],
+      "default": "booked",
+      "title": "Statut"
+    },
+    "location": {
+      "type": "string",
+      "title": "Lieu"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes post-s\u00e9ance"
+    },
+    "reminder_sent": {
+      "type": "boolean",
+      "default": false,
+      "title": "Rappel 24h envoy\u00e9"
+    }
+  },
+  "required": [
+    "client_id",
+    "date",
+    "time"
+  ]
+}

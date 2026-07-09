@@ -1,0 +1,35 @@
+{
+  "name": "Programme",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Client assign\u00e9"
+    },
+    "client_name": {
+      "type": "string",
+      "title": "Nom du client"
+    },
+    "name": {
+      "type": "string",
+      "title": "Nom du programme"
+    },
+    "duration_weeks": {
+      "type": "number",
+      "default": 4,
+      "title": "Dur\u00e9e (semaines)"
+    },
+    "objective": {
+      "type": "string",
+      "title": "Objectif"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    }
+  },
+  "required": [
+    "client_id",
+    "name"
+  ]
+}

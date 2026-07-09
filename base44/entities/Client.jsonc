@@ -1,0 +1,35 @@
+{
+  "name": "Client",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "title": "Nom complet"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "title": "Email"
+    },
+    "phone": {
+      "type": "string",
+      "title": "T\u00e9l\u00e9phone"
+    },
+    "goal": {
+      "type": "string",
+      "title": "Objectif"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes du coach"
+    },
+    "address": {
+      "type": "string",
+      "title": "Adresse domicile"
+    }
+  },
+  "required": [
+    "full_name",
+    "email"
+  ]
+}

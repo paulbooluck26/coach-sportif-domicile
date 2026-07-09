@@ -1,0 +1,40 @@
+{
+  "name": "Exercice",
+  "type": "object",
+  "properties": {
+    "programme_id": {
+      "type": "string",
+      "title": "Programme"
+    },
+    "name": {
+      "type": "string",
+      "title": "Nom de l'exercice"
+    },
+    "sets": {
+      "type": "number",
+      "title": "S\u00e9ries"
+    },
+    "reps": {
+      "type": "string",
+      "title": "R\u00e9p\u00e9titions"
+    },
+    "rest_seconds": {
+      "type": "number",
+      "default": 60,
+      "title": "Repos (sec)"
+    },
+    "description": {
+      "type": "string",
+      "title": "Instructions"
+    },
+    "order": {
+      "type": "number",
+      "default": 0,
+      "title": "Ordre"
+    }
+  },
+  "required": [
+    "programme_id",
+    "name"
+  ]
+}

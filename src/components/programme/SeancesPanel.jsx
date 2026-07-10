@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Edit, Dumbbell, Save, X } from "lucide-react";
+import { Plus, Trash2, Edit, Dumbbell, Save, X, Copy } from "lucide-react";
+import { cloneSeance } from "@/lib/programmeClone";
 
 const TYPES = { force: "Force", cardio: "Cardio", mobilite: "Mobilité", recuperation: "Récupération", mixte: "Mixte" };
 const JOURS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
@@ -21,6 +22,8 @@ export default function SeancesPanel({ semaineId, onOpen }) {
   };
   const edit = (s) => { setEditId(s.id); setForm({ titre: s.titre, jour_semaine: s.jour_semaine ?? 1, type_seance: s.type_seance || "force", description: s.description || "" }); setAdding(true); };
   const remove = async (id) => { if (confirm("Supprimer cette séance et tout son contenu ?")) { await base44.entities.SeanceProgramme.delete(id); load(); } };
+
+  const duplicate = async (s) => { await cloneSeance(s, semaineId); load(); };
 
   if (!items) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
@@ -60,6 +63,7 @@ export default function SeancesPanel({ semaineId, onOpen }) {
                 <p className="text-sm text-muted-foreground mt-0.5">{JOURS[s.jour_semaine] || "—"} · <span className="text-accent">{TYPES[s.type_seance] || s.type_seance}</span></p>
               </button>
               <div className="flex gap-1.5">
+                <button onClick={() => duplicate(s)} className="p-1.5 text-muted-foreground hover:text-accent" title="Dupliquer"><Copy className="w-4 h-4" /></button>
                 <button onClick={() => edit(s)} className="p-1.5 text-muted-foreground hover:text-accent"><Edit className="w-4 h-4" /></button>
                 <button onClick={() => remove(s.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
               </div>

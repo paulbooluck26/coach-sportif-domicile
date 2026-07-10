@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Edit, Calendar, Save, X } from "lucide-react";
+import { Plus, Trash2, Edit, Calendar, Save, X, Copy } from "lucide-react";
+import { cloneSemaine } from "@/lib/programmeClone";
 
 export default function SemainesPanel({ programmeId, onOpen }) {
   const [items, setItems] = useState(null);
@@ -18,6 +19,8 @@ export default function SemainesPanel({ programmeId, onOpen }) {
   };
   const edit = (s) => { setEditId(s.id); setForm({ numero: s.numero, titre: s.titre || "", objectif: s.objectif || "" }); setAdding(true); };
   const remove = async (id) => { if (confirm("Supprimer cette semaine et tout son contenu ?")) { await base44.entities.Semaine.delete(id); load(); } };
+
+  const duplicate = async (s) => { await cloneSemaine(s, programmeId, (items.length || 0) + 1); load(); };
 
   if (!items) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
@@ -56,6 +59,7 @@ export default function SemainesPanel({ programmeId, onOpen }) {
                 {s.objectif && <p className="text-sm text-muted-foreground mt-0.5">{s.objectif}</p>}
               </button>
               <div className="flex gap-1.5">
+                <button onClick={() => duplicate(s)} className="p-1.5 text-muted-foreground hover:text-accent" title="Dupliquer"><Copy className="w-4 h-4" /></button>
                 <button onClick={() => edit(s)} className="p-1.5 text-muted-foreground hover:text-accent"><Edit className="w-4 h-4" /></button>
                 <button onClick={() => remove(s.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
               </div>

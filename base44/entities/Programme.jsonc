@@ -2,13 +2,16 @@
   "name": "Programme",
   "type": "object",
   "properties": {
-    "client_id": {
-      "type": "string",
-      "title": "Client (user ID)"
+    "client_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Clients (user IDs)"
     },
-    "client_name": {
+    "client_names": {
       "type": "string",
-      "title": "Nom du client"
+      "title": "Noms des clients"
     },
     "name": {
       "type": "string",
@@ -39,7 +42,6 @@
     }
   },
   "required": [
-    "client_id",
     "name"
   ]
 }

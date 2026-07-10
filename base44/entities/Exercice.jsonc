@@ -23,6 +23,10 @@
       "default": 60,
       "title": "Repos (sec)"
     },
+    "intensity": {
+      "type": "string",
+      "title": "Intensit\u00e9"
+    },
     "description": {
       "type": "string",
       "title": "Instructions"

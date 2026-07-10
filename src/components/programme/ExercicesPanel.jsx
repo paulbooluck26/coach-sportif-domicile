@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Edit, Dumbbell, Save, X } from "lucide-react";
+import { Plus, Trash2, Edit, Dumbbell, Save, X, Copy } from "lucide-react";
+import { cloneExercice } from "@/lib/programmeClone";
 
 export default function ExercicesPanel({ blocId }) {
   const [items, setItems] = useState(null);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ name: "", sets: 3, reps: "12", rest_seconds: 60, description: "" });
+  const [form, setForm] = useState({ name: "", sets: 3, reps: "12", rest_seconds: 60, intensity: "", description: "" });
   const [editId, setEditId] = useState(null);
 
   const load = async () => { setItems(await base44.entities.Exercice.filter({ bloc_id: blocId }, "order")); };
@@ -14,10 +15,11 @@ export default function ExercicesPanel({ blocId }) {
   const submit = async () => {
     if (editId) { await base44.entities.Exercice.update(editId, form); setEditId(null); }
     else { await base44.entities.Exercice.create({ ...form, bloc_id: blocId, order: items?.length || 0 }); }
-    setAdding(false); setForm({ name: "", sets: 3, reps: "12", rest_seconds: 60, description: "" }); load();
+    setAdding(false); setForm({ name: "", sets: 3, reps: "12", rest_seconds: 60, intensity: "", description: "" }); load();
   };
-  const edit = (ex) => { setEditId(ex.id); setForm({ name: ex.name, sets: ex.sets || 3, reps: ex.reps || "", rest_seconds: ex.rest_seconds || 60, description: ex.description || "" }); setAdding(true); };
+  const edit = (ex) => { setEditId(ex.id); setForm({ name: ex.name, sets: ex.sets || 3, reps: ex.reps || "", rest_seconds: ex.rest_seconds || 60, intensity: ex.intensity || "", description: ex.description || "" }); setAdding(true); };
   const remove = async (id) => { await base44.entities.Exercice.delete(id); load(); };
+  const duplicate = async (ex) => { await cloneExercice(ex, blocId); load(); };
 
   if (!items) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
@@ -36,6 +38,7 @@ export default function ExercicesPanel({ blocId }) {
             <div><label className="block text-xs font-medium text-muted-foreground mb-1">Répétitions</label><input value={form.reps} onChange={e => setForm({ ...form, reps: e.target.value })} placeholder="12 ou 30s" className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
             <div><label className="block text-xs font-medium text-muted-foreground mb-1">Repos (sec)</label><input type="number" value={form.rest_seconds} onChange={e => setForm({ ...form, rest_seconds: parseInt(e.target.value) || 60 })} className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
           </div>
+          <div><label className="block text-xs font-medium text-muted-foreground mb-1">Intensité (optionnel)</label><input value={form.intensity} onChange={e => setForm({ ...form, intensity: e.target.value })} placeholder='Ex: "à 100%", "2 RIR", "à l&apos;échec"' className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
           <div><label className="block text-xs font-medium text-muted-foreground mb-1">Instructions (optionnel)</label><textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className="w-full border border-border rounded-md px-3 py-2 text-sm resize-none" /></div>
           <div className="flex gap-2">
             <button onClick={submit} disabled={!form.name} className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50"><Save className="w-4 h-4" /> {editId ? "Modifier" : "Ajouter"}</button>
@@ -58,11 +61,12 @@ export default function ExercicesPanel({ blocId }) {
                   <span className="w-7 h-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-sm flex-shrink-0">{i + 1}</span>
                   <div>
                     <p className="font-heading font-semibold text-foreground">{ex.name}</p>
-                    <p className="text-sm text-muted-foreground">{ex.sets} séries × {ex.reps} · {ex.rest_seconds}s repos</p>
+                    <p className="text-sm text-muted-foreground">{ex.sets} séries × {ex.reps} · {ex.rest_seconds}s repos{ex.intensity ? ` · ${ex.intensity}` : ""}</p>
                     {ex.description && <p className="text-sm text-foreground/60 mt-1">{ex.description}</p>}
                   </div>
                 </div>
                 <div className="flex gap-1.5">
+                  <button onClick={() => duplicate(ex)} className="p-1.5 text-muted-foreground hover:text-accent" title="Dupliquer"><Copy className="w-4 h-4" /></button>
                   <button onClick={() => edit(ex)} className="p-1.5 text-muted-foreground hover:text-accent"><Edit className="w-4 h-4" /></button>
                   <button onClick={() => remove(ex.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
                 </div>

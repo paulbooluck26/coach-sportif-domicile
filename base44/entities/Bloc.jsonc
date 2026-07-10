@@ -19,6 +19,25 @@
       "type": "number",
       "default": 60,
       "title": "Repos entre exercices (sec)"
+    },
+    "rounds": {
+      "type": "number",
+      "default": 1,
+      "title": "Nombre de tours (rounds)"
+    },
+    "rest_between_rounds": {
+      "type": "number",
+      "default": 60,
+      "title": "Repos entre tours"
+    },
+    "rest_between_rounds_unit": {
+      "type": "string",
+      "enum": [
+        "secondes",
+        "minutes"
+      ],
+      "default": "secondes",
+      "title": "Unit\u00e9 du repos entre tours"
     }
   },
   "required": [

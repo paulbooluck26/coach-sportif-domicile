@@ -15,8 +15,8 @@ export default function MonProgramme() {
     if (!user) return;
     (async () => {
       try {
-        const progs = await base44.entities.Programme.filter({ client_id: user.id, statut: "actif" });
-        const prog = progs[0];
+        const progs = await base44.entities.Programme.filter({ statut: "actif" });
+        const prog = progs.find(p => p.client_ids?.includes(user.id));
         if (!prog) { setTree(null); return; }
         const semaines = await base44.entities.Semaine.filter({ programme_id: prog.id }, "numero");
         const seancesArrays = await Promise.all(semaines.map(s => base44.entities.SeanceProgramme.filter({ semaine_id: s.id })));
@@ -117,14 +117,14 @@ export default function MonProgramme() {
                       <div className="space-y-2">
                         {se.blocs.map((bl) => (
                           <div key={bl.id} className="bg-background rounded-lg p-3">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-accent mb-2 flex items-center gap-1.5"><Layers className="w-3 h-3" /> {bl.titre}</p>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-accent mb-2 flex items-center gap-1.5"><Layers className="w-3 h-3" /> {bl.titre}{bl.rounds > 1 && <span className="text-muted-foreground font-normal normal-case tracking-normal"> · {bl.rounds} tours</span>}</p>
                             <div className="space-y-1.5">
                               {bl.exercices.map((ex, i) => (
                                 <div key={ex.id} className="flex items-start gap-2 text-sm">
                                   <span className="w-5 h-5 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">{i + 1}</span>
                                   <div className="flex-1">
                                     <p className="text-foreground font-medium">{ex.name}</p>
-                                    <p className="text-muted-foreground text-xs">{ex.sets} séries × {ex.reps} · {ex.rest_seconds}s repos</p>
+                                    <p className="text-muted-foreground text-xs">{ex.sets} séries × {ex.reps} · {ex.rest_seconds}s repos{ex.intensity ? ` · ${ex.intensity}` : ""}</p>
                                     {ex.description && <p className="text-foreground/50 text-xs mt-0.5">{ex.description}</p>}
                                   </div>
                                 </div>

@@ -23,15 +23,37 @@
       "type": "string",
       "title": "Message"
     },
-    "status": {
+    "statut": {
       "type": "string",
       "enum": [
         "nouveau",
         "en_cours",
-        "traite"
+        "traite",
+        "appel_a_passer",
+        "appel_confirme",
+        "appel_realise",
+        "appel_annule"
       ],
       "default": "nouveau",
       "title": "Statut"
+    },
+    "type_demande": {
+      "type": "string",
+      "enum": [
+        "contact",
+        "appel_decouverte"
+      ],
+      "default": "contact",
+      "title": "Type de demande"
+    },
+    "date_souhaitee": {
+      "type": "string",
+      "format": "date",
+      "title": "Date souhait\u00e9e (appel)"
+    },
+    "heure_souhaitee": {
+      "type": "string",
+      "title": "Heure souhait\u00e9e (appel)"
     }
   },
   "required": [

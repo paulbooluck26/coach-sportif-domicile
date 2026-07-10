@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import { useCreneaux } from "@/hooks/useCreneaux";
+import { creneauxDisponibles } from "@/lib/creneaux";
+import CalendrierDispo from "@/components/CalendrierDispo";
 import { Link, useNavigate } from "react-router-dom";
 import { Check, ChevronLeft, ChevronRight, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, Clock, MapPin } from "lucide-react";
 
@@ -9,8 +12,6 @@ const TYPES = [
   { id: "programme_personnalise", nom: "Programme complet", desc: "8 semaines + 8 séances", prix: 450, duree: 60 },
   { id: "evaluation", nom: "Séance d'évaluation", desc: "Bilan initial 45 min", prix: 50, duree: 45 },
 ];
-
-const CRENEAUX = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
 
 export default function Reservation() {
   const { user } = useAuth();
@@ -23,12 +24,9 @@ export default function Reservation() {
   const [card, setCard] = useState({ number: "", expiry: "", cvc: "", name: "" });
   const [paying, setPaying] = useState(false);
   const [confirmed, setConfirmed] = useState(null);
+  const { recurrentes, blocages, reservees, loading: creneauxLoading } = useCreneaux();
 
-  // Calendar state
-  const [calMonth, setCalMonth] = useState(() => {
-    const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth(), 1);
-  });
+  const slots = date ? creneauxDisponibles(new Date(date + "T00:00:00"), recurrentes, reservees) : [];
 
   if (!user) {
     return (
@@ -163,17 +161,31 @@ export default function Reservation() {
         {step === 2 && (
           <div className="space-y-6">
             <h2 className="font-heading text-2xl font-bold text-foreground">Choisissez un créneau</h2>
-            <Calendar calMonth={calMonth} setCalMonth={setCalMonth} date={date} setDate={setDate} />
+            {creneauxLoading ? (
+              <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>
+            ) : (
+              <CalendrierDispo
+                recurrentes={recurrentes}
+                blocages={blocages}
+                reservees={reservees}
+                value={date}
+                onChange={setDate}
+              />
+            )}
             {date && (
               <div>
                 <p className="text-sm font-semibold text-foreground mb-3">Créneaux disponibles le {formatDate(date)}</p>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {CRENEAUX.map(h => (
-                    <button key={h} onClick={() => { setHeure(h); setStep(3); }} className={`py-3 rounded-md text-sm font-medium border transition-colors ${heure === h ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-accent text-foreground"}`}>
-                      {h}
-                    </button>
-                  ))}
-                </div>
+                {slots.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Aucun créneau disponible ce jour. Choisissez une autre date.</p>
+                ) : (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                    {slots.map(h => (
+                      <button key={h} onClick={() => { setHeure(h); setStep(3); }} className={`py-3 rounded-md text-sm font-medium border transition-colors ${heure === h ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-accent text-foreground"}`}>
+                        {h}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
             <button onClick={() => setStep(1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="w-4 h-4" /> Retour</button>
@@ -245,62 +257,6 @@ export default function Reservation() {
             </div>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function Calendar({ calMonth, setCalMonth, date, setDate }) {
-  const year = calMonth.getFullYear();
-  const month = calMonth.getMonth();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const startWeekday = (firstDay.getDay() + 6) % 7; // Monday = 0
-  const daysInMonth = lastDay.getDate();
-
-  const monthName = calMonth.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
-  const weekdays = ["L", "M", "M", "J", "V", "S", "D"];
-
-  const cells = [];
-  for (let i = 0; i < startWeekday; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) {
-    const cellDate = new Date(year, month, d);
-    cells.push({ d, date: cellDate.toISOString().slice(0, 10), past: cellDate < today, sunday: cellDate.getDay() === 0 });
-  }
-
-  const selectedDateStr = date;
-
-  return (
-    <div className="bg-card border border-border rounded-lg p-6">
-      <div className="flex items-center justify-between mb-6">
-        <button onClick={() => setCalMonth(new Date(year, month - 1, 1))} className="p-2 hover:bg-secondary rounded-md"><ChevronLeft className="w-5 h-5 text-foreground" /></button>
-        <p className="font-heading font-semibold text-foreground capitalize">{monthName}</p>
-        <button onClick={() => setCalMonth(new Date(year, month + 1, 1))} className="p-2 hover:bg-secondary rounded-md"><ChevronRight className="w-5 h-5 text-foreground" /></button>
-      </div>
-      <div className="grid grid-cols-7 gap-1 mb-2">
-        {weekdays.map((w, i) => <div key={i} className="text-center text-xs font-semibold text-muted-foreground py-2">{w}</div>)}
-      </div>
-      <div className="grid grid-cols-7 gap-1">
-        {cells.map((cell, i) => {
-          if (!cell) return <div key={i} />;
-          const isSelected = cell.date === selectedDateStr;
-          const isDisabled = cell.past || cell.sunday;
-          return (
-            <button
-              key={i}
-              disabled={isDisabled}
-              onClick={() => setDate(cell.date)}
-              className={`aspect-square rounded-md text-sm font-medium transition-colors ${
-                isSelected ? "cal-day-selected" : isDisabled ? "cal-day-disabled" : "hover:bg-secondary text-foreground"
-              }`}
-            >
-              {cell.d}
-            </button>
-          );
-        })}
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import Home from '@/pages/Home';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import Reservation from '@/pages/client/Reservation';
+import AppelDecouverte from '@/pages/AppelDecouverte';
 import ClientDashboard from '@/pages/client/ClientDashboard';
 import MesSeances from '@/pages/client/MesSeances';
 import MonProgramme from '@/pages/client/MonProgramme';
@@ -23,6 +24,7 @@ import CoachSeances from '@/pages/coach/CoachSeances';
 import CoachClients from '@/pages/coach/CoachClients';
 import CoachProgrammes from '@/pages/coach/CoachProgrammes';
 import CoachPaiements from '@/pages/coach/CoachPaiements';
+import CoachDisponibilites from '@/pages/coach/CoachDisponibilites';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -54,6 +56,7 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/" element={<Home />} />
       <Route path="/reservation" element={<Reservation />} />
+      <Route path="/appel-decouverte" element={<AppelDecouverte />} />
 
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<ClientLayout />}>
@@ -71,6 +74,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/clients" element={<CoachClients />} />
           <Route path="/admin/programmes" element={<CoachProgrammes />} />
           <Route path="/admin/paiements" element={<CoachPaiements />} />
+          <Route path="/admin/disponibilites" element={<CoachDisponibilites />} />
         </Route>
       </Route>
 

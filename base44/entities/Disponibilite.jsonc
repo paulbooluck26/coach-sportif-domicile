@@ -2,29 +2,44 @@
   "name": "Disponibilite",
   "type": "object",
   "properties": {
-    "day_of_week": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "recurrent",
+        "blocage"
+      ],
+      "description": "recurrent = plage hebdomadaire r\u00e9currente ; blocage = date/period ferme ponctuelle"
+    },
+    "jour_semaine": {
       "type": "number",
+      "description": "0=dimanche, 1=lundi ... 6=samedi. Utilis\u00e9 seulement pour type=recurrent.",
       "minimum": 0,
-      "maximum": 6,
-      "title": "Jour (0=Dim)"
+      "maximum": 6
     },
-    "start_time": {
+    "heure_debut": {
       "type": "string",
-      "title": "D\u00e9but"
+      "description": "Format HH:MM. Utilis\u00e9 pour recurrent (d\u00e9but de plage) et blocage horaire si n\u00e9cessaire."
     },
-    "end_time": {
+    "heure_fin": {
       "type": "string",
-      "title": "Fin"
+      "description": "Format HH:MM. Utilis\u00e9 pour recurrent (fin de plage)."
     },
-    "is_available": {
-      "type": "boolean",
-      "default": true,
-      "title": "Disponible"
+    "date_debut": {
+      "type": "string",
+      "format": "date",
+      "description": "Pour blocage : premier jour ferm\u00e9. Pour recurrent avec fin optionnelle : non utilis\u00e9."
+    },
+    "date_fin": {
+      "type": "string",
+      "format": "date",
+      "description": "Pour blocage : dernier jour ferm\u00e9 (optionnel, si absent = blocage un seul jour)."
+    },
+    "libelle": {
+      "type": "string",
+      "description": "Libell\u00e9 libre (ex : Vacances, Formation, Cong\u00e8s parental)"
     }
   },
   "required": [
-    "day_of_week",
-    "start_time",
-    "end_time"
+    "type"
   ]
 }

@@ -1,4 +1,5 @@
 import { ArrowRight, Home, ClipboardList } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const services = [
   {
@@ -54,6 +55,10 @@ export default function Services() {
                     </li>
                   ))}
                 </ul>
+                <Link to="/reservation" className="inline-flex items-center gap-2 text-sm font-semibold text-secondary hover:gap-3 transition-all">
+                  Réserver une séance
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
             </div>
           ))}

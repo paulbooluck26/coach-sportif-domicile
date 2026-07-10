@@ -56,7 +56,7 @@ export default function PublicNavbar() {
             Mon espace
           </Link>
           <Link
-            to="/reservation"
+            to="/reserver"
             className="px-6 py-2.5 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold hover:scale-105 hover:shadow-lg transition-all duration-300"
           >
             Réserver
@@ -78,7 +78,7 @@ export default function PublicNavbar() {
             ))}
             <div className="h-px bg-accent/30" />
             <Link to={espaceLink} className="text-sm font-medium text-primary/80">Mon espace</Link>
-            <Link to="/reservation" className="px-6 py-3 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold text-center">
+            <Link to="/reserver" className="px-6 py-3 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold text-center">
               Réserver une séance
             </Link>
           </div>

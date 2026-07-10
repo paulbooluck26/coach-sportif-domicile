@@ -29,7 +29,7 @@ export default function Hero() {
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 animate-fade-up" style={{ animationDelay: "0.6s", opacity: 0 }}>
             <Link
-              to="/reservation"
+              to="/reserver"
               className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold hover:scale-105 hover:shadow-2xl transition-all duration-300"
             >
               Commencer ma transformation

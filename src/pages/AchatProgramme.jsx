@@ -2,7 +2,7 @@ import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronLeft, CreditCard, Lock, Loader2, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, CreditCard, Lock, Loader2, CheckCircle2, ClipboardList } from "lucide-react";
 import ProgrammeAccompagnement from "@/components/programme/ProgrammeAccompagnement";
 import ProgrammeCallBooking from "@/components/programme/ProgrammeCallBooking";
 
@@ -118,6 +118,16 @@ export default function AchatProgramme() {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">Prochaine étape</p>
             </div>
             <ProgrammeCallBooking programmeNom={offre.nom} userEmail={user.email} userName={user.full_name || user.email} />
+            <div className="bg-card border border-border rounded-lg p-6">
+              <div className="flex items-start gap-3 mb-3">
+                <ClipboardList className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-heading font-semibold text-foreground">Préparez votre accompagnement</p>
+                  <p className="text-sm text-muted-foreground mt-1">Pour préparer au mieux votre accompagnement, complétez votre Bilan initial avant votre rendez-vous avec votre coach.</p>
+                </div>
+              </div>
+              <Link to="/espace-client/bilan-initial" className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2.5 rounded-md text-sm font-semibold">Remplir mon bilan initial</Link>
+            </div>
           </div>
         </div>
       </div>

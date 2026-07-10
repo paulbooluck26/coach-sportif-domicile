@@ -15,7 +15,8 @@
       "enum": [
         "seance_individuelle",
         "programme_personnalise",
-        "evaluation"
+        "evaluation",
+        "bilan_initial"
       ],
       "default": "seance_individuelle",
       "title": "Type de s\u00e9ance"

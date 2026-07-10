@@ -21,6 +21,7 @@ import Reserver from '@/pages/client/Reserver';
 import Messages from '@/pages/client/Messages';
 import Profil from '@/pages/client/Profil';
 import MonProgramme from '@/pages/client/MonProgramme';
+import BilanInitial from '@/pages/client/BilanInitial';
 import SessionExecution from '@/pages/client/SessionExecution';
 import MesPerformances from '@/pages/client/MesPerformances';
 import AchatProgramme from '@/pages/AchatProgramme';
@@ -75,6 +76,7 @@ const AuthenticatedApp = () => {
         <Route element={<ClientLayout />}>
           <Route path="/espace-client" element={<ClientDashboard />} />
           <Route path="/espace-client/programme" element={<MonProgramme />} />
+          <Route path="/espace-client/bilan-initial" element={<BilanInitial />} />
           <Route path="/espace-client/reserver" element={<Reserver />} />
           <Route path="/espace-client/messages" element={<Messages />} />
           <Route path="/espace-client/profil" element={<Profil />} />

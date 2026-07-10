@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { User, Mail, Phone, MapPin, CreditCard, LogOut, Edit, Save, X, Target, Dumbbell } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { User, Mail, Phone, MapPin, CreditCard, LogOut, Edit, Save, X, Target, Dumbbell, ClipboardList, CheckCircle2 } from "lucide-react";
 
 export default function Profil() {
   const { user, logout } = useAuth();
@@ -12,6 +12,7 @@ export default function Profil() {
   const [programmes, setProgrammes] = useState([]);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
+  const [bilan, setBilan] = useState(null);
 
   const load = async () => {
     if (!user) return;
@@ -29,6 +30,8 @@ export default function Profil() {
       setPaiements(pays);
       const allProgs = await base44.entities.Programme.filter({ statut: "actif" });
       setProgrammes(allProgs.filter(p => p.client_ids?.includes(user.id)));
+      const bilans = await base44.entities.BilanInitial.filter({ created_by_id: user.id }).catch(() => []);
+      setBilan(bilans[0] || null);
     } catch {}
   };
 
@@ -71,6 +74,28 @@ export default function Profil() {
             <p className="flex items-center gap-3 text-sm text-foreground"><Phone className="w-4 h-4 text-muted-foreground" /> {profile.telephone || "—"}</p>
             <p className="flex items-center gap-3 text-sm text-foreground"><MapPin className="w-4 h-4 text-muted-foreground" /> {profile.adresse || "—"}</p>
             {profile.objectif && <p className="flex items-center gap-3 text-sm text-foreground"><Target className="w-4 h-4 text-muted-foreground" /> {profile.objectif}</p>}
+          </div>
+        )}
+      </div>
+
+      <div className="bg-card border border-border rounded-2xl p-5">
+        <h2 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><ClipboardList className="w-4 h-4 text-secondary" /> Bilan initial</h2>
+        {!bilan || bilan.statut === "non_commence" ? (
+          <div>
+            <p className="text-sm text-muted-foreground mb-4">Préparez votre premier échange avec votre coach en renseignant vos informations. Optionnel — vous pouvez aussi en discuter directement ensemble.</p>
+            <Link to="/espace-client/bilan-initial" className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2.5 rounded-lg text-sm font-semibold">Commencer le bilan initial</Link>
+          </div>
+        ) : bilan.statut === "en_cours" ? (
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Bilan en cours — étape {bilan.etape_actuelle || 1} / 7</p>
+            <p className="text-sm text-muted-foreground mb-4">Reprenez là où vous vous êtes arrêté.</p>
+            <Link to="/espace-client/bilan-initial" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg text-sm font-semibold">Reprendre le bilan</Link>
+          </div>
+        ) : (
+          <div>
+            <p className="flex items-center gap-2 text-sm text-secondary mb-1"><CheckCircle2 className="w-4 h-4" /> Bilan complété</p>
+            <p className="text-sm text-muted-foreground mb-4">{bilan.date_remplissage ? `Le ${new Date(bilan.date_remplissage).toLocaleDateString("fr-FR")}` : ""}</p>
+            <Link to="/espace-client/bilan-initial" className="inline-flex items-center gap-2 border border-border px-4 py-2.5 rounded-lg text-sm font-semibold text-foreground">Voir mon bilan</Link>
           </div>
         )}
       </div>

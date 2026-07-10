@@ -4,6 +4,7 @@ import { Star, Flame, Award, Activity, X, Calendar, CheckCircle2, XCircle, Clock
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { loadClientProjection } from "@/lib/projection";
 import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
+import ClientBilan from "@/components/coach/ClientBilan";
 
 const RESSENTI_LABELS = { plus_energique: "Plus énergique 💪", fatigue_satisfait: "Fatigué mais satisfait ✅", tres_fatigue: "Très fatigué 😴", douleur_inconfort: "Douleur / inconfort ⚠️" };
 const STATUS_CFG = { faite: { icon: CheckCircle2, color: "text-secondary", label: "Faite" }, manquee: { icon: XCircle, color: "text-destructive", label: "Manquée" }, a_venir: { icon: Clock, color: "text-accent", label: "À venir" } };
@@ -56,10 +57,13 @@ export default function ClientDetail({ client, onClose }) {
             <button onClick={() => setTab("perf")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "perf" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Performances</button>
             <button onClick={() => setTab("rm")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "rm" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Records (RM)</button>
             <button onClick={() => setTab("assiduite")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "assiduite" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Assiduité</button>
+            <button onClick={() => setTab("bilan")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "bilan" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Bilan initial</button>
           </div>
         </div>
         <div className="px-6 py-6">
-          {isLoading ? (
+          {tab === "bilan" ? (
+            <ClientBilan user_id={client.user_id} />
+          ) : isLoading ? (
             <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>
           ) : (
             <>

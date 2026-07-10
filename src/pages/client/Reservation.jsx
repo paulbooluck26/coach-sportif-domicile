@@ -10,6 +10,7 @@ import { determinerZone, ZONES } from "@/lib/zones";
 
 const TYPES = [
   { id: "seance_individuelle", nom: "Séance individuelle", desc: "60 min à domicile", prix: 70, duree: 60 },
+  { id: "bilan_initial", nom: "Première séance / Bilan initial", desc: "Bilan initial + 1ère séance à domicile", prix: 90, duree: 90 },
   { id: "evaluation", nom: "Séance d'évaluation", desc: "Bilan initial 45 min", prix: 50, duree: 45 },
 ];
 
@@ -125,6 +126,13 @@ export default function Reservation() {
             <p className="flex items-center gap-3 text-sm text-foreground/80"><Clock className="w-4 h-4 text-accent" /> {seance.time} · {seance.duration_minutes} min</p>
             <p className="flex items-center gap-3 text-sm text-foreground/80"><MapPin className="w-4 h-4 text-accent" /> {seance.location}</p>
           </div>
+          {selectedType.id === "bilan_initial" && (
+            <div className="bg-secondary/10 border border-secondary/30 rounded-md p-5 text-left mb-8">
+              <p className="font-heading font-semibold text-foreground mb-1">Préparez votre premier rendez-vous</p>
+              <p className="text-sm text-muted-foreground mb-4">Complétez votre Bilan initial avant votre séance pour que votre coach arrive prêt.</p>
+              <Link to="/espace-client/bilan-initial" className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2.5 rounded-md text-sm font-semibold">Remplir mon bilan initial</Link>
+            </div>
+          )}
           <div className="flex gap-3">
             <button onClick={() => navigate("/espace-client/seances")} className="flex-1 bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm">Voir mes séances</button>
             <button onClick={() => navigate("/espace-client")} className="flex-1 border border-border py-3 rounded-md font-semibold text-sm text-foreground">Tableau de bord</button>

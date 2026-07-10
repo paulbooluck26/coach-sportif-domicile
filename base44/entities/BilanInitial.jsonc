@@ -1,0 +1,184 @@
+{
+  "name": "BilanInitial",
+  "type": "object",
+  "properties": {
+    "statut": {
+      "type": "string",
+      "enum": [
+        "non_commence",
+        "en_cours",
+        "termine"
+      ],
+      "default": "non_commence",
+      "title": "Statut du bilan"
+    },
+    "etape_actuelle": {
+      "type": "number",
+      "default": 1,
+      "title": "\u00c9tape en cours (1-7)"
+    },
+    "date_remplissage": {
+      "type": "string",
+      "format": "date",
+      "title": "Date de remplissage"
+    },
+    "prenom": {
+      "type": "string",
+      "title": "Pr\u00e9nom"
+    },
+    "nom": {
+      "type": "string",
+      "title": "Nom"
+    },
+    "date_naissance": {
+      "type": "string",
+      "format": "date",
+      "title": "Date de naissance"
+    },
+    "sexe": {
+      "type": "string",
+      "title": "Sexe"
+    },
+    "telephone": {
+      "type": "string",
+      "title": "T\u00e9l\u00e9phone"
+    },
+    "adresse": {
+      "type": "string",
+      "title": "Adresse"
+    },
+    "taille_cm": {
+      "type": "number",
+      "title": "Taille (cm)"
+    },
+    "poids_kg": {
+      "type": "number",
+      "title": "Poids (kg)"
+    },
+    "antecedents_medicaux": {
+      "type": "string",
+      "title": "Ant\u00e9c\u00e9dents m\u00e9dicaux"
+    },
+    "blessures": {
+      "type": "string",
+      "title": "Blessures (actuelles/anciennes)"
+    },
+    "douleurs": {
+      "type": "string",
+      "title": "Douleurs \u00e9ventuelles"
+    },
+    "causes_douleurs": {
+      "type": "string",
+      "title": "Causes suppos\u00e9es des douleurs/blessures"
+    },
+    "operations_restrictions": {
+      "type": "string",
+      "title": "Op\u00e9rations / restrictions m\u00e9dicales"
+    },
+    "confirmation_exactitude": {
+      "type": "boolean",
+      "default": false,
+      "title": "Confirmation d'exactitude"
+    },
+    "metier": {
+      "type": "string",
+      "title": "M\u00e9tier"
+    },
+    "activite_quotidienne": {
+      "type": "string",
+      "title": "Activit\u00e9 quotidienne"
+    },
+    "heures_sommeil": {
+      "type": "number",
+      "title": "Heures de sommeil / nuit"
+    },
+    "qualite_sommeil": {
+      "type": "string",
+      "title": "Qualit\u00e9 du sommeil"
+    },
+    "niveau_stress": {
+      "type": "number",
+      "title": "Niveau de stress (1-10)"
+    },
+    "alimentation_actuelle": {
+      "type": "string",
+      "title": "Alimentation actuelle"
+    },
+    "regime_particulier": {
+      "type": "string",
+      "title": "R\u00e9gime particulier"
+    },
+    "objectif_nutritionnel": {
+      "type": "string",
+      "title": "Objectif nutritionnel principal"
+    },
+    "calories_journalieres": {
+      "type": "number",
+      "title": "Calories journali\u00e8res (estimation)"
+    },
+    "activite_sportive_reguliere": {
+      "type": "string",
+      "enum": [
+        "oui",
+        "non"
+      ],
+      "title": "Activit\u00e9 sportive r\u00e9guli\u00e8re"
+    },
+    "activites_pratiquees": {
+      "type": "string",
+      "title": "Activit\u00e9s pratiqu\u00e9es"
+    },
+    "duree_pratique": {
+      "type": "string",
+      "title": "Depuis combien de temps"
+    },
+    "seances_par_semaine": {
+      "type": "number",
+      "title": "S\u00e9ances par semaine"
+    },
+    "duree_seance": {
+      "type": "number",
+      "title": "Dur\u00e9e moyenne d'une s\u00e9ance (min)"
+    },
+    "intensite_habituelle": {
+      "type": "string",
+      "title": "Intensit\u00e9 habituelle"
+    },
+    "objectifs_principaux": {
+      "type": "string",
+      "title": "Objectifs principaux"
+    },
+    "pourquoi_accompagnement": {
+      "type": "string",
+      "title": "Pourquoi un accompagnement aujourd'hui"
+    },
+    "resultats_souhaites": {
+      "type": "string",
+      "title": "R\u00e9sultats souhait\u00e9s"
+    },
+    "seances_souhaitees_par_semaine": {
+      "type": "number",
+      "title": "S\u00e9ances souhait\u00e9es par semaine"
+    },
+    "jours_disponibles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Jours disponibles"
+    },
+    "horaires_disponibles": {
+      "type": "string",
+      "title": "Horaires disponibles"
+    },
+    "attentes_accompagnement": {
+      "type": "string",
+      "title": "Attentes de l'accompagnement"
+    },
+    "critere_reussite": {
+      "type": "string",
+      "title": "Crit\u00e8re de r\u00e9ussite"
+    }
+  },
+  "required": []
+}

@@ -1,0 +1,127 @@
+import { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { CheckCircle2, Send, ChevronRight } from "lucide-react";
+
+export default function ExecutionComplete({ executionId, sessionData, user, onDone }) {
+  const [step, setStep] = useState(1);
+  const [feedback, setFeedback] = useState("");
+  const [messageCoach, setMessageCoach] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [perfData, setPerfData] = useState({});
+
+  const allExercises = sessionData.blocs.flatMap(b =>
+    b.exercices.map(ex => ({ ...ex, bloc_titre: b.titre }))
+  );
+
+  const submitFeedback = async () => {
+    setSaving(true);
+    try {
+      if (executionId) {
+        await base44.entities.ExecutionSeance.update(executionId, { feedback, message_coach: messageCoach });
+      }
+      if (messageCoach.trim()) {
+        await base44.entities.DemandeContact.create({
+          name: user?.full_name || user?.email || "Client",
+          email: user?.email || "",
+          goal: sessionData.seance?.titre || "Séance",
+          message: messageCoach,
+          type_demande: "feedback_seance",
+          statut: "nouveau",
+        });
+      }
+    } catch (e) {}
+    setSaving(false);
+    setStep(2);
+  };
+
+  const submitPerformance = async () => {
+    setSaving(true);
+    try {
+      const records = allExercises
+        .filter(ex => perfData[ex.id] && (perfData[ex.id].actual_sets || perfData[ex.id].actual_reps || perfData[ex.id].actual_weight))
+        .map(ex => ({
+          execution_id: executionId,
+          exercice_id: ex.id,
+          exercice_name: ex.name,
+          planned_sets: ex.sets,
+          planned_reps: ex.reps,
+          planned_intensity: ex.intensity || "",
+          actual_sets: perfData[ex.id]?.actual_sets || 0,
+          actual_reps: perfData[ex.id]?.actual_reps || "",
+          actual_weight: perfData[ex.id]?.actual_weight || 0,
+          notes: "",
+        }));
+      if (records.length > 0 && executionId) {
+        await base44.entities.PerformanceExercice.bulkCreate(records);
+      }
+    } catch (e) {}
+    setSaving(false);
+    onDone();
+  };
+
+  const setPerf = (exId, field, value) => {
+    setPerfData(d => ({ ...d, [exId]: { ...d[exId], [field]: value } }));
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-primary text-primary-foreground overflow-y-auto">
+      <div className="max-w-2xl mx-auto px-6 py-12 min-h-screen flex flex-col">
+        <div className="text-center mb-10">
+          <div className="w-20 h-20 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-10 h-10 text-secondary" />
+          </div>
+          <h1 className="font-heading text-4xl font-bold mb-3">Séance terminée !</h1>
+          <p className="text-primary-foreground/60">Félicitations, vous avez complété votre séance.</p>
+        </div>
+
+        {step === 1 && (
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-semibold mb-2">Ressenti général</label>
+              <textarea value={feedback} onChange={e => setFeedback(e.target.value)} placeholder="Comment vous sentez-vous après cette séance ?" rows={3} className="w-full bg-primary-foreground/5 border border-primary-foreground/15 rounded-lg px-4 py-3 text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary resize-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Message au coach (optionnel)</label>
+              <textarea value={messageCoach} onChange={e => setMessageCoach(e.target.value)} placeholder="Une question, une difficulté, un retour à partager avec votre coach ?" rows={3} className="w-full bg-primary-foreground/5 border border-primary-foreground/15 rounded-lg px-4 py-3 text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary resize-none" />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setStep(2)} className="flex-1 border border-primary-foreground/20 py-3 rounded-md text-sm font-medium hover:bg-primary-foreground/5">Passer</button>
+              <button onClick={submitFeedback} disabled={saving} className="flex-1 bg-secondary text-secondary-foreground py-3 rounded-md text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
+                {saving ? "..." : <>Continuer <ChevronRight className="w-4 h-4" /></>}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-4">
+            <div>
+              <h2 className="font-heading text-xl font-bold mb-1">Vos performances</h2>
+              <p className="text-sm text-primary-foreground/50 mb-4">Renseignez ce que vous avez réellement fait (optionnel — pour le suivi de progression).</p>
+            </div>
+            {allExercises.map((ex, i) => (
+              <div key={ex.id || i} className="bg-primary-foreground/5 border border-primary-foreground/10 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-6 h-6 rounded bg-secondary/20 text-secondary flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
+                  <p className="font-semibold text-sm">{ex.name}</p>
+                </div>
+                <p className="text-xs text-primary-foreground/40 mb-3 pl-8">Prévu: {ex.sets || "—"} séries × {ex.reps || "—"}{ex.intensity ? ` · ${ex.intensity}` : ""}</p>
+                <div className="grid grid-cols-3 gap-2 pl-8">
+                  <input type="number" placeholder="Séries réelles" value={perfData[ex.id]?.actual_sets || ""} onChange={e => setPerf(ex.id, "actual_sets", parseInt(e.target.value) || 0)} className="bg-primary-foreground/5 border border-primary-foreground/15 rounded px-3 py-2 text-sm placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary" />
+                  <input type="text" placeholder="Reps réelles" value={perfData[ex.id]?.actual_reps || ""} onChange={e => setPerf(ex.id, "actual_reps", e.target.value)} className="bg-primary-foreground/5 border border-primary-foreground/15 rounded px-3 py-2 text-sm placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary" />
+                  <input type="number" placeholder="Poids (kg)" value={perfData[ex.id]?.actual_weight || ""} onChange={e => setPerf(ex.id, "actual_weight", parseFloat(e.target.value) || 0)} className="bg-primary-foreground/5 border border-primary-foreground/15 rounded px-3 py-2 text-sm placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary" />
+                </div>
+              </div>
+            ))}
+            <div className="flex gap-3 pt-2">
+              <button onClick={onDone} className="flex-1 border border-primary-foreground/20 py-3 rounded-md text-sm font-medium hover:bg-primary-foreground/5">Plus tard</button>
+              <button onClick={submitPerformance} disabled={saving} className="flex-1 bg-secondary text-secondary-foreground py-3 rounded-md text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
+                {saving ? "..." : <><Send className="w-4 h-4" /> Enregistrer</>}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Inbox, Mail, Phone, Trash2, CalendarDays, Clock, PhoneCall } from "lucide-react";
+import { Inbox, Mail, Phone, Trash2, CalendarDays, Clock, PhoneCall, MessageSquare } from "lucide-react";
 
 const STATUTS_CONTACT = [
   { id: "nouveau", label: "Nouveau", color: "bg-accent/15 text-accent" },
@@ -40,11 +40,12 @@ export default function CoachDemandes() {
 
   if (!demandes) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
-  const contacts = demandes.filter((d) => d.type_demande !== "appel_decouverte");
+  const contacts = demandes.filter((d) => d.type_demande !== "appel_decouverte" && d.type_demande !== "feedback_seance");
   const appels = demandes.filter((d) => d.type_demande === "appel_decouverte");
+  const feedbacks = demandes.filter((d) => d.type_demande === "feedback_seance");
 
-  const listeCourante = tab === "contact" ? contacts : appels;
-  const statutsCourants = tab === "contact" ? STATUTS_CONTACT : STATUTS_APPEL;
+  const listeCourante = tab === "contact" ? contacts : tab === "feedback" ? feedbacks : appels;
+  const statutsCourants = tab === "contact" || tab === "feedback" ? STATUTS_CONTACT : STATUTS_APPEL;
   const filtered = filter === "all" ? listeCourante : listeCourante.filter((d) => d.statut === filter);
 
   return (
@@ -67,6 +68,12 @@ export default function CoachDemandes() {
           className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${tab === "appel" ? "border-accent text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
         >
           <PhoneCall className="w-4 h-4 inline mr-1.5" /> Appels découverte ({appels.length})
+        </button>
+        <button
+          onClick={() => { setTab("feedback"); setFilter("all"); }}
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${tab === "feedback" ? "border-accent text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          <MessageSquare className="w-4 h-4 inline mr-1.5" /> Feedbacks ({feedbacks.length})
         </button>
       </div>
 

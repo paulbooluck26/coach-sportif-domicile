@@ -41,7 +41,8 @@
       "type": "string",
       "enum": [
         "contact",
-        "appel_decouverte"
+        "appel_decouverte",
+        "feedback_seance"
       ],
       "default": "contact",
       "title": "Type de demande"

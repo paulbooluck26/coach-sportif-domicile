@@ -1,0 +1,60 @@
+{
+  "name": "ExecutionSeance",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Client (user ID)"
+    },
+    "client_name": {
+      "type": "string",
+      "title": "Nom du client"
+    },
+    "seance_programme_id": {
+      "type": "string",
+      "title": "S\u00e9ance programme"
+    },
+    "seance_titre": {
+      "type": "string",
+      "title": "Titre de la s\u00e9ance"
+    },
+    "programme_id": {
+      "type": "string",
+      "title": "Programme"
+    },
+    "programme_name": {
+      "type": "string",
+      "title": "Nom du programme"
+    },
+    "date_execution": {
+      "type": "string",
+      "format": "date",
+      "title": "Date"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "en_cours",
+        "termine"
+      ],
+      "default": "en_cours",
+      "title": "Statut"
+    },
+    "duree_minutes": {
+      "type": "number",
+      "title": "Dur\u00e9e r\u00e9elle (min)"
+    },
+    "feedback": {
+      "type": "string",
+      "title": "Ressenti g\u00e9n\u00e9ral"
+    },
+    "message_coach": {
+      "type": "string",
+      "title": "Message au coach"
+    }
+  },
+  "required": [
+    "client_id",
+    "seance_programme_id"
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "name": "PerformanceExercice",
+  "type": "object",
+  "properties": {
+    "execution_id": {
+      "type": "string",
+      "title": "Ex\u00e9cution"
+    },
+    "exercice_id": {
+      "type": "string",
+      "title": "Exercice"
+    },
+    "exercice_name": {
+      "type": "string",
+      "title": "Nom de l'exercice"
+    },
+    "planned_sets": {
+      "type": "number",
+      "title": "S\u00e9ries pr\u00e9vues"
+    },
+    "planned_reps": {
+      "type": "string",
+      "title": "R\u00e9p\u00e9titions pr\u00e9vues"
+    },
+    "planned_intensity": {
+      "type": "string",
+      "title": "Intensit\u00e9 pr\u00e9vue"
+    },
+    "actual_sets": {
+      "type": "number",
+      "title": "S\u00e9ries r\u00e9alis\u00e9es"
+    },
+    "actual_reps": {
+      "type": "string",
+      "title": "R\u00e9p\u00e9titions r\u00e9alis\u00e9es"
+    },
+    "actual_weight": {
+      "type": "number",
+      "title": "Poids utilis\u00e9 (kg)"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "execution_id",
+    "exercice_name"
+  ]
+}

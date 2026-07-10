@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/lib/AuthContext";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
@@ -14,6 +15,8 @@ export default function PublicNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
+  const espaceLink = user ? "/espace-client" : "/login";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
@@ -32,7 +35,7 @@ export default function PublicNavbar() {
       }`}
     >
       <nav className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between">
-        <Link to="/" className="font-heading font-bold text-lg tracking-display text-primary">
+        <Link to="/" className={`font-heading font-bold text-lg tracking-display transition-colors ${scrolled ? "text-primary" : "text-primary-foreground"}`}>
           AURÉLIEN<span className="text-secondary">.</span>
         </Link>
 
@@ -41,7 +44,7 @@ export default function PublicNavbar() {
             <a
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-primary/70 hover:text-secondary transition-colors duration-300"
+              className={`text-sm font-medium transition-colors duration-300 ${scrolled ? "text-primary/70 hover:text-secondary" : "text-primary-foreground/80 hover:text-primary-foreground"}`}
             >
               {l.label}
             </a>
@@ -49,8 +52,8 @@ export default function PublicNavbar() {
         </div>
 
         <div className="hidden lg:flex items-center gap-4">
-          <Link to="/login" className="text-sm font-medium text-primary/70 hover:text-secondary transition-colors">
-            Espace client
+          <Link to={espaceLink} className={`text-sm font-medium transition-colors ${scrolled ? "text-primary/70 hover:text-secondary" : "text-primary-foreground/80 hover:text-primary-foreground"}`}>
+            Mon espace
           </Link>
           <Link
             to="/reservation"
@@ -60,7 +63,7 @@ export default function PublicNavbar() {
           </Link>
         </div>
 
-        <button className="lg:hidden text-primary" onClick={() => setOpen(!open)} aria-label="Menu">
+        <button className={`lg:hidden transition-colors ${scrolled ? "text-primary" : "text-primary-foreground"}`} onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </nav>
@@ -74,7 +77,7 @@ export default function PublicNavbar() {
               </a>
             ))}
             <div className="h-px bg-accent/30" />
-            <Link to="/login" className="text-sm font-medium text-primary/80">Espace client</Link>
+            <Link to={espaceLink} className="text-sm font-medium text-primary/80">Mon espace</Link>
             <Link to="/reservation" className="px-6 py-3 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold text-center">
               Réserver une séance
             </Link>

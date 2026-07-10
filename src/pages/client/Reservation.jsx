@@ -116,7 +116,7 @@ export default function Reservation() {
       <header className="glass-nav px-6 py-4">
         <div className="mx-auto max-w-3xl flex items-center justify-between">
           <Link to="/" className="font-heading text-xl font-bold text-primary-foreground">ELAN</Link>
-          <p className="text-sm text-primary-foreground/70">Réservation</p>
+          <Link to={user ? "/espace-client" : "/login"} className="text-sm font-semibold text-primary-foreground/80 hover:text-primary-foreground border border-primary-foreground/20 px-4 py-1.5 rounded-md hover:bg-primary-foreground/10 transition-colors">Mon espace</Link>
         </div>
       </header>
 

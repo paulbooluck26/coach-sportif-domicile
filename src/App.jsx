@@ -8,6 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import CoachRoute from '@/components/CoachRoute';
+import PublicLayout from '@/components/PublicLayout';
 import ClientLayout from '@/components/ClientLayout';
 import CoachLayout from '@/components/CoachLayout';
 import Home from '@/pages/Home';
@@ -60,10 +61,12 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/" element={<Home />} />
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/appel-decouverte" element={<AppelDecouverte />} />
+        <Route path="/achat-programme" element={<AchatProgramme />} />
+      </Route>
       <Route path="/reservation" element={<Reservation />} />
-      <Route path="/appel-decouverte" element={<AppelDecouverte />} />
-      <Route path="/achat-programme" element={<AchatProgramme />} />
 
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<ClientLayout />}>

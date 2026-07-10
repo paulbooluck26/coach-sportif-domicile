@@ -26,16 +26,19 @@ export default function PublicNavbar() {
 
   useEffect(() => { setOpen(false); }, [location]);
 
+  const isHome = location.pathname === "/";
+  const solid = scrolled || !isHome;
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
+        solid
           ? "bg-background/80 backdrop-blur-md border-b border-accent/30 py-4"
           : "bg-transparent py-6"
       }`}
     >
       <nav className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between">
-        <Link to="/" className={`font-heading font-bold text-lg tracking-display transition-colors ${scrolled ? "text-primary" : "text-primary-foreground"}`}>
+        <Link to="/" className={`font-heading font-bold text-lg tracking-display transition-colors ${solid ? "text-primary" : "text-primary-foreground"}`}>
           The Lab Forge
         </Link>
 
@@ -44,7 +47,7 @@ export default function PublicNavbar() {
             <a
               key={l.href}
               href={l.href}
-              className={`text-sm font-medium transition-colors duration-300 ${scrolled ? "text-primary/70 hover:text-secondary" : "text-primary-foreground/80 hover:text-primary-foreground"}`}
+              className={`text-sm font-medium transition-colors duration-300 ${solid ? "text-primary/70 hover:text-secondary" : "text-primary-foreground/80 hover:text-primary-foreground"}`}
             >
               {l.label}
             </a>
@@ -52,7 +55,7 @@ export default function PublicNavbar() {
         </div>
 
         <div className="hidden lg:flex items-center gap-4">
-          <Link to={espaceLink} className={`text-sm font-medium transition-colors ${scrolled ? "text-primary/70 hover:text-secondary" : "text-primary-foreground/80 hover:text-primary-foreground"}`}>
+          <Link to={espaceLink} className={`text-sm font-medium transition-colors ${solid ? "text-primary/70 hover:text-secondary" : "text-primary-foreground/80 hover:text-primary-foreground"}`}>
             Mon espace
           </Link>
           <Link
@@ -63,7 +66,7 @@ export default function PublicNavbar() {
           </Link>
         </div>
 
-        <button className={`lg:hidden transition-colors ${scrolled ? "text-primary" : "text-primary-foreground"}`} onClick={() => setOpen(!open)} aria-label="Menu">
+        <button className={`lg:hidden transition-colors ${solid ? "text-primary" : "text-primary-foreground"}`} onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </nav>

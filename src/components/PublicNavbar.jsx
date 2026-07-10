@@ -27,6 +27,7 @@ export default function PublicNavbar() {
   useEffect(() => { setOpen(false); }, [location]);
 
   const isHome = location.pathname === "/";
+  const isReserver = location.pathname === "/reserver";
   const solid = scrolled || !isHome;
 
   return (
@@ -58,12 +59,21 @@ export default function PublicNavbar() {
           <Link to={espaceLink} className={`text-sm font-medium transition-colors ${solid ? "text-primary/70 hover:text-secondary" : "text-primary-foreground/80 hover:text-primary-foreground"}`}>
             Mon espace
           </Link>
-          <Link
-            to="/reserver"
-            className="px-6 py-2.5 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold hover:scale-105 hover:shadow-lg transition-all duration-300"
-          >
-            Réserver
-          </Link>
+          {isReserver ? (
+            <Link
+              to="/"
+              className="px-6 py-2.5 border border-primary/40 text-primary rounded-full text-sm font-semibold hover:bg-primary/5 transition-all duration-300"
+            >
+              Retour à l'accueil
+            </Link>
+          ) : (
+            <Link
+              to="/reserver"
+              className="px-6 py-2.5 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold hover:scale-105 hover:shadow-lg transition-all duration-300"
+            >
+              Réserver
+            </Link>
+          )}
         </div>
 
         <button className={`lg:hidden transition-colors ${solid ? "text-primary" : "text-primary-foreground"}`} onClick={() => setOpen(!open)} aria-label="Menu">
@@ -81,9 +91,15 @@ export default function PublicNavbar() {
             ))}
             <div className="h-px bg-accent/30" />
             <Link to={espaceLink} className="text-sm font-medium text-primary/80">Mon espace</Link>
-            <Link to="/reserver" className="px-6 py-3 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold text-center">
-              Réserver une séance
-            </Link>
+            {isReserver ? (
+              <Link to="/" className="px-6 py-3 border border-primary/40 text-primary rounded-full text-sm font-semibold text-center">
+                Retour à l'accueil
+              </Link>
+            ) : (
+              <Link to="/reserver" className="px-6 py-3 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold text-center">
+                Réserver une séance
+              </Link>
+            )}
           </div>
         </div>
       )}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Dumbbell, Target, Calendar, ChevronDown, ChevronRight, Layers, Play, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Dumbbell, Target, Calendar, ChevronDown, ChevronRight, Layers, Play, CheckCircle2, XCircle, Clock, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 import { loadClientProjection } from "@/lib/projection";
 import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
@@ -89,9 +89,12 @@ export default function MonProgramme() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-2">Mes programmes</p>
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <h1 className="font-heading text-3xl font-bold text-foreground">{programme.name}</h1>
-          <div className="inline-flex bg-card border border-border rounded-md p-1">
-            <button onClick={() => setView("liste")} className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${view === "liste" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>Liste</button>
-            <button onClick={() => setView("calendrier")} className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${view === "calendrier" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>Calendrier</button>
+          <div className="flex items-center gap-3 flex-wrap">
+            <Link to="/espace-client/performances" className="text-sm font-medium text-accent hover:text-secondary flex items-center gap-1"><TrendingUp className="w-4 h-4" /> Progression</Link>
+            <div className="inline-flex bg-card border border-border rounded-md p-1">
+              <button onClick={() => setView("liste")} className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${view === "liste" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>Liste</button>
+              <button onClick={() => setView("calendrier")} className={`px-4 py-1.5 rounded text-sm font-medium transition-colors ${view === "calendrier" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>Calendrier</button>
+            </div>
           </div>
         </div>
         {view === "liste" && programme.description && <p className="text-foreground/60 mt-2">{programme.description}</p>}

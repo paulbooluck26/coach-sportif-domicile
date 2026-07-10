@@ -16,7 +16,9 @@ import Register from '@/pages/Register';
 import Reservation from '@/pages/client/Reservation';
 import AppelDecouverte from '@/pages/AppelDecouverte';
 import ClientDashboard from '@/pages/client/ClientDashboard';
-import MesSeances from '@/pages/client/MesSeances';
+import Reserver from '@/pages/client/Reserver';
+import Messages from '@/pages/client/Messages';
+import Profil from '@/pages/client/Profil';
 import MonProgramme from '@/pages/client/MonProgramme';
 import SessionExecution from '@/pages/client/SessionExecution';
 import MesPerformances from '@/pages/client/MesPerformances';
@@ -66,11 +68,13 @@ const AuthenticatedApp = () => {
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<ClientLayout />}>
           <Route path="/espace-client" element={<ClientDashboard />} />
-          <Route path="/espace-client/seances" element={<MesSeances />} />
           <Route path="/espace-client/programme" element={<MonProgramme />} />
-          <Route path="/espace-client/seance/:seanceId" element={<SessionExecution />} />
+          <Route path="/espace-client/reserver" element={<Reserver />} />
+          <Route path="/espace-client/messages" element={<Messages />} />
+          <Route path="/espace-client/profil" element={<Profil />} />
           <Route path="/espace-client/performances" element={<MesPerformances />} />
         </Route>
+        <Route path="/espace-client/seance/:seanceId" element={<SessionExecution />} />
       </Route>
 
       <Route element={<CoachRoute />}>

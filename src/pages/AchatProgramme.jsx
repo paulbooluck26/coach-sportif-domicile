@@ -74,12 +74,13 @@ export default function AchatProgramme() {
       });
       await base44.entities.Paiement.create({
         seance_id: "programme-" + Date.now(),
-        client_id: user.id,
-        client_name: user.full_name || user.email,
-        amount: offre.prix,
-        status: "paid",
-        method: "carte",
-        stripe_ref: "SIM-" + Date.now(),
+        client_user_id: user.id,
+        client_nom: user.full_name || user.email,
+        montant: offre.prix,
+        date_paiement: new Date().toISOString(),
+        methode: "carte",
+        statut: "reussi",
+        reference: "SIM-" + Date.now(),
       });
       const profiles = await base44.entities.ClientProfile.filter({ user_id: user.id });
       if (profiles.length === 0) {

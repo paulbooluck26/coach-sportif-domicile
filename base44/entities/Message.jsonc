@@ -1,0 +1,32 @@
+{
+  "name": "Message",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Client (user ID)"
+    },
+    "sender": {
+      "type": "string",
+      "enum": [
+        "client",
+        "coach"
+      ],
+      "title": "Exp\u00e9diteur"
+    },
+    "content": {
+      "type": "string",
+      "title": "Message"
+    },
+    "lu": {
+      "type": "boolean",
+      "default": false,
+      "title": "Lu"
+    }
+  },
+  "required": [
+    "client_id",
+    "sender",
+    "content"
+  ]
+}

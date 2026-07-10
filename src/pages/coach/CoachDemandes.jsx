@@ -98,7 +98,7 @@ export default function CoachDemandes() {
                     </div>
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-3">
                       {d.email && <a href={`mailto:${d.email}`} className="flex items-center gap-1.5 hover:text-accent"><Mail className="w-3.5 h-3.5" /> {d.email}</a>}
-                      {d.telephone && <a href={`tel:${d.telephone}`} className="flex items-center gap-1.5 hover:text-accent"><Phone className="w-3.5 h-3.5" /> {d.telephone}</a>}
+                      {d.phone && <a href={`tel:${d.phone}`} className="flex items-center gap-1.5 hover:text-accent"><Phone className="w-3.5 h-3.5" /> {d.phone}</a>}
                     </div>
                     {tab === "appel" && (d.date_souhaitee || d.heure_souhaitee) && (
                       <div className="flex flex-wrap gap-4 text-sm text-foreground mb-3">
@@ -106,7 +106,7 @@ export default function CoachDemandes() {
                         {d.heure_souhaitee && <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-accent" /> {d.heure_souhaitee}</span>}
                       </div>
                     )}
-                    {d.objectif && <p className="text-sm font-medium text-foreground mb-1">Objectif : {d.objectif}</p>}
+                    {d.goal && <p className="text-sm font-medium text-foreground mb-1">Objectif : {d.goal}</p>}
                     {d.message && <p className="text-sm text-foreground/70">{d.message}</p>}
                   </div>
                   <div className="flex md:flex-col gap-2">

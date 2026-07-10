@@ -12,7 +12,7 @@ export default function AppelDecouverte() {
   const [step, setStep] = useState(1);
   const [date, setDate] = useState(null);
   const [heure, setHeure] = useState(null);
-  const [form, setForm] = useState({ nom: "", email: "", telephone: "", objectif: "", message: "" });
+  const [form, setForm] = useState({ nom: "", email: "", phone: "", goal: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState("");
@@ -27,8 +27,8 @@ export default function AppelDecouverte() {
       await base44.entities.DemandeContact.create({
         name: form.nom,
         email: form.email,
-        telephone: form.telephone,
-        objectif: form.objectif,
+        phone: form.phone,
+        goal: form.goal,
         message: form.message,
         statut: "appel_a_passer",
         type_demande: "appel_decouverte",
@@ -39,8 +39,8 @@ export default function AppelDecouverte() {
       try {
         await base44.integrations.Core.SendEmail({
           to: form.email,
-          subject: "Confirmation de votre appel découverte — Élan Coaching",
-          body: `Bonjour ${form.nom},\n\nVotre appel découverte de 30 minutes est programmé pour le ${new Date(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} à ${heure}.\n\nUn appel téléphonique ou en visio, au choix — je vous contacterai au numéro indiqué.\n\nÀ très vite,\nAurélien`,
+          subject: "Confirmation de votre appel découverte — The Lab Forge",
+          body: `Bonjour ${form.nom},\n\nVotre appel découverte de 30 minutes est programmé pour le ${new Date(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} à ${heure}.\n\nUn appel téléphonique ou en visio, au choix — je vous contacterai au numéro indiqué.\n\nÀ très vite,\nThe Lab Forge`,
         });
       } catch {}
 
@@ -169,10 +169,10 @@ export default function AppelDecouverte() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <Field icon={User} label="Nom complet" value={form.nom} onChange={(v) => setForm({ ...form, nom: v })} required />
-              <Field icon={Phone} label="Téléphone" value={form.telephone} onChange={(v) => setForm({ ...form, telephone: v })} required />
+              <Field icon={Phone} label="Téléphone" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} required />
             </div>
             <Field icon={Mail} label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} required />
-            <Field icon={MessageSquare} label="Votre objectif / votre structure" value={form.objectif} onChange={(v) => setForm({ ...form, objectif: v })} placeholder="Ex : club de rugby, reprise du sport, préparation semi-marathon..." />
+            <Field icon={MessageSquare} label="Votre objectif / votre structure" value={form.goal} onChange={(v) => setForm({ ...form, goal: v })} placeholder="Ex : club de rugby, reprise du sport, préparation semi-marathon..." />
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Message (optionnel)</label>
               <textarea

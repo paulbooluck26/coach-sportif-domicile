@@ -1,0 +1,28 @@
+{
+  "name": "Bloc",
+  "type": "object",
+  "properties": {
+    "seance_programme_id": {
+      "type": "string",
+      "title": "S\u00e9ance"
+    },
+    "titre": {
+      "type": "string",
+      "title": "Titre du bloc"
+    },
+    "ordre": {
+      "type": "number",
+      "default": 0,
+      "title": "Ordre"
+    },
+    "repos_entre_exercices": {
+      "type": "number",
+      "default": 60,
+      "title": "Repos entre exercices (sec)"
+    }
+  },
+  "required": [
+    "seance_programme_id",
+    "titre"
+  ]
+}

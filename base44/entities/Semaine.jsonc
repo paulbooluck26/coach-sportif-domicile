@@ -1,0 +1,27 @@
+{
+  "name": "Semaine",
+  "type": "object",
+  "properties": {
+    "programme_id": {
+      "type": "string",
+      "title": "Programme"
+    },
+    "numero": {
+      "type": "number",
+      "default": 1,
+      "title": "Num\u00e9ro de semaine"
+    },
+    "titre": {
+      "type": "string",
+      "title": "Titre"
+    },
+    "objectif": {
+      "type": "string",
+      "title": "Objectif de la semaine"
+    }
+  },
+  "required": [
+    "programme_id",
+    "numero"
+  ]
+}

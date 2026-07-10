@@ -40,7 +40,7 @@ export default function AppelDecouverte() {
         await base44.integrations.Core.SendEmail({
           to: form.email,
           subject: "Confirmation de votre appel découverte — The Lab Forge",
-          body: `Bonjour ${form.nom},\n\nVotre appel découverte de 30 minutes est programmé pour le ${new Date(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} à ${heure}.\n\nUn appel téléphonique ou en visio, au choix — je vous contacterai au numéro indiqué.\n\nÀ très vite,\nThe Lab Forge`,
+          body: `Bonjour ${form.nom},\n\nVotre appel découverte de 30 minutes est programmé pour le ${new Date(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} à ${heure}.\n\nUn appel téléphonique ou en visio, au choix — je vous contacterai au numéro indiqué.\n\nÀ très vite,\nPaul Booluck, Fondateur The Lab Forge`,
         });
       } catch {}
 

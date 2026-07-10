@@ -2,9 +2,9 @@
   "name": "Exercice",
   "type": "object",
   "properties": {
-    "programme_id": {
+    "bloc_id": {
       "type": "string",
-      "title": "Programme"
+      "title": "Bloc"
     },
     "name": {
       "type": "string",
@@ -34,7 +34,7 @@
     }
   },
   "required": [
-    "programme_id",
+    "bloc_id",
     "name"
   ]
 }

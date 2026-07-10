@@ -1,0 +1,40 @@
+{
+  "name": "SeanceProgramme",
+  "type": "object",
+  "properties": {
+    "semaine_id": {
+      "type": "string",
+      "title": "Semaine"
+    },
+    "titre": {
+      "type": "string",
+      "title": "Titre de la s\u00e9ance"
+    },
+    "jour_semaine": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 6,
+      "title": "Jour (0=dim, 6=sam)"
+    },
+    "type_seance": {
+      "type": "string",
+      "enum": [
+        "force",
+        "cardio",
+        "mobilite",
+        "recuperation",
+        "mixte"
+      ],
+      "default": "force",
+      "title": "Type de s\u00e9ance"
+    },
+    "description": {
+      "type": "string",
+      "title": "Notes / description"
+    }
+  },
+  "required": [
+    "semaine_id",
+    "titre"
+  ]
+}

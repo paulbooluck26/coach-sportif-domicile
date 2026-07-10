@@ -4,7 +4,7 @@
   "properties": {
     "client_id": {
       "type": "string",
-      "title": "Client assign\u00e9"
+      "title": "Client (user ID)"
     },
     "client_name": {
       "type": "string",
@@ -26,6 +26,16 @@
     "description": {
       "type": "string",
       "title": "Description"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "brouillon",
+        "actif",
+        "termine"
+      ],
+      "default": "brouillon",
+      "title": "Statut"
     }
   },
   "required": [

@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Users, Mail, Phone, MapPin, Target, Edit, X, Save } from "lucide-react";
+import { Users, Mail, Phone, MapPin, Target, Edit, X, Save, TrendingUp } from "lucide-react";
+import ClientDetail from "@/components/coach/ClientDetail";
 
 export default function CoachClients() {
   const [clients, setClients] = useState(null);
   const [seances, setSeances] = useState(null);
   const [editing, setEditing] = useState(null);
+  const [detailClient, setDetailClient] = useState(null);
   const [form, setForm] = useState({});
 
   const load = async () => {
@@ -68,6 +70,7 @@ export default function CoachClients() {
                 <div className="flex gap-6 mt-4 pt-4 border-t border-border text-sm">
                   <div><p className="font-heading text-xl font-bold text-foreground">{clientSeances.length}</p><p className="text-xs text-muted-foreground">séances</p></div>
                   <div><p className="font-heading text-xl font-bold text-foreground">{totalDepense}€</p><p className="text-xs text-muted-foreground">total</p></div>
+                  <button onClick={() => setDetailClient(c)} className="ml-auto flex items-center gap-1.5 text-sm font-medium text-accent hover:text-secondary transition-colors"><TrendingUp className="w-4 h-4" /> Suivi détaillé</button>
                 </div>
               </div>
             );
@@ -99,6 +102,7 @@ export default function CoachClients() {
           </div>
         </div>
       )}
+      {detailClient && <ClientDetail client={detailClient} onClose={() => setDetailClient(null)} />}
     </div>
   );
 }

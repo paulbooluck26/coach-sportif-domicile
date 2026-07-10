@@ -9,43 +9,48 @@ const JOURS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "S
 
 export default function MonProgramme() {
   const { user } = useAuth();
-  const [tree, setTree] = useState(undefined);
+  const [programs, setPrograms] = useState(undefined);
+  const [selectedId, setSelectedId] = useState(null);
   const [expanded, setExpanded] = useState({});
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       try {
-        const progs = await base44.entities.Programme.filter({ statut: "actif" });
-        const prog = progs.find(p => p.client_ids?.includes(user.id));
-        if (!prog) { setTree(null); return; }
-        const semaines = await base44.entities.Semaine.filter({ programme_id: prog.id }, "numero");
-        const seancesArrays = await Promise.all(semaines.map(s => base44.entities.SeanceProgramme.filter({ semaine_id: s.id })));
-        const seances = seancesArrays.flat();
-        const blocsArrays = await Promise.all(seances.map(se => base44.entities.Bloc.filter({ seance_programme_id: se.id }, "ordre")));
-        const blocs = blocsArrays.flat();
-        const exosArrays = await Promise.all(blocs.map(b => base44.entities.Exercice.filter({ bloc_id: b.id }, "order")));
-        const exercices = exosArrays.flat();
-        const fullTree = semaines.map(s => ({
-          ...s,
-          seances: seances.filter(se => se.semaine_id === s.id).map(se => ({
-            ...se,
-            blocs: blocs.filter(b => b.seance_programme_id === se.id).map(b => ({
-              ...b,
-              exercices: exercices.filter(ex => ex.bloc_id === b.id),
+        const allProgs = await base44.entities.Programme.filter({ statut: "actif" });
+        const myProgs = allProgs.filter(p => p.client_ids?.includes(user.id));
+        if (myProgs.length === 0) { setPrograms(null); return; }
+        const trees = await Promise.all(myProgs.map(async (prog) => {
+          const semaines = await base44.entities.Semaine.filter({ programme_id: prog.id }, "numero");
+          const seancesArrays = await Promise.all(semaines.map(s => base44.entities.SeanceProgramme.filter({ semaine_id: s.id })));
+          const seances = seancesArrays.flat();
+          const blocsArrays = await Promise.all(seances.map(se => base44.entities.Bloc.filter({ seance_programme_id: se.id }, "ordre")));
+          const blocs = blocsArrays.flat();
+          const exosArrays = await Promise.all(blocs.map(b => base44.entities.Exercice.filter({ bloc_id: b.id }, "order")));
+          const exercices = exosArrays.flat();
+          const fullTree = semaines.map(s => ({
+            ...s,
+            seances: seances.filter(se => se.semaine_id === s.id).map(se => ({
+              ...se,
+              blocs: blocs.filter(b => b.seance_programme_id === se.id).map(b => ({
+                ...b,
+                exercices: exercices.filter(ex => ex.bloc_id === b.id),
+              })),
             })),
-          })),
+          }));
+          return { programme: prog, semaines: fullTree };
         }));
-        setTree({ programme: prog, semaines: fullTree });
-      } catch { setTree(null); }
+        setPrograms(trees);
+        setSelectedId(trees[0].programme.id);
+      } catch { setPrograms(null); }
     })();
   }, [user]);
 
   const toggle = (id) => setExpanded(e => ({ ...e, [id]: !e[id] }));
 
-  if (tree === undefined) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
+  if (programs === undefined) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
-  if (!tree) {
+  if (!programs) {
     return (
       <div className="space-y-8">
         <div>
@@ -61,9 +66,9 @@ export default function MonProgramme() {
     );
   }
 
+  const tree = programs.find(p => p.programme.id === selectedId) || programs[0];
   const { programme, semaines } = tree;
   const totalSeances = semaines.reduce((acc, s) => acc + s.seances.length, 0);
-  const totalExercices = semaines.reduce((acc, s) => acc + s.seances.reduce((a, se) => a + se.blocs.reduce((b, bl) => b + bl.exercices.length, 0), 0), 0);
 
   return (
     <div className="space-y-8">
@@ -72,6 +77,16 @@ export default function MonProgramme() {
         <h1 className="font-heading text-3xl font-bold text-foreground mb-2">{programme.name}</h1>
         {programme.description && <p className="text-foreground/60">{programme.description}</p>}
       </div>
+
+      {programs.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+          {programs.map((p) => (
+            <button key={p.programme.id} onClick={() => setSelectedId(p.programme.id)} className={`px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${p.programme.id === selectedId ? "bg-primary text-primary-foreground" : "bg-card border border-border text-foreground hover:border-accent"}`}>
+              {p.programme.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="grid sm:grid-cols-3 gap-4">
         <div className="bg-card border border-border rounded-lg p-5">

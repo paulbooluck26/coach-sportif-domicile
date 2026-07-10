@@ -1,0 +1,45 @@
+{
+  "name": "RecordPerso",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Client (user ID)"
+    },
+    "mouvement": {
+      "type": "string",
+      "title": "Mouvement"
+    },
+    "valeur": {
+      "type": "number",
+      "title": "Valeur"
+    },
+    "unite": {
+      "type": "string",
+      "enum": [
+        "kg",
+        "reps",
+        "sec",
+        "min",
+        "km"
+      ],
+      "default": "kg",
+      "title": "Unit\u00e9"
+    },
+    "date_record": {
+      "type": "string",
+      "format": "date",
+      "title": "Date du record"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "client_id",
+    "mouvement",
+    "valeur",
+    "date_record"
+  ]
+}

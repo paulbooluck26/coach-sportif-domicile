@@ -9,7 +9,6 @@ import { Check, ChevronLeft, ChevronRight, CreditCard, Lock, Loader2, CheckCircl
 
 const TYPES = [
   { id: "seance_individuelle", nom: "Séance individuelle", desc: "60 min à domicile", prix: 70, duree: 60 },
-  { id: "programme_personnalise", nom: "Programme complet", desc: "8 semaines + 8 séances", prix: 450, duree: 60 },
   { id: "evaluation", nom: "Séance d'évaluation", desc: "Bilan initial 45 min", prix: 50, duree: 45 },
 ];
 

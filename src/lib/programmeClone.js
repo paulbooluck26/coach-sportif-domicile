@@ -8,6 +8,7 @@ export async function cloneExercice(exercice, blocId) {
     reps: exercice.reps,
     rest_seconds: exercice.rest_seconds,
     intensity: exercice.intensity,
+    media_url: exercice.media_url,
     description: exercice.description,
     order: exercice.order,
   });
@@ -34,7 +35,7 @@ export async function cloneSeance(seance, semaineId) {
   const newSe = await base44.entities.SeanceProgramme.create({
     semaine_id: semaineId,
     titre: seance.titre ? `${seance.titre} (copie)` : "",
-    jour_semaine: seance.jour_semaine,
+    jours_semaine: seance.jours_semaine,
     type_seance: seance.type_seance,
     description: seance.description,
   });

@@ -1,23 +1,42 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { CheckCircle2, Send, ChevronRight } from "lucide-react";
+import { CheckCircle2, Send, ChevronRight, Star, Flame } from "lucide-react";
+
+const RESSENTI_OPTIONS = [
+  { value: "plus_energique", label: "Plus énergique", emoji: "💪" },
+  { value: "fatigue_satisfait", label: "Fatigué mais satisfait", emoji: "✅" },
+  { value: "tres_fatigue", label: "Très fatigué", emoji: "😴" },
+  { value: "douleur_inconfort", label: "Douleur / inconfort", emoji: "⚠️" },
+];
+const NOTE_LABELS = ["", "Très difficile", "Difficile", "Correcte", "Bonne", "Excellente"];
+const RPE_LABELS = ["", "Très facile", "Facile", "Modéré", "Difficile", "Maximal"];
 
 export default function ExecutionComplete({ executionId, sessionData, user, onDone }) {
   const [step, setStep] = useState(1);
-  const [feedback, setFeedback] = useState("");
+  const [noteSeance, setNoteSeance] = useState(0);
+  const [hoverNote, setHoverNote] = useState(0);
+  const [rpe, setRpe] = useState(0);
+  const [hoverRpe, setHoverRpe] = useState(0);
+  const [douleur, setDouleur] = useState("");
+  const [ressenti, setRessenti] = useState("");
   const [messageCoach, setMessageCoach] = useState("");
   const [saving, setSaving] = useState(false);
   const [perfData, setPerfData] = useState({});
 
-  const allExercises = sessionData.blocs.flatMap(b =>
-    b.exercices.map(ex => ({ ...ex, bloc_titre: b.titre }))
-  );
+  const allExercises = sessionData.blocs.flatMap(b => b.exercices.map(ex => ({ ...ex, bloc_titre: b.titre })));
 
   const submitFeedback = async () => {
     setSaving(true);
     try {
       if (executionId) {
-        await base44.entities.ExecutionSeance.update(executionId, { feedback, message_coach: messageCoach });
+        await base44.entities.ExecutionSeance.update(executionId, {
+          note_seance: noteSeance,
+          rpe: rpe,
+          douleur: douleur,
+          ressenti: ressenti,
+          feedback: noteSeance ? `Note ${noteSeance}/5${rpe ? `, RPE ${rpe}/5` : ""}${ressenti ? `, ${RESSENTI_OPTIONS.find(r => r.value === ressenti)?.label || ressenti}` : ""}` : "",
+          message_coach: messageCoach,
+        });
       }
       if (messageCoach.trim()) {
         await base44.entities.DemandeContact.create({
@@ -40,16 +59,10 @@ export default function ExecutionComplete({ executionId, sessionData, user, onDo
       const records = allExercises
         .filter(ex => perfData[ex.id] && (perfData[ex.id].actual_sets || perfData[ex.id].actual_reps || perfData[ex.id].actual_weight))
         .map(ex => ({
-          execution_id: executionId,
-          exercice_id: ex.id,
-          exercice_name: ex.name,
-          planned_sets: ex.sets,
-          planned_reps: ex.reps,
-          planned_intensity: ex.intensity || "",
-          actual_sets: perfData[ex.id]?.actual_sets || 0,
-          actual_reps: perfData[ex.id]?.actual_reps || "",
-          actual_weight: perfData[ex.id]?.actual_weight || 0,
-          notes: "",
+          execution_id: executionId, exercice_id: ex.id, exercice_name: ex.name,
+          planned_sets: ex.sets, planned_reps: ex.reps, planned_intensity: ex.intensity || "",
+          actual_sets: perfData[ex.id]?.actual_sets || 0, actual_reps: perfData[ex.id]?.actual_reps || "",
+          actual_weight: perfData[ex.id]?.actual_weight || 0, notes: "",
         }));
       if (records.length > 0 && executionId) {
         await base44.entities.PerformanceExercice.bulkCreate(records);
@@ -59,9 +72,7 @@ export default function ExecutionComplete({ executionId, sessionData, user, onDo
     onDone();
   };
 
-  const setPerf = (exId, field, value) => {
-    setPerfData(d => ({ ...d, [exId]: { ...d[exId], [field]: value } }));
-  };
+  const setPerf = (exId, field, value) => setPerfData(d => ({ ...d, [exId]: { ...d[exId], [field]: value } }));
 
   return (
     <div className="fixed inset-0 z-50 bg-primary text-primary-foreground overflow-y-auto">
@@ -75,15 +86,53 @@ export default function ExecutionComplete({ executionId, sessionData, user, onDo
         </div>
 
         {step === 1 && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div>
-              <label className="block text-sm font-semibold mb-2">Ressenti général</label>
-              <textarea value={feedback} onChange={e => setFeedback(e.target.value)} placeholder="Comment vous sentez-vous après cette séance ?" rows={3} className="w-full bg-primary-foreground/5 border border-primary-foreground/15 rounded-lg px-4 py-3 text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary resize-none" />
+              <label className="block text-sm font-semibold mb-3">Comment as-tu trouvé la séance aujourd'hui ?</label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map(n => (
+                  <button key={n} onClick={() => setNoteSeance(n)} onMouseEnter={() => setHoverNote(n)} onMouseLeave={() => setHoverNote(0)} className="transition-transform hover:scale-110">
+                    <Star className={`w-10 h-10 transition-colors ${(hoverNote || noteSeance) >= n ? "fill-secondary text-secondary" : "text-primary-foreground/20"}`} />
+                  </button>
+                ))}
+              </div>
+              {noteSeance > 0 && <p className="text-sm text-primary-foreground/50 mt-2">{NOTE_LABELS[noteSeance]}</p>}
             </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-3">Quel niveau d'effort as-tu fourni pendant la séance ?</label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map(n => (
+                  <button key={n} onClick={() => setRpe(n)} onMouseEnter={() => setHoverRpe(n)} onMouseLeave={() => setHoverRpe(0)} className="transition-transform hover:scale-110">
+                    <Flame className={`w-10 h-10 transition-colors ${(hoverRpe || rpe) >= n ? "fill-destructive text-destructive" : "text-primary-foreground/20"}`} />
+                  </button>
+                ))}
+              </div>
+              {rpe > 0 && <p className="text-sm text-primary-foreground/50 mt-2">{RPE_LABELS[rpe]}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-2">As-tu ressenti une douleur ou une gêne pendant la séance ?</label>
+              <textarea value={douleur} onChange={e => setDouleur(e.target.value)} placeholder="Décris la douleur ou la gêne (ou laisse vide si aucune)" rows={2} className="w-full bg-primary-foreground/5 border border-primary-foreground/15 rounded-lg px-4 py-3 text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary resize-none" />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-3">Comment te sens-tu après cette séance ?</label>
+              <div className="grid grid-cols-2 gap-2">
+                {RESSENTI_OPTIONS.map(r => (
+                  <button key={r.value} onClick={() => setRessenti(r.value)} className={`flex items-center gap-2 px-4 py-3 rounded-lg border transition-colors text-sm ${ressenti === r.value ? "border-secondary bg-secondary/15" : "border-primary-foreground/15 hover:border-primary-foreground/30"}`}>
+                    <span className="text-xl">{r.emoji}</span>
+                    <span className="text-left">{r.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-semibold mb-2">Message au coach (optionnel)</label>
-              <textarea value={messageCoach} onChange={e => setMessageCoach(e.target.value)} placeholder="Une question, une difficulté, un retour à partager avec votre coach ?" rows={3} className="w-full bg-primary-foreground/5 border border-primary-foreground/15 rounded-lg px-4 py-3 text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary resize-none" />
+              <textarea value={messageCoach} onChange={e => setMessageCoach(e.target.value)} placeholder="Une question, une difficulté, un retour à partager ?" rows={3} className="w-full bg-primary-foreground/5 border border-primary-foreground/15 rounded-lg px-4 py-3 text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary resize-none" />
             </div>
+
             <div className="flex gap-3">
               <button onClick={() => setStep(2)} className="flex-1 border border-primary-foreground/20 py-3 rounded-md text-sm font-medium hover:bg-primary-foreground/5">Passer</button>
               <button onClick={submitFeedback} disabled={saving} className="flex-1 bg-secondary text-secondary-foreground py-3 rounded-md text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50">

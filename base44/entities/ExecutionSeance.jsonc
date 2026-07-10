@@ -44,6 +44,28 @@
       "type": "number",
       "title": "Dur\u00e9e r\u00e9elle (min)"
     },
+    "note_seance": {
+      "type": "number",
+      "title": "Note de la s\u00e9ance (1-5)"
+    },
+    "rpe": {
+      "type": "number",
+      "title": "Effort per\u00e7u RPE (1-5)"
+    },
+    "douleur": {
+      "type": "string",
+      "title": "Douleur ou g\u00eane"
+    },
+    "ressenti": {
+      "type": "string",
+      "enum": [
+        "plus_energique",
+        "fatigue_satisfait",
+        "tres_fatigue",
+        "douleur_inconfort"
+      ],
+      "title": "Ressenti apr\u00e8s s\u00e9ance"
+    },
     "feedback": {
       "type": "string",
       "title": "Ressenti g\u00e9n\u00e9ral"

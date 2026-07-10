@@ -111,7 +111,7 @@ export default function MonProgramme() {
                       <div className="flex items-center gap-2 mb-3 flex-wrap">
                         <Dumbbell className="w-4 h-4 text-secondary" />
                         <p className="font-heading font-semibold text-foreground text-sm">{se.titre}</p>
-                        <span className="text-xs text-muted-foreground">· {JOURS[se.jour_semaine] || "—"}</span>
+                        <span className="text-xs text-muted-foreground">· {se.jours_semaine?.map(j => JOURS[j]).join(", ") || "—"}</span>
                         <span className="text-xs px-2 py-0.5 rounded-full bg-secondary/20 text-secondary font-medium">{TYPES[se.type_seance] || se.type_seance}</span>
                         <Link to={`/espace-client/seance/${se.id}`} className="ml-auto bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5"><Play className="w-3.5 h-3.5" /> Démarrer</Link>
                       </div>

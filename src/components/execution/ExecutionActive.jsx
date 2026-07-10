@@ -34,6 +34,7 @@ export default function ExecutionActive({
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         {phase === "exercise" && (
           <div className="text-center max-w-lg">
+            {currentExercise?.media_url && <img src={currentExercise.media_url} alt={currentExercise?.name} className="w-full max-w-sm h-48 object-cover rounded-xl mb-6" />}
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-3">Exercice en cours</p>
             <h1 className="font-heading text-4xl md:text-5xl font-bold mb-6">{currentExercise?.name}</h1>
             <div className="flex items-center justify-center gap-8 mb-6">

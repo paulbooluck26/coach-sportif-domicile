@@ -10,11 +10,14 @@
       "type": "string",
       "title": "Titre de la s\u00e9ance"
     },
-    "jour_semaine": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 6,
-      "title": "Jour (0=dim, 6=sam)"
+    "jours_semaine": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 6
+      },
+      "title": "Jours de la semaine"
     },
     "type_seance": {
       "type": "string",

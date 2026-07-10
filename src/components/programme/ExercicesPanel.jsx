@@ -6,18 +6,30 @@ import { cloneExercice } from "@/lib/programmeClone";
 export default function ExercicesPanel({ blocId }) {
   const [items, setItems] = useState(null);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ name: "", sets: 3, reps: "12", rest_seconds: 60, intensity: "", description: "" });
+  const [form, setForm] = useState({ name: "", sets: 3, reps: "12", rest_seconds: 60, intensity: "", media_url: "", description: "" });
   const [editId, setEditId] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const load = async () => { setItems(await base44.entities.Exercice.filter({ bloc_id: blocId }, "order")); };
   useEffect(() => { load().catch(() => {}); }, [blocId]);
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setForm(f => ({ ...f, media_url: file_url }));
+    } catch (err) {}
+    setUploading(false);
+  };
+
   const submit = async () => {
     if (editId) { await base44.entities.Exercice.update(editId, form); setEditId(null); }
     else { await base44.entities.Exercice.create({ ...form, bloc_id: blocId, order: items?.length || 0 }); }
-    setAdding(false); setForm({ name: "", sets: 3, reps: "12", rest_seconds: 60, intensity: "", description: "" }); load();
+    setAdding(false); setForm({ name: "", sets: 3, reps: "12", rest_seconds: 60, intensity: "", media_url: "", description: "" }); load();
   };
-  const edit = (ex) => { setEditId(ex.id); setForm({ name: ex.name, sets: ex.sets || 3, reps: ex.reps || "", rest_seconds: ex.rest_seconds || 60, intensity: ex.intensity || "", description: ex.description || "" }); setAdding(true); };
+  const edit = (ex) => { setEditId(ex.id); setForm({ name: ex.name, sets: ex.sets || 3, reps: ex.reps || "", rest_seconds: ex.rest_seconds || 60, intensity: ex.intensity || "", media_url: ex.media_url || "", description: ex.description || "" }); setAdding(true); };
   const remove = async (id) => { await base44.entities.Exercice.delete(id); load(); };
   const duplicate = async (ex) => { await cloneExercice(ex, blocId); load(); };
 
@@ -39,6 +51,18 @@ export default function ExercicesPanel({ blocId }) {
             <div><label className="block text-xs font-medium text-muted-foreground mb-1">Repos (sec)</label><input type="number" value={form.rest_seconds} onChange={e => setForm({ ...form, rest_seconds: parseInt(e.target.value) || 60 })} className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
           </div>
           <div><label className="block text-xs font-medium text-muted-foreground mb-1">Intensité (optionnel)</label><input value={form.intensity} onChange={e => setForm({ ...form, intensity: e.target.value })} placeholder={`Ex: "à 100%", "2 RIR", "à l'échec"`} className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
+          <div>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Image / GIF (optionnel)</label>
+            {form.media_url ? (
+              <div className="relative inline-block">
+                <img src={form.media_url} alt="Aperçu" className="h-28 w-auto rounded-md" />
+                <button onClick={() => setForm(f => ({ ...f, media_url: "" }))} className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1"><X className="w-3.5 h-3.5" /></button>
+              </div>
+            ) : (
+              <input type="file" accept="image/*,image/gif" onChange={handleFileUpload} disabled={uploading} className="text-sm" />
+            )}
+            {uploading && <p className="text-xs text-muted-foreground mt-1">Upload en cours...</p>}
+          </div>
           <div><label className="block text-xs font-medium text-muted-foreground mb-1">Instructions (optionnel)</label><textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className="w-full border border-border rounded-md px-3 py-2 text-sm resize-none" /></div>
           <div className="flex gap-2">
             <button onClick={submit} disabled={!form.name} className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-semibold flex items-center gap-1.5 disabled:opacity-50"><Save className="w-4 h-4" /> {editId ? "Modifier" : "Ajouter"}</button>
@@ -57,12 +81,13 @@ export default function ExercicesPanel({ blocId }) {
           {items.map((ex, i) => (
             <div key={ex.id} className="bg-card border border-border rounded-lg p-5">
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3 flex-1">
+                <div className="flex items-start gap-3 flex-1">
                   <span className="w-7 h-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-sm flex-shrink-0">{i + 1}</span>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-heading font-semibold text-foreground">{ex.name}</p>
                     <p className="text-sm text-muted-foreground">{ex.sets} séries × {ex.reps} · {ex.rest_seconds}s repos{ex.intensity ? ` · ${ex.intensity}` : ""}</p>
                     {ex.description && <p className="text-sm text-foreground/60 mt-1">{ex.description}</p>}
+                    {ex.media_url && <img src={ex.media_url} alt={ex.name} className="h-20 w-auto rounded-md mt-2" />}
                   </div>
                 </div>
                 <div className="flex gap-1.5">

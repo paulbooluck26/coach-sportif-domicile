@@ -5,6 +5,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { playBeep, playDoubleBeep, parseTimeFromReps } from "@/lib/executionAudio";
 import ExecutionActive from "@/components/execution/ExecutionActive";
 import ExecutionComplete from "@/components/execution/ExecutionComplete";
+import ExecutionWelcome from "@/components/execution/ExecutionWelcome";
+import ExecutionBlocIntro from "@/components/execution/ExecutionBlocIntro";
 
 export default function SessionExecution() {
   const { user } = useAuth();
@@ -31,11 +33,7 @@ export default function SessionExecution() {
           })
         );
         setSessionData({ seance, blocs: blocsWithEx });
-        const firstTime = parseTimeFromReps(blocsWithEx[0]?.exercices?.[0]?.reps);
-        setExecState({
-          blocIndex: 0, round: 1, exerciseIndex: 0, phase: "exercise",
-          restRemaining: 0, exerciseTimeRemaining: firstTime > 0 ? firstTime : null, isPaused: false,
-        });
+        setExecState({ blocIndex: 0, round: 1, exerciseIndex: 0, phase: "welcome", restRemaining: 0, exerciseTimeRemaining: null, isPaused: false });
       } catch (e) {
         setSessionData({ error: true });
       }
@@ -56,9 +54,23 @@ export default function SessionExecution() {
     return t > 0 ? t : null;
   };
 
+  const handleStart = () => {
+    startTimeRef.current = Date.now();
+    setExecState(prev => ({ ...prev, phase: "bloc_intro" }));
+  };
+
+  const handleContinueBloc = () => {
+    setExecState(prev => {
+      const bloc = sessionData?.blocs?.[prev.blocIndex];
+      const firstEx = bloc?.exercices?.[0];
+      const firstTime = firstEx ? parseTimeFromReps(firstEx.reps) : 0;
+      return { ...prev, phase: "exercise", exerciseTimeRemaining: firstTime > 0 ? firstTime : null, restRemaining: 0 };
+    });
+  };
+
   const handleNext = () => {
     setExecState(prev => {
-      if (!sessionData || prev.phase === "complete") return prev;
+      if (!sessionData || prev.phase === "complete" || prev.phase === "welcome" || prev.phase === "bloc_intro") return prev;
       const blocs = sessionData.blocs;
       const bloc = blocs[prev.blocIndex];
       const exercises = bloc?.exercices || [];
@@ -70,14 +82,12 @@ export default function SessionExecution() {
       if (prev.phase === "exercise") {
         if (isLastExercise) {
           if (!isLastRound) {
-            const restSecs = bloc.rest_between_rounds_unit === "minutes"
-              ? (bloc.rest_between_rounds || 60) * 60
-              : (bloc.rest_between_rounds || 60);
+            const restSecs = bloc.rest_between_rounds_unit === "minutes" ? (bloc.rest_between_rounds || 60) * 60 : (bloc.rest_between_rounds || 60);
             playBeep();
             return { ...prev, phase: "rest_between_rounds", restRemaining: restSecs, exerciseTimeRemaining: null };
           } else if (!isLastBloc) {
             playBeep();
-            return { ...prev, blocIndex: prev.blocIndex + 1, round: 1, exerciseIndex: 0, phase: "exercise", restRemaining: 0, exerciseTimeRemaining: computeNextTime(blocs, prev.blocIndex + 1, 0) };
+            return { ...prev, blocIndex: prev.blocIndex + 1, round: 1, exerciseIndex: 0, phase: "bloc_intro", restRemaining: 0, exerciseTimeRemaining: null };
           } else {
             playDoubleBeep();
             return { ...prev, phase: "complete", restRemaining: 0, exerciseTimeRemaining: null };
@@ -103,7 +113,7 @@ export default function SessionExecution() {
 
   const handlePrev = () => {
     setExecState(prev => {
-      if (!sessionData || prev.phase === "complete") return prev;
+      if (!sessionData || prev.phase === "complete" || prev.phase === "welcome" || prev.phase === "bloc_intro") return prev;
       const blocs = sessionData.blocs;
       const bloc = blocs[prev.blocIndex];
       const exercises = bloc?.exercices || [];
@@ -127,9 +137,10 @@ export default function SessionExecution() {
         if (prev.blocIndex > 0) {
           const prevBloc = blocs[prev.blocIndex - 1];
           const prevExIdx = (prevBloc?.exercices?.length || 1) - 1;
+          const prevRound = prevBloc?.rounds || 1;
           const ex = prevBloc?.exercices?.[prevExIdx];
           const t = parseTimeFromReps(ex?.reps);
-          return { ...prev, blocIndex: prev.blocIndex - 1, round: prevBloc?.rounds || 1, exerciseIndex: prevExIdx, exerciseTimeRemaining: t > 0 ? t : null };
+          return { ...prev, blocIndex: prev.blocIndex - 1, round: prevRound, exerciseIndex: prevExIdx, phase: "exercise", restRemaining: 0, exerciseTimeRemaining: t > 0 ? t : null };
         }
       }
       return prev;
@@ -138,31 +149,22 @@ export default function SessionExecution() {
 
   const togglePause = () => setExecState(prev => ({ ...prev, isPaused: !prev.isPaused }));
 
-  // Countdown timers
   useEffect(() => {
-    if (execState.isPaused || !sessionData || execState.phase === "complete") return;
-
+    if (execState.isPaused || !sessionData || execState.phase === "complete" || execState.phase === "welcome" || execState.phase === "bloc_intro") return;
     if ((execState.phase === "rest" || execState.phase === "rest_between_rounds") && execState.restRemaining > 0) {
-      const timer = setTimeout(() => {
-        setExecState(prev => ({ ...prev, restRemaining: prev.restRemaining - 1 }));
-      }, 1000);
+      const timer = setTimeout(() => setExecState(prev => ({ ...prev, restRemaining: prev.restRemaining - 1 })), 1000);
       return () => clearTimeout(timer);
     }
-
     if (execState.phase === "exercise" && execState.exerciseTimeRemaining !== null && execState.exerciseTimeRemaining > 0) {
-      const timer = setTimeout(() => {
-        setExecState(prev => ({ ...prev, exerciseTimeRemaining: prev.exerciseTimeRemaining - 1 }));
-      }, 1000);
+      const timer = setTimeout(() => setExecState(prev => ({ ...prev, exerciseTimeRemaining: prev.exerciseTimeRemaining - 1 })), 1000);
       return () => clearTimeout(timer);
     }
   }, [execState.phase, execState.isPaused, execState.restRemaining, execState.exerciseTimeRemaining, sessionData]);
 
-  // Auto-advance when timers reach 0
   const autoAdvanceRef = useRef(() => {});
   autoAdvanceRef.current = handleNext;
   useEffect(() => {
-    if (execState.isPaused || !sessionData || execState.phase === "complete") return;
-
+    if (execState.isPaused || !sessionData || execState.phase === "complete" || execState.phase === "welcome" || execState.phase === "bloc_intro") return;
     if ((execState.phase === "rest" || execState.phase === "rest_between_rounds") && execState.restRemaining === 0) {
       const t = setTimeout(() => autoAdvanceRef.current(), 100);
       return () => clearTimeout(t);
@@ -173,7 +175,6 @@ export default function SessionExecution() {
     }
   }, [execState.phase, execState.restRemaining, execState.exerciseTimeRemaining, execState.isPaused, sessionData]);
 
-  // Create execution record on completion
   useEffect(() => {
     if (execState.phase !== "complete" || executionId || !user || !sessionData) return;
     (async () => {
@@ -192,54 +193,26 @@ export default function SessionExecution() {
         } catch (e) {}
         const duration = Math.max(1, Math.round((Date.now() - startTimeRef.current) / 60000));
         const exec = await base44.entities.ExecutionSeance.create({
-          client_id: user.id,
-          client_name: user.full_name || user.email,
-          seance_programme_id: seanceId,
-          seance_titre: seance?.titre || "",
-          programme_id: programmeId,
-          programme_name: programmeName,
+          client_id: user.id, client_name: user.full_name || user.email,
+          seance_programme_id: seanceId, seance_titre: seance?.titre || "",
+          programme_id: programmeId, programme_name: programmeName,
           date_execution: new Date().toISOString().split("T")[0],
-          statut: "termine",
-          duree_minutes: duration,
+          statut: "termine", duree_minutes: duration,
         });
         setExecutionId(exec.id);
       } catch (e) {}
     })();
   }, [execState.phase, executionId, user, sessionData, seanceId]);
 
-  if (!sessionData) {
-    return (
-      <div className="fixed inset-0 z-50 bg-primary flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (!sessionData) return <div className="fixed inset-0 z-50 bg-primary flex items-center justify-center"><div className="w-10 h-10 border-4 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /></div>;
 
-  if (sessionData.error) {
-    return (
-      <div className="fixed inset-0 z-50 bg-primary flex items-center justify-center p-6">
-        <div className="text-center text-primary-foreground">
-          <p className="mb-4">Séance introuvable.</p>
-          <button onClick={() => navigate("/espace-client/programme")} className="bg-primary-foreground text-primary px-6 py-3 rounded-md font-semibold">Retour</button>
-        </div>
-      </div>
-    );
-  }
+  if (sessionData.error) return <div className="fixed inset-0 z-50 bg-primary flex items-center justify-center p-6"><div className="text-center text-primary-foreground"><p className="mb-4">Séance introuvable.</p><button onClick={() => navigate("/espace-client/programme")} className="bg-primary-foreground text-primary px-6 py-3 rounded-md font-semibold">Retour</button></div></div>;
 
-  if (sessionData.blocs.length === 0 || sessionData.blocs.every(b => b.exercices.length === 0)) {
-    return (
-      <div className="fixed inset-0 z-50 bg-primary flex items-center justify-center p-6">
-        <div className="text-center text-primary-foreground">
-          <p className="mb-4">Cette séance ne contient aucun exercice.</p>
-          <button onClick={() => navigate("/espace-client/programme")} className="bg-primary-foreground text-primary px-6 py-3 rounded-md font-semibold">Retour au programme</button>
-        </div>
-      </div>
-    );
-  }
+  if (sessionData.blocs.length === 0 || sessionData.blocs.every(b => b.exercices.length === 0)) return <div className="fixed inset-0 z-50 bg-primary flex items-center justify-center p-6"><div className="text-center text-primary-foreground"><p className="mb-4">Cette séance ne contient aucun exercice.</p><button onClick={() => navigate("/espace-client/programme")} className="bg-primary-foreground text-primary px-6 py-3 rounded-md font-semibold">Retour au programme</button></div></div>;
 
-  if (execState.phase === "complete") {
-    return <ExecutionComplete executionId={executionId} sessionData={sessionData} user={user} onDone={() => navigate("/espace-client/programme")} />;
-  }
+  if (execState.phase === "welcome") return <ExecutionWelcome sessionData={sessionData} onStart={handleStart} onExit={() => navigate("/espace-client/programme")} />;
+  if (execState.phase === "bloc_intro") return <ExecutionBlocIntro bloc={currentBloc} totalRounds={totalRounds} onContinue={handleContinueBloc} onExit={() => navigate("/espace-client/programme")} />;
+  if (execState.phase === "complete") return <ExecutionComplete executionId={executionId} sessionData={sessionData} user={user} onDone={() => navigate("/espace-client/programme")} />;
 
   return (
     <ExecutionActive

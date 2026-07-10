@@ -1,0 +1,42 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Client (user ID)"
+    },
+    "titre": {
+      "type": "string",
+      "title": "Titre"
+    },
+    "message": {
+      "type": "string",
+      "title": "Message"
+    },
+    "lu": {
+      "type": "boolean",
+      "default": false,
+      "title": "Lu"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "programme_pret",
+        "info",
+        "rappel"
+      ],
+      "default": "info",
+      "title": "Type"
+    },
+    "lien": {
+      "type": "string",
+      "title": "Lien de navigation"
+    }
+  },
+  "required": [
+    "client_id",
+    "titre",
+    "message"
+  ]
+}

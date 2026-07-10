@@ -1,0 +1,24 @@
+{
+  "name": "ProgrammeAssignation",
+  "type": "object",
+  "properties": {
+    "programme_id": {
+      "type": "string",
+      "title": "Programme"
+    },
+    "client_id": {
+      "type": "string",
+      "title": "Client (user ID)"
+    },
+    "date_debut": {
+      "type": "string",
+      "format": "date",
+      "title": "Date de d\u00e9but"
+    }
+  },
+  "required": [
+    "programme_id",
+    "client_id",
+    "date_debut"
+  ]
+}

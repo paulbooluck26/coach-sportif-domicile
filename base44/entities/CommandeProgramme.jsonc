@@ -1,0 +1,60 @@
+{
+  "name": "CommandeProgramme",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Client (user ID)"
+    },
+    "client_nom": {
+      "type": "string",
+      "title": "Nom du client"
+    },
+    "client_email": {
+      "type": "string",
+      "title": "Email"
+    },
+    "offre": {
+      "type": "string",
+      "enum": [
+        "decouverte",
+        "transformation",
+        "premium"
+      ],
+      "title": "Offre"
+    },
+    "duree_semaines": {
+      "type": "number",
+      "title": "Dur\u00e9e (semaines)"
+    },
+    "montant": {
+      "type": "number",
+      "title": "Montant (\u20ac)"
+    },
+    "date_achat": {
+      "type": "string",
+      "format": "date",
+      "title": "Date d'achat"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "en_preparation",
+        "pret"
+      ],
+      "default": "en_preparation",
+      "title": "Statut"
+    },
+    "programme_id": {
+      "type": "string",
+      "title": "Programme assign\u00e9"
+    }
+  },
+  "required": [
+    "client_id",
+    "offre",
+    "duree_semaines",
+    "montant",
+    "date_achat"
+  ]
+}

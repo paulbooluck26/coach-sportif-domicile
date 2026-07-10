@@ -20,6 +20,9 @@ import MesSeances from '@/pages/client/MesSeances';
 import MonProgramme from '@/pages/client/MonProgramme';
 import SessionExecution from '@/pages/client/SessionExecution';
 import MesPerformances from '@/pages/client/MesPerformances';
+import CalendrierProgramme from '@/pages/client/CalendrierProgramme';
+import AchatProgramme from '@/pages/AchatProgramme';
+import CoachCommandes from '@/pages/coach/CoachCommandes';
 import CoachDashboard from '@/pages/coach/CoachDashboard';
 import CoachDemandes from '@/pages/coach/CoachDemandes';
 import CoachSeances from '@/pages/coach/CoachSeances';
@@ -59,6 +62,7 @@ const AuthenticatedApp = () => {
       <Route path="/" element={<Home />} />
       <Route path="/reservation" element={<Reservation />} />
       <Route path="/appel-decouverte" element={<AppelDecouverte />} />
+      <Route path="/achat-programme" element={<AchatProgramme />} />
 
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<ClientLayout />}>
@@ -67,6 +71,7 @@ const AuthenticatedApp = () => {
           <Route path="/espace-client/programme" element={<MonProgramme />} />
           <Route path="/espace-client/seance/:seanceId" element={<SessionExecution />} />
           <Route path="/espace-client/performances" element={<MesPerformances />} />
+          <Route path="/espace-client/calendrier" element={<CalendrierProgramme />} />
         </Route>
       </Route>
 
@@ -77,6 +82,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/seances" element={<CoachSeances />} />
           <Route path="/admin/clients" element={<CoachClients />} />
           <Route path="/admin/programmes" element={<CoachProgrammes />} />
+          <Route path="/admin/commandes" element={<CoachCommandes />} />
           <Route path="/admin/paiements" element={<CoachPaiements />} />
           <Route path="/admin/disponibilites" element={<CoachDisponibilites />} />
         </Route>

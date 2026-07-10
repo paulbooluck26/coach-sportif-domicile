@@ -1,67 +1,63 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Star, Flame, Award, Activity, X } from "lucide-react";
+import { Star, Flame, Award, Activity, X, Calendar, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { loadClientProjection } from "@/lib/projection";
+import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
 
 const RESSENTI_LABELS = { plus_energique: "Plus énergique 💪", fatigue_satisfait: "Fatigué mais satisfait ✅", tres_fatigue: "Très fatigué 😴", douleur_inconfort: "Douleur / inconfort ⚠️" };
+const STATUS_CFG = { faite: { icon: CheckCircle2, color: "text-secondary", label: "Faite" }, manquee: { icon: XCircle, color: "text-destructive", label: "Manquée" }, a_venir: { icon: Clock, color: "text-accent", label: "À venir" } };
 
 export default function ClientDetail({ client, onClose }) {
   const [tab, setTab] = useState("feedback");
   const [feedbacks, setFeedbacks] = useState(undefined);
   const [perfByExercise, setPerfByExercise] = useState(undefined);
   const [records, setRecords] = useState(undefined);
+  const [projections, setProjections] = useState(undefined);
+  const [selectedDay, setSelectedDay] = useState(null);
 
   useEffect(() => {
     if (!client?.user_id) return;
     (async () => {
       try {
         const execs = await base44.entities.ExecutionSeance.filter({ client_id: client.user_id }, "-date_execution", 50);
-        setFeedbacks(execs.filter(e => e.note_seance || e.rpe || e.ressenti || e.feedback || e.message_coach));
+        setFeedbacks(execs.filter(e => e.note_seance || e.rpe || e.ressenti || e.feedback || e.douleur || e.message_coach));
         const perfsArrays = await Promise.all(execs.map(ex => base44.entities.PerformanceExercice.filter({ execution_id: ex.id })));
         const flat = perfsArrays.flatMap((perfs, i) => perfs.map(p => ({ ...p, date: execs[i].date_execution, seance_titre: execs[i].seance_titre })));
         const byExercise = {};
-        flat.forEach(p => {
-          if (!byExercise[p.exercice_name]) byExercise[p.exercice_name] = [];
-          byExercise[p.exercice_name].push(p);
-        });
+        flat.forEach(p => { if (!byExercise[p.exercice_name]) byExercise[p.exercice_name] = []; byExercise[p.exercice_name].push(p); });
         Object.keys(byExercise).forEach(k => byExercise[k].sort((a, b) => new Date(a.date) - new Date(b.date)));
         setPerfByExercise(byExercise);
         const recs = await base44.entities.RecordPerso.filter({ client_id: client.user_id }, "-date_record");
         setRecords(recs);
-      } catch (e) {
-        setFeedbacks([]); setPerfByExercise({}); setRecords([]);
-      }
+        const projs = await loadClientProjection(client.user_id);
+        setProjections(projs);
+      } catch (e) { setFeedbacks([]); setPerfByExercise({}); setRecords([]); setProjections([]); }
     })();
   }, [client]);
 
   const recordsByMouvement = {};
-  (records || []).forEach(r => {
-    if (!recordsByMouvement[r.mouvement]) recordsByMouvement[r.mouvement] = [];
-    recordsByMouvement[r.mouvement].push(r);
-  });
+  (records || []).forEach(r => { if (!recordsByMouvement[r.mouvement]) recordsByMouvement[r.mouvement] = []; recordsByMouvement[r.mouvement].push(r); });
   Object.keys(recordsByMouvement).forEach(k => recordsByMouvement[k].sort((a, b) => new Date(b.date_record) - new Date(a.date_record)));
 
-  const isLoading = feedbacks === undefined || perfByExercise === undefined || records === undefined;
+  const isLoading = feedbacks === undefined || perfByExercise === undefined || records === undefined || projections === undefined;
+  const stats = projections ? { faite: projections.filter(p => p.status === "faite").length, manquee: projections.filter(p => p.status === "manquee").length, a_venir: projections.filter(p => p.status === "a_venir").length } : { faite: 0, manquee: 0, a_venir: 0 };
 
   return (
     <div className="fixed inset-0 z-50 bg-primary/40 flex items-center justify-center p-6" onClick={onClose}>
       <div className="bg-background rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between z-10">
-          <div>
-            <h3 className="font-heading text-xl font-bold text-foreground">{client?.nom}</h3>
-            <p className="text-sm text-muted-foreground">Suivi détaillé</p>
-          </div>
+          <div><h3 className="font-heading text-xl font-bold text-foreground">{client?.nom}</h3><p className="text-sm text-muted-foreground">Suivi détaillé</p></div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
         </div>
-
         <div className="px-6 pt-4">
-          <div className="flex gap-2 border-b border-border">
-            <button onClick={() => setTab("feedback")} className={`px-4 py-2 text-sm font-medium border-b-2 ${tab === "feedback" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Feedbacks</button>
-            <button onClick={() => setTab("perf")} className={`px-4 py-2 text-sm font-medium border-b-2 ${tab === "perf" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Performances</button>
-            <button onClick={() => setTab("rm")} className={`px-4 py-2 text-sm font-medium border-b-2 ${tab === "rm" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Records (RM)</button>
+          <div className="flex gap-2 border-b border-border overflow-x-auto no-scrollbar">
+            <button onClick={() => setTab("feedback")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "feedback" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Feedbacks</button>
+            <button onClick={() => setTab("perf")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "perf" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Performances</button>
+            <button onClick={() => setTab("rm")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "rm" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Records (RM)</button>
+            <button onClick={() => setTab("assiduite")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "assiduite" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Assiduité</button>
           </div>
         </div>
-
         <div className="px-6 py-6">
           {isLoading ? (
             <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>
@@ -188,6 +184,43 @@ export default function ClientDetail({ client, onClose }) {
                         </div>
                       );
                     })
+                  )}
+                </div>
+              )}
+
+              {tab === "assiduite" && (
+                <div className="space-y-4">
+                  {projections.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">Aucune séance programmée. Le programme doit être actif avec une date de début (assignation).</p>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="bg-card border border-border rounded-lg p-3 text-center"><CheckCircle2 className="w-5 h-5 text-secondary mx-auto mb-1" /><p className="font-heading text-xl font-bold text-foreground">{stats.faite}</p><p className="text-xs text-muted-foreground">faites</p></div>
+                        <div className="bg-card border border-border rounded-lg p-3 text-center"><XCircle className="w-5 h-5 text-destructive mx-auto mb-1" /><p className="font-heading text-xl font-bold text-foreground">{stats.manquee}</p><p className="text-xs text-muted-foreground">manquées</p></div>
+                        <div className="bg-card border border-border rounded-lg p-3 text-center"><Clock className="w-5 h-5 text-accent mx-auto mb-1" /><p className="font-heading text-xl font-bold text-foreground">{stats.a_venir}</p><p className="text-xs text-muted-foreground">à venir</p></div>
+                      </div>
+                      <ProgrammeCalendar projections={projections} onDayClick={(date, dayProjs) => setSelectedDay({ date, projections: dayProjs })} />
+                      {selectedDay && (
+                        <div className="bg-card border border-border rounded-lg p-4">
+                          <p className="font-heading font-semibold text-foreground mb-3">{new Date(selectedDay.date + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</p>
+                          <div className="space-y-2">
+                            {selectedDay.projections.map((p, i) => {
+                              const cfg = STATUS_CFG[p.status];
+                              const Icon = cfg.icon;
+                              return (
+                                <div key={i} className="flex items-center justify-between border border-border rounded p-3">
+                                  <div>
+                                    <p className="text-sm font-medium text-foreground">{p.seance.titre}</p>
+                                    <p className="text-xs text-muted-foreground">{p.programme.name} · Semaine {p.semaine.numero}</p>
+                                  </div>
+                                  <span className={`flex items-center gap-1 text-xs font-medium ${cfg.color}`}><Icon className="w-3.5 h-3.5" /> {cfg.label}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}

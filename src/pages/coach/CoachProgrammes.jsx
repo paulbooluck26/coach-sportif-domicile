@@ -26,7 +26,16 @@ export default function CoachProgrammes() {
     setProgrammes(p);
     setClients(c);
   };
-  useEffect(() => { load().catch(() => {}); }, []);
+  useEffect(() => {
+    load().catch(() => {});
+    const params = new URLSearchParams(window.location.search);
+    const cmdClientId = params.get("client_id");
+    const cmdDuree = params.get("duree");
+    if (cmdClientId) {
+      setEditing({ new: true });
+      setForm({ name: "", description: "", duration_weeks: parseInt(cmdDuree) || 4, objective: "", client_ids: [cmdClientId], statut: "actif" });
+    }
+  }, []);
 
   const startNew = () => { setEditing({ new: true }); setForm(emptyForm); };
   const startEdit = (p) => { setEditing(p); setForm({ name: p.name || "", description: p.description || "", duration_weeks: p.duration_weeks || 4, objective: p.objective || "", client_ids: p.client_ids || [], statut: p.statut || "brouillon" }); };
@@ -38,10 +47,33 @@ export default function CoachProgrammes() {
   const save = async () => {
     const clientNames = form.client_ids.map(id => clients.find(c => c.user_id === id)?.nom).filter(Boolean).join(", ");
     const payload = { ...form, client_names: clientNames };
+    let programmeId;
     if (editing.id) {
       await base44.entities.Programme.update(editing.id, payload);
+      programmeId = editing.id;
     } else {
-      await base44.entities.Programme.create(payload);
+      const created = await base44.entities.Programme.create(payload);
+      programmeId = created.id;
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+    for (const clientId of form.client_ids) {
+      const existing = await base44.entities.ProgrammeAssignation.filter({ programme_id: programmeId, client_id: clientId });
+      if (existing.length === 0) {
+        await base44.entities.ProgrammeAssignation.create({ programme_id: programmeId, client_id: clientId, date_debut: today });
+        const commandes = await base44.entities.CommandeProgramme.filter({ client_id: clientId, statut: "en_preparation" });
+        for (const cmd of commandes) {
+          await base44.entities.CommandeProgramme.update(cmd.id, { statut: "pret", programme_id: programmeId });
+          await base44.entities.Notification.create({
+            client_id: clientId,
+            titre: "Votre programme est prêt !",
+            message: `Votre programme "${form.name}" est désormais disponible. Rendez-vous dans "Mon programme" pour le consulter.`,
+            type: "programme_pret",
+            lien: "/espace-client/programme",
+            lu: false,
+          });
+        }
+      }
     }
     setEditing(null);
     load();

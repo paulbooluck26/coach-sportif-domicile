@@ -1,12 +1,11 @@
 import { Outlet, NavLink, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
-import { LayoutDashboard, Dumbbell, CalendarClock, LogOut, ArrowLeft, TrendingUp, Calendar } from "lucide-react";
+import { LayoutDashboard, Dumbbell, CalendarClock, LogOut, ArrowLeft, TrendingUp } from "lucide-react";
 import NotificationsBell from "@/components/NotificationsBell";
 
 const navItems = [
   { to: "/espace-client", label: "Mes séances", icon: LayoutDashboard, end: true },
-  { to: "/espace-client/programme", label: "Mon programme", icon: Dumbbell },
-  { to: "/espace-client/calendrier", label: "Calendrier", icon: Calendar },
+  { to: "/espace-client/programme", label: "Mes programmes", icon: Dumbbell },
   { to: "/espace-client/performances", label: "Performances", icon: TrendingUp },
   { to: "/reservation", label: "Nouvelle séance", icon: CalendarClock },
 ];

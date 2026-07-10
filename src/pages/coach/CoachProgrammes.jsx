@@ -9,7 +9,7 @@ const STATUTS = {
   termine: { label: "Terminé", color: "bg-primary/10 text-primary/60" },
 };
 
-const emptyForm = { name: "", description: "", duration_weeks: 4, objective: "", client_ids: [], statut: "brouillon" };
+const emptyForm = { name: "", description: "", duration_weeks: 4, objective: "", client_ids: [], statut: "brouillon", date_debut: new Date().toISOString().split("T")[0] };
 
 export default function CoachProgrammes() {
   const [programmes, setProgrammes] = useState(null);
@@ -33,12 +33,12 @@ export default function CoachProgrammes() {
     const cmdDuree = params.get("duree");
     if (cmdClientId) {
       setEditing({ new: true });
-      setForm({ name: "", description: "", duration_weeks: parseInt(cmdDuree) || 4, objective: "", client_ids: [cmdClientId], statut: "actif" });
+      setForm({ name: "", description: "", duration_weeks: parseInt(cmdDuree) || 4, objective: "", client_ids: [cmdClientId], statut: "actif", date_debut: new Date().toISOString().split("T")[0] });
     }
   }, []);
 
   const startNew = () => { setEditing({ new: true }); setForm(emptyForm); };
-  const startEdit = (p) => { setEditing(p); setForm({ name: p.name || "", description: p.description || "", duration_weeks: p.duration_weeks || 4, objective: p.objective || "", client_ids: p.client_ids || [], statut: p.statut || "brouillon" }); };
+  const startEdit = (p) => { setEditing(p); setForm({ name: p.name || "", description: p.description || "", duration_weeks: p.duration_weeks || 4, objective: p.objective || "", client_ids: p.client_ids || [], statut: p.statut || "brouillon", date_debut: new Date().toISOString().split("T")[0] }); };
 
   const toggleClient = (userId) => {
     setForm(f => ({ ...f, client_ids: f.client_ids.includes(userId) ? f.client_ids.filter(id => id !== userId) : [...f.client_ids, userId] }));
@@ -60,7 +60,7 @@ export default function CoachProgrammes() {
     for (const clientId of form.client_ids) {
       const existing = await base44.entities.ProgrammeAssignation.filter({ programme_id: programmeId, client_id: clientId });
       if (existing.length === 0) {
-        await base44.entities.ProgrammeAssignation.create({ programme_id: programmeId, client_id: clientId, date_debut: today });
+        await base44.entities.ProgrammeAssignation.create({ programme_id: programmeId, client_id: clientId, date_debut: form.date_debut || today });
         const commandes = await base44.entities.CommandeProgramme.filter({ client_id: clientId, statut: "en_preparation" });
         for (const cmd of commandes) {
           await base44.entities.CommandeProgramme.update(cmd.id, { statut: "pret", programme_id: programmeId });
@@ -162,6 +162,7 @@ export default function CoachProgrammes() {
                   ))}
                 </div>
               </div>
+              <div><label className="block text-sm font-medium text-foreground mb-1.5">Date de début (nouveaux clients)</label><input type="date" value={form.date_debut || ""} onChange={e => setForm({ ...form, date_debut: e.target.value })} className="w-full border border-border rounded-md px-3 py-2 focus:outline-none focus:border-accent" /><p className="text-xs text-muted-foreground mt-1">Date à laquelle le programme commence pour les clients nouvellement assignés.</p></div>
               <div><label className="block text-sm font-medium text-foreground mb-1.5">Description</label><textarea value={form.description || ""} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className="w-full border border-border rounded-md px-3 py-2 resize-none focus:outline-none focus:border-accent" /></div>
             </div>
             <div className="flex gap-3 mt-6">

@@ -20,7 +20,6 @@ import MesSeances from '@/pages/client/MesSeances';
 import MonProgramme from '@/pages/client/MonProgramme';
 import SessionExecution from '@/pages/client/SessionExecution';
 import MesPerformances from '@/pages/client/MesPerformances';
-import CalendrierProgramme from '@/pages/client/CalendrierProgramme';
 import AchatProgramme from '@/pages/AchatProgramme';
 import CoachCommandes from '@/pages/coach/CoachCommandes';
 import CoachDashboard from '@/pages/coach/CoachDashboard';
@@ -71,7 +70,6 @@ const AuthenticatedApp = () => {
           <Route path="/espace-client/programme" element={<MonProgramme />} />
           <Route path="/espace-client/seance/:seanceId" element={<SessionExecution />} />
           <Route path="/espace-client/performances" element={<MesPerformances />} />
-          <Route path="/espace-client/calendrier" element={<CalendrierProgramme />} />
         </Route>
       </Route>
 

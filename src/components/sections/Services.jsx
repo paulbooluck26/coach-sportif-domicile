@@ -61,7 +61,7 @@ export default function Services() {
                     </li>
                   ))}
                 </ul>
-                <Link to="/reservation" className="inline-flex items-center gap-2 text-sm font-semibold text-secondary hover:gap-3 transition-all">
+                <Link to="/reserver" className="inline-flex items-center gap-2 text-sm font-semibold text-secondary hover:gap-3 transition-all">
                   Réserver une séance
                   <ArrowRight className="w-4 h-4" />
                 </Link>

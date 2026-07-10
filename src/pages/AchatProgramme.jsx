@@ -3,6 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft, CreditCard, Lock, Loader2, CheckCircle2 } from "lucide-react";
+import ProgrammeAccompagnement from "@/components/programme/ProgrammeAccompagnement";
+import ProgrammeCallBooking from "@/components/programme/ProgrammeCallBooking";
 
 const OFFRES = {
   decouverte: { id: "decouverte", nom: "Découverte", duree: 4, prix: 49, desc: "4 semaines pour démarrer et construire de bonnes bases." },
@@ -26,7 +28,8 @@ export default function AchatProgramme() {
         <div className="max-w-4xl mx-auto">
           <button onClick={() => navigate("/espace-client/reserver")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8"><ChevronLeft className="w-4 h-4" /> Retour</button>
           <h1 className="font-heading text-3xl font-bold text-primary mb-2">Programmes en ligne</h1>
-          <p className="text-muted-foreground mb-8">Achetez un programme personnalisé, préparé sur mesure par votre coach. Aucun créneau à réserver — entraînez-vous en autonomie.</p>
+          <p className="text-muted-foreground mb-8">Achetez un programme personnalisé, préparé sur mesure par votre coach. Aucun créneau à réserver — entraînez-vous en autonomie. Chaque programme inclut un accompagnement humain complet : un appel de démarrage, un appel de bilan et une messagerie privée avec votre coach.</p>
+          <ProgrammeAccompagnement className="mb-10" />
           <div className="grid md:grid-cols-3 gap-6">
             {Object.values(OFFRES).map(o => (
               <div key={o.id} className={`bg-card border rounded-2xl p-8 relative ${o.recommande ? "border-secondary shadow-lg" : "border-border"}`}>
@@ -96,16 +99,26 @@ export default function AchatProgramme() {
 
   if (confirmed) {
     return (
-      <div className="min-h-screen bg-secondary/20 flex items-center justify-center px-6 py-20">
-        <div className="max-w-lg w-full bg-card border border-border rounded-lg p-10 text-center">
-          <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="w-8 h-8 text-accent" />
+      <div className="min-h-screen bg-secondary/20 pt-32 pb-20 px-6">
+        <div className="max-w-2xl mx-auto space-y-8">
+          <div className="bg-card border border-border rounded-lg p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="w-8 h-8 text-accent" />
+            </div>
+            <h1 className="font-heading text-3xl font-bold text-foreground mb-3">Commande confirmée</h1>
+            <p className="text-foreground/60 mb-8">Votre achat du programme <strong className="text-foreground">{offre.nom}</strong> ({offre.prix}€) a été validé. Votre coach prépare votre programme personnalisé. Vous serez notifié dès qu'il sera disponible dans votre espace.</p>
+            <div className="flex gap-3">
+              <button onClick={() => navigate("/espace-client")} className="flex-1 bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm">Mon espace</button>
+              <button onClick={() => navigate("/")} className="flex-1 border border-border py-3 rounded-md font-semibold text-sm text-foreground">Accueil</button>
+            </div>
           </div>
-          <h1 className="font-heading text-3xl font-bold text-foreground mb-3">Commande confirmée</h1>
-          <p className="text-foreground/60 mb-8">Votre achat du programme <strong className="text-foreground">{offre.nom}</strong> ({offre.prix}€) a été validé. Votre coach va préparer votre programme personnalisé. Vous recevrez une notification dès qu'il sera disponible.</p>
-          <div className="flex gap-3">
-            <button onClick={() => navigate("/espace-client")} className="flex-1 bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm">Mon espace</button>
-            <button onClick={() => navigate("/")} className="flex-1 border border-border py-3 rounded-md font-semibold text-sm text-foreground">Accueil</button>
+
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">Prochaine étape</p>
+            </div>
+            <ProgrammeCallBooking programmeNom={offre.nom} userEmail={user.email} userName={user.full_name || user.email} />
           </div>
         </div>
       </div>
@@ -118,6 +131,8 @@ export default function AchatProgramme() {
         <button onClick={() => navigate("/achat-programme")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-8"><ChevronLeft className="w-4 h-4" /> Autres offres</button>
         <h1 className="font-heading text-3xl font-bold text-foreground mb-2">Programme {offre.nom}</h1>
         <p className="text-muted-foreground mb-8">{offre.desc} · {offre.duree} semaines</p>
+
+        <ProgrammeAccompagnement className="mb-8" />
 
         <div className="bg-card border border-border rounded-lg p-6 mb-6">
           <div className="flex items-center justify-between pb-4 border-b border-border mb-4">

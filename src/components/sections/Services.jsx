@@ -1,5 +1,6 @@
 import { ArrowRight, Home, ClipboardList } from "lucide-react";
 import { Link } from "react-router-dom";
+import ProgrammeAccompagnement from "@/components/programme/ProgrammeAccompagnement";
 
 const services = [
   {
@@ -76,8 +77,9 @@ export default function Services() {
             <h3 className="text-3xl lg:text-4xl font-heading font-bold text-primary leading-tight">
               Achetez un programme,<br />entraînez-vous en autonomie.
             </h3>
-            <p className="text-muted-foreground mt-4">Programme préparé sur mesure par votre coach. Aucun créneau à réserver — vous vous entraînez quand vous voulez.</p>
+            <p className="text-muted-foreground mt-4">Programme préparé sur mesure par votre coach. Aucun créneau à réserver — vous vous entraînez quand vous voulez. Chaque programme inclut un accompagnement humain complet : un appel de démarrage, un appel de bilan et une messagerie privée avec votre coach.</p>
           </div>
+          <ProgrammeAccompagnement className="mb-10" />
           <div className="grid md:grid-cols-3 gap-6">
             {OFFRES_PROG.map(o => (
               <div key={o.id} className={`bg-background rounded-2xl border p-8 relative ${o.recommande ? "border-secondary shadow-xl" : "border-accent/20"}`}>

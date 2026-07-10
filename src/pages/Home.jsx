@@ -4,6 +4,7 @@ import Services from "@/components/sections/Services";
 import Clubs from "@/components/sections/Clubs";
 import Pricing from "@/components/sections/Pricing";
 import Testimonials from "@/components/sections/Testimonials";
+import AppExperience from "@/components/sections/AppExperience";
 import Contact from "@/components/sections/Contact";
 
 export default function Home() {
@@ -15,6 +16,7 @@ export default function Home() {
       <Clubs />
       <Pricing />
       <Testimonials />
+      <AppExperience />
       <Contact />
     </>
   );

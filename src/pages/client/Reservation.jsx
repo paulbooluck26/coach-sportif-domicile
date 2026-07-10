@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useCreneaux } from "@/hooks/useCreneaux";
 import { creneauxDisponibles } from "@/lib/creneaux";
 import CalendrierDispo from "@/components/CalendrierDispo";
 import { Link, useNavigate } from "react-router-dom";
-import { Check, ChevronLeft, ChevronRight, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, Clock, MapPin } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, Clock, MapPin, MessageSquare } from "lucide-react";
+import { determinerZone, ZONES } from "@/lib/zones";
 
 const TYPES = [
   { id: "seance_individuelle", nom: "Séance individuelle", desc: "60 min à domicile", prix: 70, duree: 60 },
@@ -23,7 +24,19 @@ export default function Reservation() {
   const [card, setCard] = useState({ number: "", expiry: "", cvc: "", name: "" });
   const [paying, setPaying] = useState(false);
   const [confirmed, setConfirmed] = useState(null);
+  const [horsZone, setHorsZone] = useState(false);
+  const [zoneErreur, setZoneErreur] = useState("");
   const { recurrentes, blocages, reservees, loading: creneauxLoading } = useCreneaux();
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      try {
+        const profiles = await base44.entities.ClientProfile.filter({ user_id: user.id });
+        if (profiles.length && profiles[0].adresse) setAdresse(profiles[0].adresse);
+      } catch {}
+    })();
+  }, [user]);
 
   const slots = date ? creneauxDisponibles(new Date(date + "T00:00:00"), recurrentes, reservees) : [];
 
@@ -47,26 +60,24 @@ export default function Reservation() {
     try {
       const typeData = TYPES.find(t => t.id === type);
       const seance = await base44.entities.Seance.create({
-        client_user_id: user.id,
-        client_nom: user.full_name || user.email,
-        type_seance: type,
+        client_id: user.id,
+        client_name: user.full_name || user.email,
+        session_type: type,
         date,
-        heure,
-        duree: typeData.duree,
-        statut: "confirmee",
-        montant: typeData.prix,
-        paiement_statut: "paye",
-        lieu: adresse || "Domicile",
+        time: heure,
+        duration_minutes: typeData.duree,
+        price: typeData.prix,
+        status: "booked",
+        location: adresse || "Domicile",
       });
       await base44.entities.Paiement.create({
         seance_id: seance.id,
-        client_user_id: user.id,
-        client_nom: user.full_name || user.email,
-        montant: typeData.prix,
-        date_paiement: new Date().toISOString(),
-        methode: "carte",
-        statut: "reussi",
-        reference: "SIM-" + Date.now(),
+        client_id: user.id,
+        client_name: user.full_name || user.email,
+        amount: typeData.prix,
+        method: "stripe",
+        status: "paid",
+        stripe_ref: "SIM-" + Date.now(),
       });
       // ensure client profile exists
       const profiles = await base44.entities.ClientProfile.filter({ user_id: user.id });
@@ -83,6 +94,22 @@ export default function Reservation() {
     }
   };
 
+  const handleContinuer = () => {
+    const adresseFinale = (adresse || "").trim();
+    if (!adresseFinale) {
+      setZoneErreur("Renseignez votre adresse pour vérifier la zone de déplacement.");
+      return;
+    }
+    setZoneErreur("");
+    const zone = determinerZone(adresseFinale);
+    if (zone.autoriseReservation) {
+      setHorsZone(false);
+      setStep(4);
+    } else {
+      setHorsZone(true);
+    }
+  };
+
   if (confirmed) {
     const { seance, typeData } = confirmed;
     return (
@@ -95,8 +122,8 @@ export default function Reservation() {
           <p className="text-foreground/60 mb-8">Votre paiement de <strong className="text-foreground">{typeData.prix}€</strong> a été validé. Un email de confirmation vous a été envoyé.</p>
           <div className="bg-secondary/40 rounded-md p-6 text-left mb-8 space-y-3">
             <p className="flex items-center gap-3 text-sm text-foreground/80"><CalendarDays className="w-4 h-4 text-accent" /> {formatDate(seance.date)}</p>
-            <p className="flex items-center gap-3 text-sm text-foreground/80"><Clock className="w-4 h-4 text-accent" /> {seance.heure} · {seance.duree} min</p>
-            <p className="flex items-center gap-3 text-sm text-foreground/80"><MapPin className="w-4 h-4 text-accent" /> {seance.lieu}</p>
+            <p className="flex items-center gap-3 text-sm text-foreground/80"><Clock className="w-4 h-4 text-accent" /> {seance.time} · {seance.duration_minutes} min</p>
+            <p className="flex items-center gap-3 text-sm text-foreground/80"><MapPin className="w-4 h-4 text-accent" /> {seance.location}</p>
           </div>
           <div className="flex gap-3">
             <button onClick={() => navigate("/espace-client/seances")} className="flex-1 bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm">Voir mes séances</button>
@@ -195,7 +222,7 @@ export default function Reservation() {
         )}
 
         {/* Step 3: Details */}
-        {step === 3 && (
+        {step === 3 && !horsZone && (
           <div className="space-y-6">
             <h2 className="font-heading text-2xl font-bold text-foreground">Détails de la séance</h2>
             <div className="bg-card border border-border rounded-lg p-6 space-y-3">
@@ -204,12 +231,38 @@ export default function Reservation() {
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Adresse de la séance</label>
-              <input value={adresse} onChange={e => setAdresse(e.target.value)} placeholder="123 rue de Paris, 75001 Paris" className="w-full bg-card border border-border rounded-md px-4 py-3 text-foreground focus:outline-none focus:border-accent" />
-              <p className="text-xs text-muted-foreground mt-2">Si vide, l'adresse enregistrée sur votre compte sera utilisée.</p>
+              <input value={adresse} onChange={e => { setAdresse(e.target.value); setZoneErreur(""); setHorsZone(false); }} placeholder="Ex : 12 rue des Boulangers, 68000 Colmar" className="w-full bg-card border border-border rounded-md px-4 py-3 text-foreground focus:outline-none focus:border-accent" />
+              <p className="text-xs text-muted-foreground mt-2">Indiquez votre adresse pour vérifier la zone de déplacement. Réservation immédiate pour Colmar intra-muros.</p>
+              {zoneErreur && <p className="text-xs text-destructive mt-2">{zoneErreur}</p>}
             </div>
             <div className="flex gap-3">
               <button onClick={() => setStep(2)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground px-4 py-3"><ChevronLeft className="w-4 h-4" /> Retour</button>
-              <button onClick={() => setStep(4)} className="flex-1 bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm">Continuer vers le paiement</button>
+              <button onClick={handleContinuer} className="flex-1 bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm">Continuer vers le paiement</button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Hors zone */}
+        {step === 3 && horsZone && (
+          <div className="space-y-6">
+            <h2 className="font-heading text-2xl font-bold text-foreground">Détails de la séance</h2>
+            <div className="bg-card border border-accent/30 rounded-lg p-6">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+                  <MapPin className="w-5 h-5 text-secondary" />
+                </div>
+                <div>
+                  <p className="font-heading font-semibold text-foreground">Adresse en dehors de Colmar</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{adresse}</p>
+                </div>
+              </div>
+              <p className="text-sm text-foreground/80 leading-relaxed">{ZONES.hors_zone.message}</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setHorsZone(false)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground px-4 py-3"><ChevronLeft className="w-4 h-4" /> Modifier mon adresse</button>
+              <Link to="/appel-decouverte" className="flex-1 bg-secondary text-secondary-foreground py-3 rounded-md font-semibold text-sm flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform">
+                <MessageSquare className="w-4 h-4" /> Discuter de mon projet avec le coach
+              </Link>
             </div>
           </div>
         )}

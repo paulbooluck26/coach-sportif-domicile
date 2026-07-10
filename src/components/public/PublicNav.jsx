@@ -23,7 +23,7 @@ export default function PublicNav() {
     <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${scrolled ? "glass-nav shadow-lg" : "bg-transparent"}`}>
       <div className="mx-auto max-w-7xl px-6 lg:px-10 h-20 flex items-center justify-between">
         <a href="/" className={`font-heading text-xl font-bold tracking-tight transition-colors ${scrolled ? "text-primary-foreground" : "text-primary"}`}>
-          ELAN
+          The Lab Forge
         </a>
         <nav className="hidden md:flex items-center gap-8">
           {links.map((l) => (

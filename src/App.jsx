@@ -26,6 +26,7 @@ import MesPerformances from '@/pages/client/MesPerformances';
 import AchatProgramme from '@/pages/AchatProgramme';
 import PublicReserver from '@/pages/Reserver';
 import CoachCommandes from '@/pages/coach/CoachCommandes';
+import CoachMessages from '@/pages/coach/CoachMessages';
 import CoachDashboard from '@/pages/coach/CoachDashboard';
 import CoachDemandes from '@/pages/coach/CoachDemandes';
 import CoachSeances from '@/pages/coach/CoachSeances';
@@ -86,6 +87,7 @@ const AuthenticatedApp = () => {
         <Route element={<CoachLayout />}>
           <Route path="/admin" element={<CoachDashboard />} />
           <Route path="/admin/demandes" element={<CoachDemandes />} />
+          <Route path="/admin/messages" element={<CoachMessages />} />
           <Route path="/admin/seances" element={<CoachSeances />} />
           <Route path="/admin/clients" element={<CoachClients />} />
           <Route path="/admin/programmes" element={<CoachProgrammes />} />

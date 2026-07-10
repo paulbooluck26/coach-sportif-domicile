@@ -116,7 +116,7 @@ export default function Reservation() {
         <div className="mx-auto max-w-3xl flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/espace-client/reserver" className="flex items-center gap-1.5 text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"><ChevronLeft className="w-4 h-4" /> Retour</Link>
-            <Link to="/" className="font-heading text-xl font-bold text-primary-foreground">ELAN</Link>
+            <Link to="/" className="font-heading text-xl font-bold text-primary-foreground">The Lab Forge</Link>
           </div>
           <Link to={user ? "/espace-client" : "/login"} className="text-sm font-semibold text-primary-foreground/80 hover:text-primary-foreground border border-primary-foreground/20 px-4 py-1.5 rounded-md hover:bg-primary-foreground/10 transition-colors">Mon espace</Link>
         </div>

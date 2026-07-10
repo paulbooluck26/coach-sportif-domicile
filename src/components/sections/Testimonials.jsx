@@ -2,7 +2,7 @@ import { Star } from "lucide-react";
 
 const testimonials = [
   {
-    text: "Aurélien a transformé ma routine. Je n'aurais jamais cru que je pouvais progresser autant à domicile. Professionnel, à l'écoute et d'une exigence rare.",
+    text: "Paul a transformé ma routine. Je n'aurais jamais cru que je pouvais progresser autant à domicile. Professionnel, à l'écoute et d'une exigence rare.",
     name: "Sophie M.",
     detail: "Coaching sur 6 mois",
   },

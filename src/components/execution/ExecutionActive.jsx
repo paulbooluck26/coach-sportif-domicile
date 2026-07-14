@@ -67,7 +67,20 @@ export default function ExecutionActive({
         )}
 
         {phase === "rest_between_rounds" && (
-          <CountdownRing remaining={restRemaining} total={restBetweenRoundsSecs} label="Repos entre tours" large />
+          <div className="flex flex-col items-center text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Récupération</p>
+            <h2 className="font-heading text-2xl md:text-4xl font-bold text-primary-foreground mb-10">Début du prochain tour dans</h2>
+            <div className="relative w-64 h-64 md:w-72 md:h-72 mb-2">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="3" className="text-primary-foreground/10" />
+                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="4" className="text-secondary transition-all duration-1000 ease-linear" strokeDasharray={282.7} strokeDashoffset={282.7 * (1 - restRemaining / (restBetweenRoundsSecs || 1))} strokeLinecap="round" />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="font-heading text-8xl md:text-9xl font-bold leading-none">{restRemaining}</span>
+                <span className="text-xs uppercase tracking-[0.2em] text-primary-foreground/50 mt-3">secondes</span>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 

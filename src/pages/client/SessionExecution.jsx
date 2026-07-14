@@ -113,10 +113,20 @@ export default function SessionExecution() {
 
   const handlePrev = () => {
     setExecState(prev => {
-      if (!sessionData || prev.phase === "complete" || prev.phase === "welcome" || prev.phase === "bloc_intro") return prev;
+      if (!sessionData || prev.phase === "complete" || prev.phase === "welcome") return prev;
       const blocs = sessionData.blocs;
       const bloc = blocs[prev.blocIndex];
       const exercises = bloc?.exercices || [];
+
+      if (prev.phase === "bloc_intro") {
+        if (prev.blocIndex === 0) return prev;
+        const prevBloc = blocs[prev.blocIndex - 1];
+        const prevExIdx = (prevBloc?.exercices?.length || 1) - 1;
+        const prevRound = prevBloc?.rounds || 1;
+        const ex = prevBloc?.exercices?.[prevExIdx];
+        const t = parseTimeFromReps(ex?.reps);
+        return { ...prev, blocIndex: prev.blocIndex - 1, round: prevRound, exerciseIndex: prevExIdx, phase: "exercise", restRemaining: 0, exerciseTimeRemaining: t > 0 ? t : null };
+      }
 
       if (prev.phase === "rest" || prev.phase === "rest_between_rounds") {
         const ex = exercises[prev.exerciseIndex];
@@ -211,7 +221,7 @@ export default function SessionExecution() {
   if (sessionData.blocs.length === 0 || sessionData.blocs.every(b => b.exercices.length === 0)) return <div className="fixed inset-0 z-50 bg-primary flex items-center justify-center p-6"><div className="text-center text-primary-foreground"><p className="mb-4">Cette séance ne contient aucun exercice.</p><button onClick={() => navigate("/espace-client/programme")} className="bg-primary-foreground text-primary px-6 py-3 rounded-md font-semibold">Retour au programme</button></div></div>;
 
   if (execState.phase === "welcome") return <ExecutionWelcome sessionData={sessionData} onStart={handleStart} onExit={() => navigate("/espace-client/programme")} />;
-  if (execState.phase === "bloc_intro") return <ExecutionBlocIntro bloc={currentBloc} totalRounds={totalRounds} onContinue={handleContinueBloc} onExit={() => navigate("/espace-client/programme")} />;
+  if (execState.phase === "bloc_intro") return <ExecutionBlocIntro bloc={currentBloc} totalRounds={totalRounds} onContinue={handleContinueBloc} onPrev={execState.blocIndex > 0 ? handlePrev : undefined} onExit={() => navigate("/espace-client/programme")} />;
   if (execState.phase === "complete") return <ExecutionComplete executionId={executionId} sessionData={sessionData} user={user} onDone={() => navigate("/espace-client/programme")} />;
 
   return (

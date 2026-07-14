@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Edit, Dumbbell, Save, X, Copy } from "lucide-react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { Plus, Trash2, Edit, Dumbbell, Save, X, Copy, GripVertical } from "lucide-react";
 import { cloneExercice } from "@/lib/programmeClone";
 
 export default function ExercicesPanel({ blocId }) {
@@ -32,6 +33,16 @@ export default function ExercicesPanel({ blocId }) {
   const edit = (ex) => { setEditId(ex.id); setForm({ name: ex.name, sets: ex.sets || 3, reps: ex.reps || "", rest_seconds: ex.rest_seconds || 60, intensity: ex.intensity || "", media_url: ex.media_url || "", description: ex.description || "" }); setAdding(true); };
   const remove = async (id) => { await base44.entities.Exercice.delete(id); load(); };
   const duplicate = async (ex) => { await cloneExercice(ex, blocId); load(); };
+
+  const onDragEnd = async (result) => {
+    if (!result.destination || result.destination.index === result.source.index) return;
+    const reordered = Array.from(items);
+    const [moved] = reordered.splice(result.source.index, 1);
+    reordered.splice(result.destination.index, 0, moved);
+    setItems(reordered);
+    try { await base44.entities.Exercice.bulkUpdate(reordered.map((ex, i) => ({ id: ex.id, order: i }))); }
+    catch { load(); }
+  };
 
   if (!items) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
@@ -77,28 +88,40 @@ export default function ExercicesPanel({ blocId }) {
           <p className="text-muted-foreground text-sm">Aucun exercice. Ajoutez les exercices de ce bloc ci-dessus.</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {items.map((ex, i) => (
-            <div key={ex.id} className="bg-card border border-border rounded-lg p-5">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-3 flex-1">
-                  <span className="w-7 h-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-sm flex-shrink-0">{i + 1}</span>
-                  <div className="flex-1">
-                    <p className="font-heading font-semibold text-foreground">{ex.name}</p>
-                    <p className="text-sm text-muted-foreground">{ex.sets} séries × {ex.reps} · {ex.rest_seconds}s repos{ex.intensity ? ` · ${ex.intensity}` : ""}</p>
-                    {ex.description && <p className="text-sm text-foreground/60 mt-1">{ex.description}</p>}
-                    {ex.media_url && <img src={ex.media_url} alt={ex.name} className="h-20 w-auto rounded-md mt-2" />}
-                  </div>
-                </div>
-                <div className="flex gap-1.5">
-                  <button onClick={() => duplicate(ex)} className="p-1.5 text-muted-foreground hover:text-accent" title="Dupliquer"><Copy className="w-4 h-4" /></button>
-                  <button onClick={() => edit(ex)} className="p-1.5 text-muted-foreground hover:text-accent"><Edit className="w-4 h-4" /></button>
-                  <button onClick={() => remove(ex.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
-                </div>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="exercices">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3">
+                {items.map((ex, index) => (
+                  <Draggable key={ex.id} draggableId={ex.id} index={index}>
+                    {(prov) => (
+                      <div ref={prov.innerRef} {...prov.draggableProps} className="bg-card border border-border rounded-lg p-5">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                            <span {...prov.dragHandleProps} className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing shrink-0 mt-0.5"><GripVertical className="w-5 h-5" /></span>
+                            <span className="w-7 h-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-sm flex-shrink-0">{index + 1}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-heading font-semibold text-foreground">{ex.name}</p>
+                              <p className="text-sm text-muted-foreground">{ex.sets} séries × {ex.reps} · {ex.rest_seconds}s repos{ex.intensity ? ` · ${ex.intensity}` : ""}</p>
+                              {ex.description && <p className="text-sm text-foreground/60 mt-1">{ex.description}</p>}
+                              {ex.media_url && <img src={ex.media_url} alt={ex.name} className="h-20 w-auto rounded-md mt-2" />}
+                            </div>
+                          </div>
+                          <div className="flex gap-1.5 shrink-0">
+                            <button onClick={() => duplicate(ex)} className="p-1.5 text-muted-foreground hover:text-accent" title="Dupliquer"><Copy className="w-4 h-4" /></button>
+                            <button onClick={() => edit(ex)} className="p-1.5 text-muted-foreground hover:text-accent"><Edit className="w-4 h-4" /></button>
+                            <button onClick={() => remove(ex.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       )}
     </div>
   );

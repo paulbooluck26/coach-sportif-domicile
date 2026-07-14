@@ -34,6 +34,11 @@
     "description": {
       "type": "string",
       "title": "Notes / description"
+    },
+    "ordre": {
+      "type": "number",
+      "default": 0,
+      "title": "Ordre"
     }
   },
   "required": [

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Edit, Dumbbell, Save, X, Copy } from "lucide-react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { Plus, Trash2, Edit, Dumbbell, Save, X, Copy, GripVertical } from "lucide-react";
 import { cloneSeance } from "@/lib/programmeClone";
 
 const TYPES = { force: "Force", cardio: "Cardio", mobilite: "Mobilité", recuperation: "Récupération", mixte: "Mixte" };
@@ -12,18 +13,27 @@ export default function SeancesPanel({ semaineId, onOpen }) {
   const [form, setForm] = useState({ titre: "", jours_semaine: [], type_seance: "force", description: "" });
   const [editId, setEditId] = useState(null);
 
-  const load = async () => { setItems(await base44.entities.SeanceProgramme.filter({ semaine_id: semaineId })); };
+  const load = async () => { setItems(await base44.entities.SeanceProgramme.filter({ semaine_id: semaineId }, "ordre")); };
   useEffect(() => { load().catch(() => {}); }, [semaineId]);
 
   const submit = async () => {
     if (editId) { await base44.entities.SeanceProgramme.update(editId, form); setEditId(null); }
-    else { await base44.entities.SeanceProgramme.create({ ...form, semaine_id: semaineId }); }
+    else { await base44.entities.SeanceProgramme.create({ ...form, semaine_id: semaineId, ordre: items?.length || 0 }); }
     setAdding(false); setForm({ titre: "", jours_semaine: [], type_seance: "force", description: "" }); load();
   };
   const edit = (s) => { setEditId(s.id); setForm({ titre: s.titre, jours_semaine: s.jours_semaine || [], type_seance: s.type_seance || "force", description: s.description || "" }); setAdding(true); };
   const remove = async (id) => { if (confirm("Supprimer cette séance et tout son contenu ?")) { await base44.entities.SeanceProgramme.delete(id); load(); } };
-
   const duplicate = async (s) => { await cloneSeance(s, semaineId); load(); };
+
+  const onDragEnd = async (result) => {
+    if (!result.destination || result.destination.index === result.source.index) return;
+    const reordered = Array.from(items);
+    const [moved] = reordered.splice(result.source.index, 1);
+    reordered.splice(result.destination.index, 0, moved);
+    setItems(reordered);
+    try { await base44.entities.SeanceProgramme.bulkUpdate(reordered.map((s, i) => ({ id: s.id, ordre: i }))); }
+    catch { load(); }
+  };
 
   if (!items) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
@@ -55,21 +65,35 @@ export default function SeancesPanel({ semaineId, onOpen }) {
           <p className="text-muted-foreground text-sm">Aucune séance. Ajoutez votre première séance ci-dessus.</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {items.map(s => (
-            <div key={s.id} className="bg-card border border-border rounded-lg p-5 flex items-center justify-between">
-              <button onClick={() => onOpen(s)} className="flex-1 text-left">
-                <p className="font-heading font-semibold text-foreground">{s.titre}</p>
-                <p className="text-sm text-muted-foreground mt-0.5">{(s.jours_semaine || []).map(j => JOURS[j]).join(", ") || "—"} · <span className="text-accent">{TYPES[s.type_seance] || s.type_seance}</span></p>
-              </button>
-              <div className="flex gap-1.5">
-                <button onClick={() => duplicate(s)} className="p-1.5 text-muted-foreground hover:text-accent" title="Dupliquer"><Copy className="w-4 h-4" /></button>
-                <button onClick={() => edit(s)} className="p-1.5 text-muted-foreground hover:text-accent"><Edit className="w-4 h-4" /></button>
-                <button onClick={() => remove(s.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="seances">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3">
+                {items.map((s, index) => (
+                  <Draggable key={s.id} draggableId={s.id} index={index}>
+                    {(prov) => (
+                      <div ref={prov.innerRef} {...prov.draggableProps} className="bg-card border border-border rounded-lg p-5 flex items-center justify-between">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <span {...prov.dragHandleProps} className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing shrink-0"><GripVertical className="w-5 h-5" /></span>
+                          <button onClick={() => onOpen(s)} className="flex-1 text-left min-w-0">
+                            <p className="font-heading font-semibold text-foreground truncate">{s.titre}</p>
+                            <p className="text-sm text-muted-foreground mt-0.5">{(s.jours_semaine || []).map(j => JOURS[j]).join(", ") || "—"} · <span className="text-accent">{TYPES[s.type_seance] || s.type_seance}</span></p>
+                          </button>
+                        </div>
+                        <div className="flex gap-1.5 shrink-0">
+                          <button onClick={() => duplicate(s)} className="p-1.5 text-muted-foreground hover:text-accent" title="Dupliquer"><Copy className="w-4 h-4" /></button>
+                          <button onClick={() => edit(s)} className="p-1.5 text-muted-foreground hover:text-accent"><Edit className="w-4 h-4" /></button>
+                          <button onClick={() => remove(s.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       )}
     </div>
   );

@@ -7,7 +7,7 @@ import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
 import ClientBilan from "@/components/coach/ClientBilan";
 
 const RESSENTI_LABELS = { plus_energique: "Plus énergique 💪", fatigue_satisfait: "Fatigué mais satisfait ✅", tres_fatigue: "Très fatigué 😴", douleur_inconfort: "Douleur / inconfort ⚠️" };
-const STATUS_CFG = { faite: { icon: CheckCircle2, color: "text-secondary", label: "Faite" }, manquee: { icon: XCircle, color: "text-destructive", label: "Manquée" }, a_venir: { icon: Clock, color: "text-accent", label: "À venir" } };
+const STATUS_CFG = { faite: { icon: CheckCircle2, color: "text-secondary", label: "Faite" }, manquee: { icon: XCircle, color: "text-destructive", label: "À rattraper" }, a_venir: { icon: Clock, color: "text-accent", label: "À venir" } };
 
 export default function ClientDetail({ client, onClose }) {
   const [tab, setTab] = useState("feedback");
@@ -200,7 +200,7 @@ export default function ClientDetail({ client, onClose }) {
                     <>
                       <div className="grid grid-cols-3 gap-3">
                         <div className="bg-card border border-border rounded-lg p-3 text-center"><CheckCircle2 className="w-5 h-5 text-secondary mx-auto mb-1" /><p className="font-heading text-xl font-bold text-foreground">{stats.faite}</p><p className="text-xs text-muted-foreground">faites</p></div>
-                        <div className="bg-card border border-border rounded-lg p-3 text-center"><XCircle className="w-5 h-5 text-destructive mx-auto mb-1" /><p className="font-heading text-xl font-bold text-foreground">{stats.manquee}</p><p className="text-xs text-muted-foreground">manquées</p></div>
+                        <div className="bg-card border border-border rounded-lg p-3 text-center"><XCircle className="w-5 h-5 text-destructive mx-auto mb-1" /><p className="font-heading text-xl font-bold text-foreground">{stats.manquee}</p><p className="text-xs text-muted-foreground">à rattraper</p></div>
                         <div className="bg-card border border-border rounded-lg p-3 text-center"><Clock className="w-5 h-5 text-accent mx-auto mb-1" /><p className="font-heading text-xl font-bold text-foreground">{stats.a_venir}</p><p className="text-xs text-muted-foreground">à venir</p></div>
                       </div>
                       <ProgrammeCalendar projections={projections} onDayClick={(date, dayProjs) => setSelectedDay({ date, projections: dayProjs })} />
@@ -212,13 +212,13 @@ export default function ClientDetail({ client, onClose }) {
                               const cfg = STATUS_CFG[p.status];
                               const Icon = cfg.icon;
                               return (
-                                <div key={i} className="flex items-center justify-between border border-border rounded p-3">
-                                  <div>
-                                    <p className="text-sm font-medium text-foreground">{p.seance.titre}</p>
-                                    <p className="text-xs text-muted-foreground">{p.programme.name} · Semaine {p.semaine.numero}</p>
-                                  </div>
-                                  <span className={`flex items-center gap-1 text-xs font-medium ${cfg.color}`}><Icon className="w-3.5 h-3.5" /> {cfg.label}</span>
-                                </div>
+                                <div key={i} className="flex items-center justify-between border border-border rounded p-3 gap-2">
+                                   <div>
+                                     <p className="text-sm font-medium text-foreground">{p.seance.titre}</p>
+                                     <p className="text-xs text-muted-foreground">{p.programme.name} · Semaine {p.semaine.numero}{p.deplacee ? ` · Reportée du ${new Date(p.date_prevue + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}` : ""}</p>
+                                   </div>
+                                   <span className={`flex items-center gap-1 text-xs font-medium ${cfg.color} shrink-0`}><Icon className="w-3.5 h-3.5" /> {cfg.label}</span>
+                                 </div>
                               );
                             })}
                           </div>

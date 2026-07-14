@@ -1,0 +1,34 @@
+{
+  "name": "SeanceDeplacee",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Client (user ID)"
+    },
+    "seance_programme_id": {
+      "type": "string",
+      "title": "S\u00e9ance programme"
+    },
+    "seance_titre": {
+      "type": "string",
+      "title": "Titre de la s\u00e9ance"
+    },
+    "date_prevue": {
+      "type": "string",
+      "format": "date",
+      "title": "Date pr\u00e9vue initiale"
+    },
+    "nouvelle_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Nouvelle date"
+    }
+  },
+  "required": [
+    "client_id",
+    "seance_programme_id",
+    "date_prevue",
+    "nouvelle_date"
+  ]
+}

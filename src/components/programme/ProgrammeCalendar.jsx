@@ -80,14 +80,18 @@ export default function ProgrammeCalendar({ projections, onDayClick }) {
               {hasSessions && cell.projections.length > 1 && (
                 <span className="absolute top-0.5 right-0.5 text-[9px] font-bold opacity-80">{cell.projections.length}</span>
               )}
+              {hasSessions && cell.projections.some(p => p.deplacee) && (
+                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-yellow-500" />
+              )}
             </button>
           );
         })}
       </div>
-      <div className="flex gap-4 mt-4 text-xs">
+      <div className="flex flex-wrap gap-4 mt-4 text-xs">
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-secondary" /> Faite</span>
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-destructive" /> Manquée</span>
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-destructive" /> À rattraper</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-accent" /> À venir</span>
+        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-yellow-500" /> Reportée</span>
       </div>
     </div>
   );

@@ -23,6 +23,14 @@ export async function loadClientProjection(clientId) {
 
   const assignations = await base44.entities.ProgrammeAssignation.filter({ client_id: clientId });
   const executions = await base44.entities.ExecutionSeance.filter({ client_id: clientId }, "-date_execution", 100);
+  let deplacements = [];
+  try {
+    deplacements = await base44.entities.SeanceDeplacee.filter({ client_id: clientId });
+  } catch {}
+
+  // Chaîne de reports : clé "seanceId|date_prevue" -> nouvelle_date
+  const depMap = {};
+  deplacements.forEach(d => { if (d.date_prevue && d.nouvelle_date) depMap[`${d.seance_programme_id}|${d.date_prevue}`] = d.nouvelle_date; });
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -41,20 +49,35 @@ export async function loadClientProjection(clientId) {
       const weekSeances = seances.filter(s => s.semaine_id === sem.id);
       weekSeances.forEach(seance => {
         (seance.jours_semaine || []).forEach(jour => {
-          const date = projectSessionDate(assignation.date_debut, sem.numero || 1, jour);
-          const isoDate = toISODate(date);
+          const plannedDate = projectSessionDate(assignation.date_debut, sem.numero || 1, jour);
+          const plannedIso = toISODate(plannedDate);
+
+          // Suivre la chaîne de reports éventuelle
+          let effectiveIso = plannedIso;
+          let deplacee = false;
+          let guard = 0;
+          while (depMap[`${seance.id}|${effectiveIso}`] && guard < 20) {
+            effectiveIso = depMap[`${seance.id}|${effectiveIso}`];
+            deplacee = true;
+            guard++;
+          }
+          const effectiveDate = new Date(effectiveIso + "T00:00:00");
 
           const exec = executions.find(e =>
             e.seance_programme_id === seance.id &&
-            Math.abs(new Date(e.date_execution + "T00:00:00") - date) <= 3 * 86400000
+            Math.abs(new Date(e.date_execution + "T00:00:00") - effectiveDate) <= 3 * 86400000
           );
 
           let status;
           if (exec) status = "faite";
-          else if (date < today) status = "manquee";
+          else if (effectiveDate < today) status = "manquee";
           else status = "a_venir";
 
-          allProjections.push({ date: isoDate, seance, programme: prog, semaine: sem, status });
+          allProjections.push({
+            date: effectiveIso,
+            seance, programme: prog, semaine: sem, status,
+            ...(deplacee ? { deplacee: true, date_prevue: plannedIso } : {}),
+          });
         });
       });
     });

@@ -7,11 +7,11 @@
       "items": {
         "type": "string"
       },
-      "title": "Clients (user IDs)"
+      "title": "Clients (user IDs) \u2014 obsol\u00e8te (CycleClient)"
     },
     "client_names": {
       "type": "string",
-      "title": "Noms des clients"
+      "title": "Noms des clients \u2014 obsol\u00e8te (CycleClient)"
     },
     "name": {
       "type": "string",
@@ -39,6 +39,19 @@
       ],
       "default": "brouillon",
       "title": "Statut"
+    },
+    "offre": {
+      "type": "string",
+      "enum": [
+        "start",
+        "forge",
+        "legacy"
+      ],
+      "title": "Niveau d'offre"
+    },
+    "cycle_id": {
+      "type": "string",
+      "title": "Cycle li\u00e9"
     }
   },
   "required": [

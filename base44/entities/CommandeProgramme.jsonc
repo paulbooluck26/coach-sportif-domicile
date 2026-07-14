@@ -29,7 +29,16 @@
     },
     "montant": {
       "type": "number",
-      "title": "Montant (\u20ac)"
+      "title": "Montant catalogue (\u20ac)"
+    },
+    "montant_paye": {
+      "type": "number",
+      "title": "Montant net pay\u00e9 (\u20ac)"
+    },
+    "credit_cycle_precedent": {
+      "type": "number",
+      "default": 0,
+      "title": "Cr\u00e9dit appliqu\u00e9 (\u20ac)"
     },
     "date_achat": {
       "type": "string",
@@ -48,6 +57,10 @@
     "programme_id": {
       "type": "string",
       "title": "Programme assign\u00e9"
+    },
+    "cycle_id": {
+      "type": "string",
+      "title": "Cycle cr\u00e9\u00e9"
     }
   },
   "required": [

@@ -1,0 +1,138 @@
+{
+  "name": "CycleClient",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Client (User ID)"
+    },
+    "numero": {
+      "type": "number",
+      "default": 1,
+      "title": "Num\u00e9ro de cycle dans le parcours"
+    },
+    "offre": {
+      "type": "string",
+      "enum": [
+        "start",
+        "forge",
+        "legacy"
+      ],
+      "title": "Offre"
+    },
+    "type_parcours": {
+      "type": "string",
+      "enum": [
+        "transformation",
+        "performance",
+        "retour_blessure"
+      ],
+      "default": "transformation",
+      "title": "Type de parcours The Lab Forge"
+    },
+    "commande_id": {
+      "type": "string",
+      "title": "Commande \u00e0 l'origine"
+    },
+    "programme_id": {
+      "type": "string",
+      "title": "Programme construit (vide tant qu'en attente)"
+    },
+    "date_debut": {
+      "type": "string",
+      "format": "date",
+      "title": "Date de d\u00e9but"
+    },
+    "duree_semaines": {
+      "type": "number",
+      "title": "Dur\u00e9e (semaines)"
+    },
+    "date_fin_calculee": {
+      "type": "string",
+      "format": "date",
+      "title": "Date de fin calcul\u00e9e"
+    },
+    "date_fin_reelle": {
+      "type": "string",
+      "format": "date",
+      "title": "Date de fin r\u00e9elle"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "en_attente_programme",
+        "a_venir",
+        "en_cours",
+        "termine",
+        "interrompu",
+        "abandonne"
+      ],
+      "default": "en_attente_programme",
+      "title": "Statut"
+    },
+    "prix_offre": {
+      "type": "number",
+      "title": "Prix catalogue (\u20ac)"
+    },
+    "credit_cycle_precedent": {
+      "type": "number",
+      "default": 0,
+      "title": "Cr\u00e9dit appliqu\u00e9 (\u20ac)"
+    },
+    "montant_paye": {
+      "type": "number",
+      "title": "Montant net pay\u00e9 (\u20ac)"
+    },
+    "cycle_precedent_id": {
+      "type": "string",
+      "title": "Cycle pr\u00e9c\u00e9dent (tra\u00e7abilit\u00e9 cr\u00e9dit)"
+    },
+    "credit_eligible": {
+      "type": "number",
+      "default": 0,
+      "title": "Cr\u00e9dit propos\u00e9 pour l'offre suivante"
+    },
+    "offre_suivante_proposee": {
+      "type": "string",
+      "enum": [
+        "start",
+        "forge",
+        "legacy"
+      ],
+      "title": "Prochaine offre sugg\u00e9r\u00e9e"
+    },
+    "date_expiration_credit": {
+      "type": "string",
+      "format": "date",
+      "title": "Date d'expiration du cr\u00e9dit"
+    },
+    "appel_initial_effectue": {
+      "type": "boolean",
+      "default": false,
+      "title": "Appel de d\u00e9marrage effectu\u00e9"
+    },
+    "date_appel_initial": {
+      "type": "string",
+      "format": "date",
+      "title": "Date de l'appel de d\u00e9marrage"
+    },
+    "appel_bilan_effectue": {
+      "type": "boolean",
+      "default": false,
+      "title": "Appel de bilan effectu\u00e9"
+    },
+    "date_appel_bilan": {
+      "type": "string",
+      "format": "date",
+      "title": "Date de l'appel de bilan"
+    }
+  },
+  "required": [
+    "client_id",
+    "numero",
+    "offre",
+    "duree_semaines",
+    "prix_offre",
+    "montant_paye"
+  ]
+}

@@ -26,6 +26,10 @@
       "type": "string",
       "title": "Nom du programme"
     },
+    "cycle_id": {
+      "type": "string",
+      "title": "Cycle rattach\u00e9"
+    },
     "date_execution": {
       "type": "string",
       "format": "date",

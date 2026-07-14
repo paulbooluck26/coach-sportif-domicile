@@ -1,0 +1,57 @@
+{
+  "name": "PaiementProgramme",
+  "type": "object",
+  "properties": {
+    "commande_id": {
+      "type": "string",
+      "title": "Commande"
+    },
+    "cycle_id": {
+      "type": "string",
+      "title": "Cycle"
+    },
+    "client_id": {
+      "type": "string",
+      "title": "Client (User ID)"
+    },
+    "client_name": {
+      "type": "string",
+      "title": "Nom du client"
+    },
+    "montant": {
+      "type": "number",
+      "title": "Montant net pay\u00e9 (\u20ac)"
+    },
+    "methode": {
+      "type": "string",
+      "default": "stripe",
+      "title": "M\u00e9thode"
+    },
+    "stripe_ref": {
+      "type": "string",
+      "title": "R\u00e9f\u00e9rence paiement"
+    },
+    "date_paiement": {
+      "type": "string",
+      "format": "date",
+      "title": "Date de paiement"
+    },
+    "statut_paiement": {
+      "type": "string",
+      "enum": [
+        "en_attente",
+        "paye",
+        "rembourse",
+        "echec"
+      ],
+      "default": "en_attente",
+      "title": "Statut du paiement"
+    }
+  },
+  "required": [
+    "cycle_id",
+    "client_id",
+    "montant",
+    "date_paiement"
+  ]
+}

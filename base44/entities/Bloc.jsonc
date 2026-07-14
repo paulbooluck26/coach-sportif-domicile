@@ -15,10 +15,15 @@
       "default": 0,
       "title": "Ordre"
     },
+    "nb_series": {
+      "type": "number",
+      "default": 1,
+      "title": "Nombre de s\u00e9ries (g\u00e9r\u00e9 au niveau du bloc)"
+    },
     "repos_entre_exercices": {
       "type": "number",
       "default": 60,
-      "title": "Repos entre exercices (sec)"
+      "title": "Repos entre exercices (sec) \u2014 obsol\u00e8te (non configur\u00e9)"
     },
     "rounds": {
       "type": "number",

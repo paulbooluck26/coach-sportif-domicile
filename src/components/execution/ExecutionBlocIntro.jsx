@@ -14,7 +14,7 @@ export default function ExecutionBlocIntro({ bloc, totalRounds, onContinue, onPr
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-10 overflow-y-auto">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-4">Prochain bloc</p>
         <h1 className="font-heading text-5xl md:text-6xl font-bold text-center mb-3">{bloc?.titre}</h1>
-        {totalRounds > 1 && <p className="text-primary-foreground/60 mb-2">À réaliser : {totalRounds} tours</p>}
+        <p className="text-primary-foreground/60 mb-2">{bloc?.nb_series || 1} série{(bloc?.nb_series || 1) > 1 ? "s" : ""}{totalRounds > 1 ? ` · ${totalRounds} tours` : ""}</p>
 
         {exercices.length > 0 && (
           <div className="w-full max-w-md mb-2 mt-4">
@@ -24,7 +24,7 @@ export default function ExecutionBlocIntro({ bloc, totalRounds, onContinue, onPr
                 <li key={ex.id} className="flex items-center gap-3 bg-primary-foreground/5 rounded-lg px-4 py-2.5">
                   <span className="w-6 h-6 rounded bg-secondary/20 text-secondary flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
                   <span className="font-medium flex-1">{ex.name}</span>
-                  <span className="text-sm text-primary-foreground/60 whitespace-nowrap">{ex.reps}{ex.sets ? ` × ${ex.sets}` : ""}</span>
+                  <span className="text-sm text-primary-foreground/60 whitespace-nowrap">{ex.reps}</span>
                 </li>
               ))}
             </ul>

@@ -1,12 +1,15 @@
 import { parseTimeFromReps } from "@/lib/executionAudio";
+import PerformanceCapture from "./PerformanceCapture";
 import { Pause, Play, SkipForward, SkipBack, X, Clock } from "lucide-react";
 
 export default function ExecutionActive({
   execState, currentBloc, currentExercise, totalRounds, totalBlocs, totalExercises,
-  restBetweenRoundsSecs, onNext, onPrev, onTogglePause, onExit
+  restBetweenRoundsSecs, onNext, onPrev, onTogglePause, onExit,
+  perfData, onPerfChange
 }) {
   const { phase, round, exerciseIndex, restRemaining, exerciseTimeRemaining, isPaused } = execState;
   const blocTitle = currentBloc?.titre || `Bloc ${execState.blocIndex + 1}`;
+  const nbSeries = currentBloc?.nb_series || currentExercise?.sets || null;
 
   const restTotal = phase === "rest"
     ? (currentExercise?.rest_seconds || currentBloc?.repos_entre_exercices || 60)
@@ -40,7 +43,7 @@ export default function ExecutionActive({
             <div className="flex items-center justify-center gap-8 mb-6">
               <div>
                 <p className="text-xs text-primary-foreground/50 uppercase tracking-wider mb-1">Séries</p>
-                <p className="font-heading text-4xl font-bold">{currentExercise?.sets || "—"}</p>
+                <p className="font-heading text-4xl font-bold">{nbSeries || "—"}</p>
               </div>
               <div className="text-primary-foreground/20 text-4xl font-heading">×</div>
               <div>
@@ -63,7 +66,10 @@ export default function ExecutionActive({
         )}
 
         {phase === "rest" && (
-          <CountdownRing remaining={restRemaining} total={restTotal} label="Repos" large />
+          <div className="flex flex-col items-center w-full">
+            <CountdownRing remaining={restRemaining} total={restTotal} label="Repos" large />
+            <PerformanceCapture exercise={currentExercise} perf={perfData?.[currentExercise?.id]} onChange={(f, val) => onPerfChange(currentExercise?.id, f, val)} />
+          </div>
         )}
 
         {phase === "rest_between_rounds" && (
@@ -80,6 +86,7 @@ export default function ExecutionActive({
                 <span className="text-xs uppercase tracking-[0.2em] text-primary-foreground/50 mt-3">secondes</span>
               </div>
             </div>
+            <PerformanceCapture exercise={currentExercise} perf={perfData?.[currentExercise?.id]} onChange={(f, val) => onPerfChange(currentExercise?.id, f, val)} />
           </div>
         )}
       </div>

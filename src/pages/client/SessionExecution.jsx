@@ -19,7 +19,10 @@ export default function SessionExecution() {
     restRemaining: 0, exerciseTimeRemaining: null, isPaused: false,
   });
   const [executionId, setExecutionId] = useState(null);
+  const [perfData, setPerfData] = useState({});
   const startTimeRef = useRef(Date.now());
+
+  const setPerf = (exId, field, value) => setPerfData(d => ({ ...d, [exId]: { ...d[exId], [field]: value } }));
 
   useEffect(() => {
     if (!seanceId) return;
@@ -231,9 +234,9 @@ export default function SessionExecution() {
 
   if (sessionData.blocs.length === 0 || sessionData.blocs.every(b => b.exercices.length === 0)) return <div className="fixed inset-0 z-50 bg-primary flex items-center justify-center p-6"><div className="text-center text-primary-foreground"><p className="mb-4">Cette séance ne contient aucun exercice.</p><button onClick={() => navigate("/espace-client/programme")} className="bg-primary-foreground text-primary px-6 py-3 rounded-md font-semibold">Retour au programme</button></div></div>;
 
-  if (execState.phase === "welcome") return <ExecutionWelcome sessionData={sessionData} onStart={handleStart} onExit={() => navigate("/espace-client/programme")} />;
+  if (execState.phase === "welcome") return <ExecutionWelcome sessionData={sessionData} plannedDate={plannedDate} onStart={handleStart} onExit={() => navigate("/espace-client/programme")} />;
   if (execState.phase === "bloc_intro") return <ExecutionBlocIntro bloc={currentBloc} totalRounds={totalRounds} onContinue={handleContinueBloc} onPrev={execState.blocIndex > 0 ? handlePrev : undefined} onExit={() => navigate("/espace-client/programme")} />;
-  if (execState.phase === "complete") return <ExecutionComplete executionId={executionId} sessionData={sessionData} user={user} onDone={() => navigate("/espace-client/programme")} />;
+  if (execState.phase === "complete") return <ExecutionComplete executionId={executionId} sessionData={sessionData} user={user} initialPerfData={perfData} onDone={() => navigate("/espace-client/programme")} />;
 
   return (
     <ExecutionActive
@@ -248,6 +251,8 @@ export default function SessionExecution() {
       onPrev={handlePrev}
       onTogglePause={togglePause}
       onExit={() => navigate("/espace-client/programme")}
+      perfData={perfData}
+      onPerfChange={setPerf}
     />
   );
 }

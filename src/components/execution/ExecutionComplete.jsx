@@ -11,7 +11,7 @@ const RESSENTI_OPTIONS = [
 const NOTE_LABELS = ["", "Très difficile", "Difficile", "Correcte", "Bonne", "Excellente"];
 const RPE_LABELS = ["", "Très facile", "Facile", "Modéré", "Difficile", "Maximal"];
 
-export default function ExecutionComplete({ executionId, sessionData, user, onDone }) {
+export default function ExecutionComplete({ executionId, sessionData, user, onDone, initialPerfData }) {
   const [step, setStep] = useState(1);
   const [noteSeance, setNoteSeance] = useState(0);
   const [hoverNote, setHoverNote] = useState(0);
@@ -21,9 +21,22 @@ export default function ExecutionComplete({ executionId, sessionData, user, onDo
   const [ressenti, setRessenti] = useState("");
   const [messageCoach, setMessageCoach] = useState("");
   const [saving, setSaving] = useState(false);
-  const [perfData, setPerfData] = useState({});
+  const [perfData, setPerfData] = useState(() => {
+    const init = {};
+    if (initialPerfData) {
+      Object.entries(initialPerfData).forEach(([exId, v]) => {
+        if (!v) return;
+        init[exId] = {
+          actual_reps: v.reps ?? "",
+          actual_weight: v.charge ?? "",
+          notes: v.commentaire ?? "",
+        };
+      });
+    }
+    return init;
+  });
 
-  const allExercises = sessionData.blocs.flatMap(b => b.exercices.map(ex => ({ ...ex, bloc_titre: b.titre })));
+  const allExercises = sessionData.blocs.flatMap(b => b.exercices.map(ex => ({ ...ex, bloc_titre: b.titre, bloc_nb_series: b.nb_series })));
 
   const submitFeedback = async () => {
     setSaving(true);
@@ -62,7 +75,7 @@ export default function ExecutionComplete({ executionId, sessionData, user, onDo
           execution_id: executionId, exercice_id: ex.id, exercice_name: ex.name,
           planned_sets: ex.sets, planned_reps: ex.reps, planned_intensity: ex.intensity || "",
           actual_sets: perfData[ex.id]?.actual_sets || 0, actual_reps: perfData[ex.id]?.actual_reps || "",
-          actual_weight: perfData[ex.id]?.actual_weight || 0, notes: "",
+          actual_weight: perfData[ex.id]?.actual_weight || 0, notes: perfData[ex.id]?.notes || "",
         }));
       if (records.length > 0 && executionId) {
         await base44.entities.PerformanceExercice.bulkCreate(records);
@@ -154,7 +167,7 @@ export default function ExecutionComplete({ executionId, sessionData, user, onDo
                   <span className="w-6 h-6 rounded bg-secondary/20 text-secondary flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
                   <p className="font-semibold text-sm">{ex.name}</p>
                 </div>
-                <p className="text-xs text-primary-foreground/40 mb-3 pl-8">Prévu: {ex.sets || "—"} séries × {ex.reps || "—"}{ex.intensity ? ` · ${ex.intensity}` : ""}</p>
+                <p className="text-xs text-primary-foreground/40 mb-3 pl-8">Prévu: {ex.bloc_nb_series || ex.sets || "—"} séries × {ex.reps || "—"}{ex.intensity ? ` · ${ex.intensity}` : ""}</p>
                 <div className="grid grid-cols-3 gap-2 pl-8">
                   <input type="number" placeholder="Séries réelles" value={perfData[ex.id]?.actual_sets || ""} onChange={e => setPerf(ex.id, "actual_sets", parseInt(e.target.value) || 0)} className="bg-primary-foreground/5 border border-primary-foreground/15 rounded px-3 py-2 text-sm placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary" />
                   <input type="text" placeholder="Reps réelles" value={perfData[ex.id]?.actual_reps || ""} onChange={e => setPerf(ex.id, "actual_reps", e.target.value)} className="bg-primary-foreground/5 border border-primary-foreground/15 rounded px-3 py-2 text-sm placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary" />

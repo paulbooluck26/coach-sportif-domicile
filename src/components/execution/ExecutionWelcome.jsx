@@ -1,5 +1,6 @@
 import { Play, X, Clock } from "lucide-react";
 import { parseTimeFromReps } from "@/lib/executionAudio";
+import AddToCalendarButton from "@/components/programme/AddToCalendarButton";
 
 function estimateDuration(blocs) {
   let sec = 0;
@@ -8,7 +9,7 @@ function estimateDuration(blocs) {
     let perRound = 0;
     (b.exercices || []).forEach((ex) => {
       const t = parseTimeFromReps(ex.reps);
-      const sets = ex.sets || 1;
+      const sets = b.nb_series || ex.sets || 1;
       perRound += (t > 0 ? t : 45) * sets;
       perRound += ex.rest_seconds || b.repos_entre_exercices || 60;
     });
@@ -20,8 +21,10 @@ function estimateDuration(blocs) {
   return Math.max(1, Math.round(sec / 60));
 }
 
-export default function ExecutionWelcome({ sessionData, onStart, onExit }) {
+export default function ExecutionWelcome({ sessionData, plannedDate, onStart, onExit }) {
   const duree = estimateDuration(sessionData.blocs);
+  const seanceUrl = sessionData.seance?.id ? `${window.location.origin}/espace-client/seance/${sessionData.seance.id}${plannedDate ? `?date=${plannedDate}` : ""}` : "";
+  const showCalendar = plannedDate && new Date(plannedDate + "T00:00:00") >= new Date(new Date().setHours(0, 0, 0, 0));
   const totalEx = sessionData.blocs.reduce((acc, b) => acc + (b.exercices?.length || 0), 0);
 
   return (
@@ -50,7 +53,7 @@ export default function ExecutionWelcome({ sessionData, onStart, onExit }) {
                 <div className="flex items-center gap-3">
                   <span className="w-7 h-7 rounded bg-secondary/20 text-secondary flex items-center justify-center text-sm font-bold flex-shrink-0">{i + 1}</span>
                   <span className="font-medium">{b.titre}</span>
-                  {b.rounds > 1 && <span className="text-xs text-primary-foreground/40 ml-auto">{b.rounds} tours</span>}
+                  {((b.nb_series && b.nb_series > 1) || b.rounds > 1) && <span className="text-xs text-primary-foreground/40 ml-auto">{[b.nb_series > 1 && `${b.nb_series} séries`, b.rounds > 1 && `${b.rounds} tours`].filter(Boolean).join(" · ")}</span>}
                 </div>
                 {b.exercices?.length > 0 && (
                   <ul className="mt-2 ml-10 space-y-1">
@@ -58,7 +61,7 @@ export default function ExecutionWelcome({ sessionData, onStart, onExit }) {
                       <li key={ex.id} className="text-sm flex items-center gap-2">
                         <span className="w-1 h-1 rounded-full bg-secondary/60 shrink-0" />
                         <span className="font-medium text-primary-foreground/90">{ex.name}</span>
-                        <span className="text-primary-foreground/40">· {ex.reps}{ex.sets ? ` × ${ex.sets}` : ""}</span>
+                        <span className="text-primary-foreground/40">· {ex.reps}</span>
                       </li>
                     ))}
                   </ul>
@@ -68,6 +71,11 @@ export default function ExecutionWelcome({ sessionData, onStart, onExit }) {
           </div>
         </div>
 
+        {showCalendar && (
+          <div className="mb-5">
+            <AddToCalendarButton seance={sessionData.seance} date={plannedDate} dureeMin={duree} url={seanceUrl} className="border-primary-foreground/25 text-primary-foreground hover:border-secondary" />
+          </div>
+        )}
         <button onClick={onStart} className="bg-secondary text-secondary-foreground px-10 py-4 rounded-full text-lg font-semibold flex items-center gap-2 hover:scale-105 transition-transform">
           <Play className="w-5 h-5" /> Démarrer
         </button>

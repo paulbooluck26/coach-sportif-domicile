@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { loadClientProjection } from "@/lib/projection";
 import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
 import RescheduleSession from "@/components/programme/RescheduleSession";
+import AddToCalendarButton from "@/components/programme/AddToCalendarButton";
 
 const STATUS_CFG = { faite: { icon: CheckCircle2, color: "text-secondary", label: "Faite" }, manquee: { icon: XCircle, color: "text-destructive", label: "À rattraper" }, a_venir: { icon: Clock, color: "text-accent", label: "À venir" } };
 
@@ -117,6 +118,11 @@ export default function MonProgramme() {
                             <span className={`flex items-center gap-1 text-xs font-medium ${cfg.color} shrink-0`}><Icon className="w-3.5 h-3.5" /> {cfg.label}</span>
                           </div>
                           <p className="text-xs text-muted-foreground mb-3">{p.programme.name} · Semaine {p.semaine.numero}{p.deplacee ? ` · Reportée du ${new Date(p.date_prevue + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}` : ""}</p>
+                          {p.status === "a_venir" && (
+                            <div className="mb-3">
+                              <AddToCalendarButton seance={p.seance} date={p.date} programmeName={p.programme.name} dureeMin={60} url={`${window.location.origin}/espace-client/seance/${p.seance.id}?date=${p.date}`} />
+                            </div>
+                          )}
                           {(() => {
                             const seanceUrl = `/espace-client/seance/${p.seance.id}?date=${p.date}`;
                             if (p.status === "faite") return (

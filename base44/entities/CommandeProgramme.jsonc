@@ -17,9 +17,9 @@
     "offre": {
       "type": "string",
       "enum": [
-        "decouverte",
-        "transformation",
-        "premium"
+        "start",
+        "forge",
+        "legacy"
       ],
       "title": "Offre"
     },

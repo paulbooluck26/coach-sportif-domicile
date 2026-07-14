@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useNavigate } from "react-router-dom";
 import { ShoppingBag, Clock, CheckCircle2, Hammer } from "lucide-react";
 
-const OFFRES = { decouverte: "Découverte", transformation: "Transformation", premium: "Premium" };
+const OFFRES = { start: "START", forge: "FORGE", legacy: "LEGACY" };
 const STATUTS = {
   en_preparation: { label: "En préparation", color: "bg-accent/15 text-accent", icon: Clock },
   pret: { label: "Prêt", color: "bg-secondary text-secondary-foreground", icon: CheckCircle2 },

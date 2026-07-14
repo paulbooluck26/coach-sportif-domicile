@@ -63,10 +63,11 @@ export async function loadClientProjection(clientId) {
           }
           const effectiveDate = new Date(effectiveIso + "T00:00:00");
 
-          const exec = executions.find(e =>
-            e.seance_programme_id === seance.id &&
-            Math.abs(new Date(e.date_execution + "T00:00:00") - effectiveDate) <= 3 * 86400000
-          );
+          const exec = executions.find(e => {
+            if (e.seance_programme_id !== seance.id) return false;
+            const ed = new Date(e.date_execution + "T00:00:00");
+            return ed >= new Date(effectiveDate.getTime() - 7 * 86400000) && ed <= new Date(effectiveDate.getTime() + 3 * 86400000);
+          });
 
           let status;
           if (exec) status = "faite";

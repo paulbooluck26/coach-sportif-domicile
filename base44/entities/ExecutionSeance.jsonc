@@ -40,6 +40,16 @@
       "default": "en_cours",
       "title": "Statut"
     },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "planning",
+        "avance",
+        "repetition"
+      ],
+      "default": "planning",
+      "title": "Mode de r\u00e9alisation"
+    },
     "duree_minutes": {
       "type": "number",
       "title": "Dur\u00e9e r\u00e9elle (min)"

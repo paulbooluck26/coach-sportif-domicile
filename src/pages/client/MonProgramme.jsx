@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Dumbbell, Target, Calendar, Play, CheckCircle2, XCircle, Clock, TrendingUp } from "lucide-react";
+import { Dumbbell, Target, Calendar, Play, CheckCircle2, XCircle, Clock, TrendingUp, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { loadClientProjection } from "@/lib/projection";
 import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
@@ -117,12 +117,30 @@ export default function MonProgramme() {
                             <span className={`flex items-center gap-1 text-xs font-medium ${cfg.color} shrink-0`}><Icon className="w-3.5 h-3.5" /> {cfg.label}</span>
                           </div>
                           <p className="text-xs text-muted-foreground mb-3">{p.programme.name} · Semaine {p.semaine.numero}{p.deplacee ? ` · Reportée du ${new Date(p.date_prevue + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}` : ""}</p>
-                          {p.status === "a_venir" && p.date === today && (
-                            <Link to={`/espace-client/seance/${p.seance.id}`} className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-xs font-semibold"><Play className="w-3 h-3" /> Démarrer maintenant</Link>
-                          )}
-                          {p.status === "a_venir" && p.date !== today && <p className="text-xs text-muted-foreground">Programmée pour cette date.</p>}
-                          {p.status === "faite" && <p className="text-xs text-secondary">Séance réalisée ✓</p>}
-                          {p.status === "manquee" && <RescheduleSession projection={p} onRescheduled={reloadProjections} />}
+                          {(() => {
+                            const seanceUrl = `/espace-client/seance/${p.seance.id}?date=${p.date}`;
+                            if (p.status === "faite") return (
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs text-secondary font-medium">Réalisée ✓</span>
+                                <Link to={seanceUrl} className="inline-flex items-center gap-1.5 bg-secondary/10 text-secondary border border-secondary/30 px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-secondary/20"><RotateCcw className="w-3 h-3" /> Refaire</Link>
+                              </div>
+                            );
+                            if (p.status === "manquee") return (
+                              <div className="space-y-2">
+                                <Link to={seanceUrl} className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-xs font-semibold"><Play className="w-3 h-3" /> Rattraper maintenant</Link>
+                                <RescheduleSession projection={p} onRescheduled={reloadProjections} />
+                              </div>
+                            );
+                            if (p.status === "a_venir" && p.date === today) return (
+                              <Link to={seanceUrl} className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-xs font-semibold"><Play className="w-3 h-3" /> Démarrer maintenant</Link>
+                            );
+                            return (
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">Programmée pour cette date.</p>
+                                <Link to={seanceUrl} className="inline-flex items-center gap-1.5 bg-accent text-accent-foreground px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-accent/90"><Play className="w-3 h-3" /> Faire en avance</Link>
+                              </div>
+                            );
+                          })()}
                         </div>
                       );
                     })}

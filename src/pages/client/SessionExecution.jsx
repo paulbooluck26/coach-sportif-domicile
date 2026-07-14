@@ -12,6 +12,7 @@ export default function SessionExecution() {
   const { user } = useAuth();
   const { seanceId } = useParams();
   const navigate = useNavigate();
+  const plannedDate = new URLSearchParams(window.location.search).get("date");
   const [sessionData, setSessionData] = useState(null);
   const [execState, setExecState] = useState({
     blocIndex: 0, round: 1, exerciseIndex: 0, phase: "loading",
@@ -202,12 +203,22 @@ export default function SessionExecution() {
           }
         } catch (e) {}
         const duration = Math.max(1, Math.round((Date.now() - startTimeRef.current) / 60000));
+        let mode = "planning";
+        try {
+          const existing = await base44.entities.ExecutionSeance.filter({ client_id: user.id, seance_programme_id: seanceId });
+          if (existing.length > 0) mode = "repetition";
+          else if (plannedDate) {
+            const pd = new Date(plannedDate + "T00:00:00");
+            const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+            if (pd > t0 && (pd - t0) > 3 * 86400000) mode = "avance";
+          }
+        } catch (e) {}
         const exec = await base44.entities.ExecutionSeance.create({
           client_id: user.id, client_name: user.full_name || user.email,
           seance_programme_id: seanceId, seance_titre: seance?.titre || "",
           programme_id: programmeId, programme_name: programmeName,
           date_execution: new Date().toISOString().split("T")[0],
-          statut: "termine", duree_minutes: duration,
+          statut: "termine", duree_minutes: duration, mode,
         });
         setExecutionId(exec.id);
       } catch (e) {}

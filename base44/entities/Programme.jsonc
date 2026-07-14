@@ -51,7 +51,7 @@
     },
     "cycle_id": {
       "type": "string",
-      "title": "Cycle li\u00e9"
+      "title": "Cycle li\u00e9 (informatif \u2014 la source principale est CycleClient.programme_id)"
     }
   },
   "required": [

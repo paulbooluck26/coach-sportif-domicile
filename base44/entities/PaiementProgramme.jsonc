@@ -22,6 +22,11 @@
       "type": "number",
       "title": "Montant net pay\u00e9 (\u20ac)"
     },
+    "devise": {
+      "type": "string",
+      "default": "EUR",
+      "title": "Devise"
+    },
     "methode": {
       "type": "string",
       "default": "stripe",
@@ -30,6 +35,10 @@
     "stripe_ref": {
       "type": "string",
       "title": "R\u00e9f\u00e9rence paiement"
+    },
+    "stripe_session_id": {
+      "type": "string",
+      "title": "ID de session Stripe"
     },
     "date_paiement": {
       "type": "string",

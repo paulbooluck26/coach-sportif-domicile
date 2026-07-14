@@ -45,6 +45,20 @@ export default function BilanInitial() {
     })();
   }, [user]);
 
+  const NUMBER_FIELDS = ["taille_cm", "poids_kg", "heures_sommeil", "niveau_stress", "calories_journalieres", "seances_par_semaine", "duree_seance", "seances_souhaitees_par_semaine"];
+
+  const sanitize = (data) => {
+    const out = { ...data };
+    NUMBER_FIELDS.forEach((k) => {
+      const v = out[k];
+      if (v === "" || v === null || v === undefined) { delete out[k]; return; }
+      const n = Number(v);
+      if (Number.isNaN(n)) delete out[k];
+      else out[k] = n;
+    });
+    return out;
+  };
+
   const set = (k, v) => setBilan((prev) => ({ ...prev, [k]: v }));
 
   const toggleJour = (j) => {
@@ -58,7 +72,7 @@ export default function BilanInitial() {
     setSaving(true);
     setError("");
     try {
-      const payload = { ...bilan, etape_actuelle: nextStep, statut: isTermine ? "termine" : "en_cours" };
+      const payload = sanitize({ ...bilan, etape_actuelle: nextStep, statut: isTermine ? "termine" : "en_cours" });
       if (isTermine) payload.date_remplissage = new Date().toISOString().split("T")[0];
       let rec;
       if (bilanId) rec = await base44.entities.BilanInitial.update(bilanId, payload);

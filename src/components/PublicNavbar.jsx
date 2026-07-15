@@ -68,7 +68,7 @@ export default function PublicNavbar() {
             </Link>
           ) : (
             <Link
-              to="/reserver"
+              to="/offres"
               className="px-6 py-2.5 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold hover:scale-105 hover:shadow-lg transition-all duration-300"
             >
               Réserver
@@ -96,7 +96,7 @@ export default function PublicNavbar() {
                 Retour à l'accueil
               </Link>
             ) : (
-              <Link to="/reserver" className="px-6 py-3 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold text-center">
+              <Link to="/offres" className="px-6 py-3 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold text-center">
                 Réserver une séance
               </Link>
             )}

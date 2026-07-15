@@ -9,6 +9,7 @@ const services = [
     desc: "Un coaching complet, chez vous. Renforcement musculaire, cardio, mobilité et posture — adapté à votre espace et votre matériel. Chaque séance dure 60 minutes.",
     features: ["Évaluation posturale initiale", "Matériel fourni si besoin", "Suivi progression séance par séance"],
     image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80",
+    link: "/reserver",
   },
   {
     icon: ClipboardList,
@@ -16,6 +17,7 @@ const services = [
     desc: "Un plan d'entraînement structuré sur plusieurs semaines, conçu pour atteindre un objectif précis. Idéal en complément des séances ou pour s'entraîner en autonomie.",
     features: ["Plan sur 4 à 12 semaines", "Exercices détaillés et vidéos", "Ajustements selon progression"],
     image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80",
+    link: "/achat-programme",
   },
 ];
 
@@ -62,7 +64,7 @@ export default function Services() {
                     </li>
                   ))}
                 </ul>
-                <Link to="/reserver" className="inline-flex items-center gap-2 text-sm font-semibold text-secondary hover:gap-3 transition-all">
+                <Link to={s.link} className="inline-flex items-center gap-2 text-sm font-semibold text-secondary hover:gap-3 transition-all">
                   {i === 0 ? "Réserver une séance" : "Acheter un programme"}
                   <ArrowRight className="w-4 h-4" />
                 </Link>

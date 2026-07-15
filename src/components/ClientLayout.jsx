@@ -1,11 +1,10 @@
 import { Outlet, NavLink, Link } from "react-router-dom";
-import { Home, Dumbbell, CalendarPlus, MessageCircle, User, TrendingUp } from "lucide-react";
+import { Home, Dumbbell, CalendarPlus, MessageCircle, User } from "lucide-react";
 import NotificationsBell from "@/components/NotificationsBell";
 
 const navItems = [
   { to: "/espace-client", label: "Accueil", icon: Home, end: true },
   { to: "/espace-client/programme", label: "Programmes", icon: Dumbbell },
-  { to: "/espace-client/performances", label: "Performances", icon: TrendingUp },
   { to: "/espace-client/reserver", label: "Réserver", icon: CalendarPlus },
   { to: "/espace-client/messages", label: "Messages", icon: MessageCircle },
   { to: "/espace-client/profil", label: "Profil", icon: User },

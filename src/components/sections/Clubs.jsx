@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Users, Trophy, Activity, ShieldCheck } from "lucide-react";
+import { ArrowRight, Users, Trophy, Activity, ShieldCheck, Monitor } from "lucide-react";
 
 const benefices = [
   { icon: Trophy, title: "Performance collective", desc: "Programmes ciblés par sport : explosivité, endurance, prévention des blessures." },
@@ -41,6 +41,29 @@ export default function Clubs() {
               <p className="text-sm text-primary-foreground/60 leading-relaxed">{b.desc}</p>
             </div>
           ))}
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6 mb-16">
+          <div className="bg-primary-foreground/5 border border-primary-foreground/15 rounded-2xl p-8">
+            <div className="w-11 h-11 rounded-xl bg-secondary/20 flex items-center justify-center mb-4">
+              <Monitor className="w-5 h-5 text-secondary" />
+            </div>
+            <h3 className="text-xl font-heading font-semibold text-primary-foreground mb-2">Performance Online</h3>
+            <p className="text-sm text-primary-foreground/60 leading-relaxed mb-4">
+              Programmation à distance, accès à l'app individuelle, suivi des performances et ajustements réguliers.
+            </p>
+            <p className="text-sm font-semibold text-secondary">Sur devis</p>
+          </div>
+          <div className="bg-primary-foreground/5 border border-primary-foreground/15 rounded-2xl p-8">
+            <div className="w-11 h-11 rounded-xl bg-secondary/20 flex items-center justify-center mb-4">
+              <Users className="w-5 h-5 text-secondary" />
+            </div>
+            <h3 className="text-xl font-heading font-semibold text-primary-foreground mb-2">Performance Terrain</h3>
+            <p className="text-sm text-primary-foreground/60 leading-relaxed mb-4">
+              Séances collectives, tests physiques, planification de saison, suivi de l'effectif et collaboration avec les entraîneurs.
+            </p>
+            <p className="text-sm font-semibold text-secondary">Sur devis</p>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 bg-primary-foreground/5 border border-primary-foreground/15 rounded-2xl p-8">

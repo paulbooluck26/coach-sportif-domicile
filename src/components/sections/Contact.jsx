@@ -45,7 +45,7 @@ export default function Contact() {
               <span className="font-semibold text-primary">Email :</span> contact@thelabforge.fr
             </p>
             <p className="text-muted-foreground">
-              <span className="font-semibold text-primary">Zone :</span> Paris et Île-de-France
+              <span className="font-semibold text-primary">Zone :</span> Colmar et alentours (Haut-Rhin)
             </p>
           </div>
         </div>

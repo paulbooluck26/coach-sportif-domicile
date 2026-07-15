@@ -20,9 +20,9 @@ const services = [
 ];
 
 const OFFRES_PROG = [
-  { id: "decouverte", nom: "Découverte", duree: 4, prix: 49, desc: "4 semaines pour démarrer et construire de bonnes bases." },
-  { id: "transformation", nom: "Transformation", duree: 8, prix: 89, desc: "8 semaines pour transformer votre physique et vos habitudes.", recommande: true },
-  { id: "premium", nom: "Premium", duree: 12, prix: 129, desc: "12 semaines pour une transformation complète et durable." },
+  { id: "start", nom: "START", duree: 4, prix: 49, desc: "Programme découverte pour construire de bonnes bases et reprendre une routine efficace." },
+  { id: "forge", nom: "FORGE Transformation", duree: 12, prix: 149, desc: "Le programme principal pour une transformation physique et des habitudes durables.", recommande: true },
+  { id: "legacy", nom: "LEGACY", duree: 24, prix: 299, desc: "Un accompagnement longue durée pour une transformation complète." },
 ];
 
 export default function Services() {

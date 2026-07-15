@@ -5,6 +5,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft, CreditCard, Lock, Loader2, CheckCircle2, ClipboardList, ArrowRight, Target, Dumbbell, MessageSquare, Sparkles } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import ProgrammeCallBooking from "@/components/programme/ProgrammeCallBooking";
+import { finaliserAchatProgramme } from "@/lib/reservationFlow";
 
 const OFFRES = {
   start: {
@@ -187,29 +188,21 @@ export default function AchatProgramme() {
   const handlePay = async () => {
     setPaying(true);
     try {
-      await base44.entities.CommandeProgramme.create({
-        client_id: user.id,
-        client_nom: user.full_name || user.email,
-        client_email: user.email,
-        offre: offre.id,
-        duree_semaines: offre.duree,
-        montant: offre.prix,
-        date_achat: new Date().toISOString().split("T")[0],
-        statut: "en_preparation",
+      await finaliserAchatProgramme({
+        user,
+        programmeNom: offre.nom,
+        prix: offre.prix,
+        commandePayload: {
+          client_id: user.id,
+          client_nom: user.full_name || user.email,
+          client_email: user.email,
+          offre: offre.id,
+          duree_semaines: offre.duree,
+          montant: offre.prix,
+          date_achat: new Date().toISOString().split("T")[0],
+          statut: "en_preparation",
+        },
       });
-      await base44.entities.Paiement.create({
-        seance_id: "programme-" + Date.now(),
-        client_id: user.id,
-        client_name: user.full_name || user.email,
-        amount: offre.prix,
-        method: "stripe",
-        status: "paid",
-        stripe_ref: "SIM-" + Date.now(),
-      });
-      const profiles = await base44.entities.ClientProfile.filter({ user_id: user.id });
-      if (profiles.length === 0) {
-        await base44.entities.ClientProfile.create({ user_id: user.id, nom: user.full_name || "", email: user.email });
-      }
       setConfirmed(true);
     } catch (err) {
       alert("Erreur lors du paiement. Veuillez réessayer.");

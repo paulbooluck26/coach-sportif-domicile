@@ -7,6 +7,7 @@ import CalendrierDispo from "@/components/CalendrierDispo";
 import { Link, useNavigate } from "react-router-dom";
 import { Check, ChevronLeft, ChevronRight, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, Clock, MapPin, MessageSquare } from "lucide-react";
 import { determinerZone, ZONES } from "@/lib/zones";
+import { finaliserSeancePayante } from "@/lib/reservationFlow";
 
 const TYPES = [
   { id: "seance_individuelle", nom: "Séance individuelle", desc: "60 min à domicile", prix: 70, duree: 60 },
@@ -60,33 +61,16 @@ export default function Reservation() {
     setPaying(true);
     try {
       const typeData = TYPES.find(t => t.id === type);
-      const seance = await base44.entities.Seance.create({
-        client_id: user.id,
-        client_name: user.full_name || user.email,
-        session_type: type,
+      const { seance } = await finaliserSeancePayante({
+        user,
+        sessionType: type,
         date,
-        time: heure,
-        duration_minutes: typeData.duree,
-        price: typeData.prix,
-        status: "booked",
+        heure,
+        duree: typeData.duree,
+        prix: typeData.prix,
         location: adresse || "Domicile",
+        prestationLabel: typeData.nom,
       });
-      await base44.entities.Paiement.create({
-        seance_id: seance.id,
-        client_id: user.id,
-        client_name: user.full_name || user.email,
-        amount: typeData.prix,
-        method: "stripe",
-        status: "paid",
-        stripe_ref: "SIM-" + Date.now(),
-      });
-      // ensure client profile exists
-      const profiles = await base44.entities.ClientProfile.filter({ user_id: user.id });
-      if (profiles.length === 0) {
-        await base44.entities.ClientProfile.create({ user_id: user.id, nom: user.full_name || "", email: user.email, adresse });
-      } else if (adresse) {
-        await base44.entities.ClientProfile.update(profiles[0].id, { adresse });
-      }
       setConfirmed({ seance, typeData });
     } catch (err) {
       alert("Erreur lors du paiement. Veuillez réessayer.");
@@ -126,7 +110,7 @@ export default function Reservation() {
             <p className="flex items-center gap-3 text-sm text-foreground/80"><Clock className="w-4 h-4 text-accent" /> {seance.time} · {seance.duration_minutes} min</p>
             <p className="flex items-center gap-3 text-sm text-foreground/80"><MapPin className="w-4 h-4 text-accent" /> {seance.location}</p>
           </div>
-          {selectedType.id === "bilan_initial" && (
+          {typeData.id === "bilan_initial" && (
             <div className="bg-secondary/10 border border-secondary/30 rounded-md p-5 text-left mb-8">
               <p className="font-heading font-semibold text-foreground mb-1">Préparez votre premier rendez-vous</p>
               <p className="text-sm text-muted-foreground mb-4">Complétez votre Bilan initial avant votre séance pour que votre coach arrive prêt.</p>
@@ -134,7 +118,7 @@ export default function Reservation() {
             </div>
           )}
           <div className="flex gap-3">
-            <button onClick={() => navigate("/espace-client/seances")} className="flex-1 bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm">Voir mes séances</button>
+            <button onClick={() => navigate("/espace-client")} className="flex-1 bg-primary text-primary-foreground py-3 rounded-md font-semibold text-sm">Voir mon espace</button>
             <button onClick={() => navigate("/espace-client")} className="flex-1 border border-border py-3 rounded-md font-semibold text-sm text-foreground">Tableau de bord</button>
           </div>
         </div>

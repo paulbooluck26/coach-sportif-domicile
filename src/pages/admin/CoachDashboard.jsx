@@ -25,9 +25,9 @@ export default function CoachDashboard() {
   if (!demandes) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
   const today = new Date().toISOString().slice(0, 10);
-  const aVenir = seances.filter(s => s.date >= today && s.statut !== "annulee" && s.statut !== "effectuee");
+  const aVenir = seances.filter(s => s.date >= today && s.status !== "cancelled" && s.status !== "completed");
   const nouvellesDemandes = demandes.filter(d => d.statut === "nouveau");
-  const revenuMois = paiements.filter(p => p.statut === "reussi" && new Date(p.date_paiement).getMonth() === new Date().getMonth()).reduce((sum, p) => sum + (p.montant || 0), 0);
+  const revenuMois = paiements.filter(p => p.status === "paid" && p.date_paiement && new Date(p.date_paiement).getMonth() === new Date().getMonth()).reduce((sum, p) => sum + (p.amount || 0), 0);
 
   const stats = [
     { label: "Séances à venir", value: aVenir.length, icon: CalendarDays, to: "/admin/seances" },
@@ -76,8 +76,8 @@ export default function CoachDashboard() {
                     <span className="font-heading font-bold text-sm text-foreground leading-none">{new Date(s.date).getDate()}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground text-sm truncate">{s.client_nom || "Client"}</p>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> {s.heure} · {typeLabel(s.type_seance)}</p>
+                    <p className="font-medium text-foreground text-sm truncate">{s.client_name || "Client"}</p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" /> {s.time} · {typeLabel(s.session_type)}</p>
                   </div>
                 </div>
               ))}
@@ -96,8 +96,8 @@ export default function CoachDashboard() {
             <div className="space-y-3">
               {nouvellesDemandes.slice(0, 5).map(d => (
                 <div key={d.id} className="py-2">
-                  <p className="font-medium text-foreground text-sm">{d.nom}</p>
-                  <p className="text-xs text-muted-foreground truncate">{d.objectif || d.message}</p>
+                  <p className="font-medium text-foreground text-sm">{d.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{d.goal || d.message}</p>
                 </div>
               ))}
             </div>

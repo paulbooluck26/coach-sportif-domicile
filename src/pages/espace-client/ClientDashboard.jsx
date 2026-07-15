@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import { loadClientProjection } from "@/lib/projection";
+import { parseDateLocal } from "@/lib/creneaux";
 import { Play, CalendarDays, Clock, MapPin, Flame, Trophy, TrendingUp, ChevronRight, Dumbbell, CalendarPlus } from "lucide-react";
 import ClientAvatar from "@/components/ClientAvatar";
 
@@ -18,7 +19,7 @@ export default function ClientDashboard() {
     (async () => {
       try {
         const [allSeances, execs, profiles] = await Promise.all([
-          base44.entities.Seance.filter({ client_user_id: user.id }, "date"),
+          base44.entities.Seance.filter({ client_id: user.id }, "date"),
           base44.entities.ExecutionSeance.filter({ client_id: user.id }, "-date_execution", 100),
           base44.entities.ClientProfile.filter({ user_id: user.id }),
         ]);
@@ -40,11 +41,11 @@ export default function ClientDashboard() {
   const today = new Date().toISOString().split("T")[0];
   const prenom = (user.full_name || user.email || "").split(" ")[0];
 
-  const todayHomeSeance = seances.find(s => s.date === today && s.statut !== "annulee" && s.statut !== "effectuee");
+  const todayHomeSeance = seances.find(s => s.date === today && s.status !== "cancelled" && s.status !== "completed");
   const todayProgSeances = projections.filter(p => p.date === today && p.status !== "faite");
   const hasTodaySession = todayHomeSeance || todayProgSeances.length > 0;
 
-  const futureHomeSeances = seances.filter(s => s.date >= today && s.statut !== "annulee" && s.statut !== "effectuee");
+  const futureHomeSeances = seances.filter(s => s.date >= today && s.status !== "cancelled" && s.status !== "completed");
   const futureProgSeances = projections.filter(p => p.date > today && p.status === "a_venir");
   const allFuture = [
     ...futureHomeSeances.map(s => ({ type: "home", date: s.date, titre: typeLabel(s.type_seance), lieu: s.lieu })),
@@ -82,15 +83,15 @@ export default function ClientDashboard() {
             <>
               <h2 className="font-heading text-xl font-semibold mb-3">{typeLabel(todayHomeSeance.type_seance)}</h2>
               <div className="space-y-1.5 text-sm text-primary-foreground/80 mb-4">
-                <p className="flex items-center gap-2"><Clock className="w-4 h-4 text-accent" /> {todayHomeSeance.heure} · {todayHomeSeance.duree || 60} min</p>
-                {todayHomeSeance.lieu && <p className="flex items-center gap-2"><MapPin className="w-4 h-4 text-accent" /> {todayHomeSeance.lieu}</p>}
+                <p className="flex items-center gap-2"><Clock className="w-4 h-4 text-accent" /> {todayHomeSeance.time} · {todayHomeSeance.duration_minutes || 60} min</p>
+                {todayHomeSeance.location && <p className="flex items-center gap-2"><MapPin className="w-4 h-4 text-accent" /> {todayHomeSeance.location}</p>}
               </div>
               <p className="text-xs text-primary-foreground/50">Votre coach arrive à domicile à l'heure prévue.</p>
             </>
           )}
           {todayHomeSeance && todayProgSeances.length > 0 && (
             <div className="mt-3 pt-3 border-t border-primary-foreground/15 text-sm text-primary-foreground/70">
-              <p className="flex items-center gap-2"><Clock className="w-4 h-4 text-accent" /> Coach à domicile : {todayHomeSeance.heure}</p>
+              <p className="flex items-center gap-2"><Clock className="w-4 h-4 text-accent" /> Coach à domicile : {todayHomeSeance.time}</p>
             </div>
           )}
         </div>
@@ -134,7 +135,7 @@ export default function ClientDashboard() {
               <div className="flex-1">
                 <p className="font-semibold text-foreground text-sm">{nextSession.titre}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {new Date(nextSession.date + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+                  {parseDateLocal(nextSession.date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
                   {nextSession.lieu && ` · ${nextSession.lieu}`}
                 </p>
               </div>

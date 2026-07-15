@@ -52,8 +52,8 @@ export default function CoachClients() {
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {clients.map(c => {
-            const clientSeances = seances.filter(s => s.client_user_id === c.user_id);
-            const totalDepense = clientSeances.reduce((sum, s) => sum + (s.statut !== "annulee" ? (s.montant || 0) : 0), 0);
+            const clientSeances = seances.filter(s => s.client_id === c.user_id);
+            const totalDepense = clientSeances.reduce((sum, s) => sum + (s.status !== "cancelled" ? (s.price || 0) : 0), 0);
             return (
               <div key={c.id} className="bg-card border border-border rounded-lg p-6">
                 <div className="flex items-start justify-between mb-4">

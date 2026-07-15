@@ -37,6 +37,11 @@
     "stripe_ref": {
       "type": "string",
       "title": "R\u00e9f\u00e9rence paiement"
+    },
+    "date_paiement": {
+      "type": "string",
+      "format": "date",
+      "title": "Date de paiement"
     }
   },
   "required": [

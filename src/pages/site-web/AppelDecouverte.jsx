@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useCreneaux } from "@/hooks/useCreneaux";
-import { creneauxDisponibles } from "@/lib/creneaux";
+import { creneauxDisponibles, parseDateLocal } from "@/lib/creneaux";
 import CalendrierDispo from "@/components/CalendrierDispo";
 import { ArrowLeft, CheckCircle2, Loader2, Phone, Clock, CalendarDays, User, Mail, MessageSquare } from "lucide-react";
 
@@ -17,7 +17,7 @@ export default function AppelDecouverte() {
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState("");
 
-  const slots = date ? creneauxDisponibles(new Date(date + "T00:00:00"), recurrentes, reservees) : [];
+  const slots = date ? creneauxDisponibles(parseDateLocal(date), recurrentes, reservees) : [];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,7 +40,7 @@ export default function AppelDecouverte() {
         await base44.integrations.Core.SendEmail({
           to: form.email,
           subject: "Confirmation de votre appel découverte — The Lab Forge",
-          body: `Bonjour ${form.nom},\n\nVotre appel découverte de 30 minutes est programmé pour le ${new Date(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} à ${heure}.\n\nUn appel téléphonique ou en visio, au choix — je vous contacterai au numéro indiqué.\n\nÀ très vite,\nPaul Booluck, Fondateur The Lab Forge`,
+          body: `Bonjour ${form.nom},\n\nVotre appel découverte de 30 minutes est programmé pour le ${parseDateLocal(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} à ${heure}.\n\nUn appel téléphonique ou en visio, au choix — je vous contacterai au numéro indiqué.\n\nÀ très vite,\nPaul Booluck, Fondateur The Lab Forge`,
         });
       } catch {}
 
@@ -62,7 +62,7 @@ export default function AppelDecouverte() {
           <h1 className="text-4xl font-heading font-bold text-primary mb-4">Appel programmé</h1>
           <p className="text-muted-foreground mb-8">
             Votre appel découverte de 30 minutes est prévu le{" "}
-            <strong className="text-primary">{new Date(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</strong>{" "}
+            <strong className="text-primary">{parseDateLocal(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</strong>{" "}
             à <strong className="text-primary">{heure}</strong>. Un email de confirmation vous a été envoyé.
           </p>
           <button
@@ -129,7 +129,7 @@ export default function AppelDecouverte() {
                 {date && (
                   <div>
                     <p className="text-sm font-semibold text-primary mb-3 flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-secondary" /> Créneaux disponibles le {new Date(date + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+                      <Clock className="w-4 h-4 text-secondary" /> Créneaux disponibles le {parseDateLocal(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
                     </p>
                     {slots.length === 0 ? (
                       <p className="text-sm text-muted-foreground">Aucun créneau disponible ce jour.</p>
@@ -160,7 +160,7 @@ export default function AppelDecouverte() {
             <div className="bg-background border border-border rounded-2xl p-6 space-y-3">
               <p className="flex items-center gap-3 text-sm text-muted-foreground">
                 <CalendarDays className="w-4 h-4 text-secondary" />
-                {new Date(date + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+                {parseDateLocal(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
               </p>
               <p className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Clock className="w-4 h-4 text-secondary" /> {heure} · 30 min

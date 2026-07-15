@@ -14,8 +14,8 @@ export default function CoachPaiements() {
 
   if (!paiements) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
-  const total = paiements.filter(p => p.statut === "reussi").reduce((s, p) => s + (p.montant || 0), 0);
-  const rembourses = paiements.filter(p => p.statut === "rembourse").reduce((s, p) => s + (p.montant || 0), 0);
+  const total = paiements.filter(p => p.status === "paid").reduce((s, p) => s + (p.amount || 0), 0);
+  const rembourses = paiements.filter(p => p.status === "refunded").reduce((s, p) => s + (p.amount || 0), 0);
   const net = total - rembourses;
 
   const months = [...new Set(paiements.map(p => new Date(p.date_paiement).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })))];
@@ -65,12 +65,12 @@ export default function CoachPaiements() {
             <tbody className="divide-y divide-border">
               {filtered.map(p => (
                 <tr key={p.id} className="hover:bg-secondary/20">
-                  <td className="px-6 py-4 text-foreground">{new Date(p.date_paiement).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}</td>
-                  <td className="px-6 py-4 text-foreground font-medium">{p.client_nom || "—"}</td>
-                  <td className="px-6 py-4 font-heading font-semibold text-foreground">{p.montant}€</td>
-                  <td className="px-6 py-4 text-muted-foreground capitalize">{p.methode || "carte"}</td>
+                  <td className="px-6 py-4 text-foreground">{p.date_paiement ? new Date(p.date_paiement).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : "—"}</td>
+                  <td className="px-6 py-4 text-foreground font-medium">{p.client_name || "—"}</td>
+                  <td className="px-6 py-4 font-heading font-semibold text-foreground">{p.amount}€</td>
+                  <td className="px-6 py-4 text-muted-foreground capitalize">{p.method || "carte"}</td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${p.statut === "reussi" ? "bg-accent/15 text-accent" : p.statut === "rembourse" ? "bg-destructive/10 text-destructive" : "bg-secondary text-muted-foreground"}`}>{p.statut}</span>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${p.status === "paid" ? "bg-accent/15 text-accent" : p.status === "refunded" ? "bg-destructive/10 text-destructive" : "bg-secondary text-muted-foreground"}`}>{p.status}</span>
                   </td>
                 </tr>
               ))}

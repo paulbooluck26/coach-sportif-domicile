@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import { User, Mail, Phone, MapPin, CreditCard, LogOut, Edit, Save, X, Target, Dumbbell, ClipboardList, CheckCircle2 } from "lucide-react";
+import { User, Mail, Phone, MapPin, CreditCard, LogOut, Edit, Save, X, Target, Dumbbell, ClipboardList, CheckCircle2, TrendingUp } from "lucide-react";
 
 export default function Profil() {
   const { user, logout } = useAuth();
@@ -117,6 +117,12 @@ export default function Profil() {
         ) : (
           <p className="text-sm text-muted-foreground">Aucun programme actif.</p>
         )}
+      </div>
+
+      <div className="bg-card border border-border rounded-2xl p-5">
+        <h2 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><TrendingUp className="w-4 h-4 text-secondary" /> Suivi & progression</h2>
+        <p className="text-sm text-muted-foreground mb-4">Consultez l'évolution de vos performances et vos records personnels au fil des séances.</p>
+        <Link to="/espace-client/performances" className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2.5 rounded-lg text-sm font-semibold">Voir mes performances</Link>
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-5">

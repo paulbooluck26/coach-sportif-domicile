@@ -13,7 +13,18 @@ const toHHMM = (total) => {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 };
 
-const dateStr = (d) => d.toISOString().slice(0, 10);
+const dateStr = (d) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
+/** Reconstruit une Date locale (minuit) depuis une string "YYYY-MM-DD", sans décalage UTC. */
+export const parseDateLocal = (str) => {
+  const [y, m, d] = (str || "").split("-").map(Number);
+  return new Date(y || 1970, (m || 1) - 1, d || 1);
+};
 
 /**
  * Récupère toutes les disponibilités (récurrentes + blocages).
@@ -83,7 +94,14 @@ export function creneauxDisponibles(date, recurrentes, reservees) {
       .filter((s) => s.date === ds && s.statut !== "annulee")
       .map((s) => s.heure)
   );
-  return slots.filter((s) => !pris.has(s));
+  const now = new Date();
+  const isToday = dateStr(now) === ds;
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  return slots.filter((s) => {
+    if (pris.has(s)) return false;
+    if (isToday && toMinutes(s) < nowMin) return false;
+    return true;
+  });
 }
 
 /**

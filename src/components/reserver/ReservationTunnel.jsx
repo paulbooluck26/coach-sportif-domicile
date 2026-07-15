@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useCreneaux } from "@/hooks/useCreneaux";
-import { creneauxDisponibles } from "@/lib/creneaux";
+import { creneauxDisponibles, parseDateLocal } from "@/lib/creneaux";
 import { determinerZone, ZONES } from "@/lib/zones";
 import CalendrierDispo from "@/components/CalendrierDispo";
 import { Check, ChevronLeft, ChevronRight, CalendarDays, Clock, MapPin, User, Mail, Phone, Loader2, CheckCircle2, Sparkles } from "lucide-react";
@@ -43,7 +43,7 @@ export default function ReservationTunnel({ preselect }) {
   }, [preselect?.key]);
 
   const offre = offreId ? FORGE_OFFRES[offreId] : null;
-  const slots = date ? creneauxDisponibles(new Date(date + "T00:00:00"), recurrentes, reservees) : [];
+  const slots = date ? creneauxDisponibles(parseDateLocal(date), recurrentes, reservees) : [];
 
   const verifierAdresse = (val) => {
     setForm((f) => ({ ...f, adresse: val }));
@@ -254,5 +254,5 @@ function Field({ icon: Icon, label, value, onChange, placeholder }) {
 }
 
 function formatDate(d) {
-  return new Date(d + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  return parseDateLocal(d).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 }

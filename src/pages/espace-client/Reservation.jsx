@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useCreneaux } from "@/hooks/useCreneaux";
-import { creneauxDisponibles } from "@/lib/creneaux";
+import { creneauxDisponibles, parseDateLocal } from "@/lib/creneaux";
 import CalendrierDispo from "@/components/CalendrierDispo";
 import { Link, useNavigate } from "react-router-dom";
 import { Check, ChevronLeft, ChevronRight, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, Clock, MapPin, MessageSquare } from "lucide-react";
@@ -39,7 +39,7 @@ export default function Reservation() {
     })();
   }, [user]);
 
-  const slots = date ? creneauxDisponibles(new Date(date + "T00:00:00"), recurrentes, reservees) : [];
+  const slots = date ? creneauxDisponibles(parseDateLocal(date), recurrentes, reservees) : [];
 
   if (!user) {
     return (
@@ -326,5 +326,5 @@ export default function Reservation() {
 }
 
 function formatDate(d) {
-  return new Date(d).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  return parseDateLocal(d).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 }

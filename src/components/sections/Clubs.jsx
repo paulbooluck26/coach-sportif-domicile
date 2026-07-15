@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Users, Trophy, Activity, ShieldCheck, Monitor } from "lucide-react";
+import { ArrowRight, Dumbbell, HeartPulse, Users, Activity, Monitor, Building2 } from "lucide-react";
 
 const benefices = [
-  { icon: Trophy, title: "Performance collective", desc: "Programmes ciblés par sport : explosivité, endurance, prévention des blessures." },
-  { icon: Users, title: "Tous les publics", desc: "Jeunes, seniors, compétiteurs ou loisir — chaque groupe progresse à son rythme." },
-  { icon: ShieldCheck, title: "Prévention & santé", desc: "Renforcement des chaînes musculaires, proprioception et gestion de la charge." },
-  { icon: Activity, title: "Suivi mesuré", desc: "Tests réguliers et ajustements pour une progression visible et durable." },
+  { icon: Dumbbell, title: "Préparation physique", desc: "Programmes spécifiques, développement des qualités physiques, prévention des blessures et optimisation des performances." },
+  { icon: HeartPulse, title: "Santé & Bien-être", desc: "Séances favorisant la mobilité, le renforcement, la prévention des troubles musculo-squelettiques et le bien-être des collaborateurs ou adhérents." },
+  { icon: Users, title: "Cohésion d'équipe", desc: "Des séances dynamiques pour renforcer l'esprit d'équipe, la motivation et l'engagement collectif." },
+  { icon: Activity, title: "Suivi personnalisé", desc: "Évaluation, tests, ajustements réguliers et accompagnement dans la durée." },
 ];
 
 export default function Clubs() {
@@ -20,14 +20,15 @@ export default function Clubs() {
       </div>
       <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
         <div className="max-w-3xl mb-16">
-          <p className="text-xs font-semibold tracking-label text-secondary mb-4">PRÉPARATION PHYSIQUE</p>
+          <p className="text-xs font-semibold tracking-label text-secondary mb-4">PERFORMANCE COLLECTIVE</p>
           <h2 className="text-4xl lg:text-5xl font-heading font-bold leading-tight mb-6">
-            Pour les clubs,<br />les équipes et les associations.
+            Pour les clubs,<br />les entreprises et les organisations.
           </h2>
+          <p className="text-lg text-primary-foreground/70 leading-relaxed mb-4">
+            J'accompagne les structures qui souhaitent améliorer la santé, la performance et la cohésion de leurs équipes grâce à des interventions sur mesure.
+          </p>
           <p className="text-lg text-primary-foreground/70 leading-relaxed">
-            J'accompagne les structures sportives dans la préparation physique de leurs adhérents :
-            élaboration de programmes, séances en groupe, suivi collectif et individualisé.
-            Une approche adaptée à chaque discipline et à chaque niveau.
+            Que vous soyez un club sportif, une entreprise, une association ou une collectivité, chaque accompagnement est conçu selon vos objectifs et votre public.
           </p>
         </div>
 
@@ -50,17 +51,17 @@ export default function Clubs() {
             </div>
             <h3 className="text-xl font-heading font-semibold text-primary-foreground mb-2">Performance Online</h3>
             <p className="text-sm text-primary-foreground/60 leading-relaxed mb-4">
-              Programmation à distance, accès à l'app individuelle, suivi des performances et ajustements réguliers.
+              Programmation personnalisée à distance, accès à l'application The Lab Forge, suivi des performances et ajustements réguliers.
             </p>
             <p className="text-sm font-semibold text-secondary">Sur devis</p>
           </div>
           <div className="bg-primary-foreground/5 border border-primary-foreground/15 rounded-2xl p-8">
             <div className="w-11 h-11 rounded-xl bg-secondary/20 flex items-center justify-center mb-4">
-              <Users className="w-5 h-5 text-secondary" />
+              <Building2 className="w-5 h-5 text-secondary" />
             </div>
             <h3 className="text-xl font-heading font-semibold text-primary-foreground mb-2">Performance Terrain</h3>
             <p className="text-sm text-primary-foreground/60 leading-relaxed mb-4">
-              Séances collectives, tests physiques, planification de saison, suivi de l'effectif et collaboration avec les entraîneurs.
+              Interventions sur site : séances collectives, préparation physique, ateliers santé, tests physiques et accompagnement directement dans votre structure.
             </p>
             <p className="text-sm font-semibold text-secondary">Sur devis</p>
           </div>
@@ -68,17 +69,17 @@ export default function Clubs() {
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 bg-primary-foreground/5 border border-primary-foreground/15 rounded-2xl p-8">
           <div className="flex-1">
-            <h3 className="text-xl font-heading font-semibold text-primary-foreground mb-1">Parlons de votre projet</h3>
-            <p className="text-sm text-primary-foreground/60">
-              Réservez un appel découverte gratuit de 30 minutes — en visio ou par téléphone.
-              Sans engagement, pour évaluer vos besoins et bâtir un plan adapté à votre structure.
+            <h3 className="text-xl font-heading font-semibold text-primary-foreground mb-1">Construisons votre projet</h3>
+            <p className="text-sm text-primary-foreground/60 mb-2">
+              Chaque structure est différente. Réservons un échange de 30 minutes pour comprendre vos besoins et construire une intervention adaptée.
             </p>
+            <p className="text-xs text-secondary/80 font-medium">Appel découverte gratuit • Sans engagement</p>
           </div>
           <Link
             to="/appel-decouverte"
             className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold hover:scale-105 transition-transform duration-300 whitespace-nowrap"
           >
-            Réserver un appel gratuit
+            Parler de votre projet
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

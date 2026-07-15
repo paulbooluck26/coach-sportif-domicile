@@ -62,8 +62,7 @@ export default function ClientDashboard() {
       <div className="flex items-center gap-4">
         <ClientAvatar name={user.full_name} photoUrl={profile?.photo_url} size={56} />
         <div>
-          <p className="text-sm text-muted-foreground">{getGreeting()}</p>
-          <h1 className="font-heading text-3xl font-bold text-foreground mt-0.5">Bonjour {prenom} 👋</h1>
+          <h1 className="font-heading text-3xl font-bold text-foreground">{getGreeting()} {prenom} 👋</h1>
         </div>
       </div>
 

@@ -13,8 +13,8 @@ export default function Home() {
       <About />
       <Services />
       <Clubs />
-      <Testimonials />
       <AppExperience />
+      <Testimonials />
       <Contact />
     </>
   );

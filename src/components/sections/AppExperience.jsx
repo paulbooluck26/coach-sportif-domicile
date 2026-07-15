@@ -97,7 +97,7 @@ export default function AppExperience() {
         </div>
 
         <div className="mt-12 text-center">
-          <Link to="/reserver" className="inline-flex items-center gap-2 px-7 py-3.5 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold hover:scale-105 transition-transform">
+          <Link to="/offres" className="inline-flex items-center gap-2 px-7 py-3.5 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold hover:scale-105 transition-transform">
             Découvrir nos formules <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

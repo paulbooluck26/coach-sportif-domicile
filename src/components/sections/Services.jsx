@@ -8,7 +8,7 @@ const services = [
     title: "Séances individuelles à domicile",
     desc: "Un coaching complet, chez vous. Renforcement musculaire, cardio, mobilité et posture — adapté à votre espace et votre matériel. Chaque séance dure 60 minutes.",
     features: ["Évaluation posturale initiale", "Matériel fourni si besoin", "Suivi progression séance par séance"],
-    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80",
   },
   {
     icon: ClipboardList,

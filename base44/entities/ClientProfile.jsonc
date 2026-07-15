@@ -32,6 +32,11 @@
     "date_naissance": {
       "type": "string",
       "format": "date"
+    },
+    "photo_url": {
+      "type": "string",
+      "title": "Photo de profil (URL)",
+      "description": "URL de la photo de profil carr\u00e9e compress\u00e9e"
     }
   },
   "required": [

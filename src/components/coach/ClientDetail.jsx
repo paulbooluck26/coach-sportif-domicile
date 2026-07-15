@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { loadClientProjection } from "@/lib/projection";
 import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
 import ClientBilan from "@/components/coach/ClientBilan";
+import ClientAvatar from "@/components/ClientAvatar";
 
 const RESSENTI_LABELS = { plus_energique: "Plus énergique 💪", fatigue_satisfait: "Fatigué mais satisfait ✅", tres_fatigue: "Très fatigué 😴", douleur_inconfort: "Douleur / inconfort ⚠️" };
 const STATUS_CFG = { faite: { icon: CheckCircle2, color: "text-secondary", label: "Faite" }, manquee: { icon: XCircle, color: "text-destructive", label: "À rattraper" }, a_venir: { icon: Clock, color: "text-accent", label: "À venir" } };
@@ -48,7 +49,10 @@ export default function ClientDetail({ client, onClose }) {
     <div className="fixed inset-0 z-50 bg-primary/40 flex items-center justify-center p-6" onClick={onClose}>
       <div className="bg-background rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between z-10">
-          <div><h3 className="font-heading text-xl font-bold text-foreground">{client?.nom}</h3><p className="text-sm text-muted-foreground">Suivi détaillé</p></div>
+          <div className="flex items-center gap-3">
+            <ClientAvatar name={client?.nom} photoUrl={client?.photo_url} size={44} />
+            <div><h3 className="font-heading text-xl font-bold text-foreground">{client?.nom}</h3><p className="text-sm text-muted-foreground">Suivi détaillé</p></div>
+          </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
         </div>
         <div className="px-6 pt-4">

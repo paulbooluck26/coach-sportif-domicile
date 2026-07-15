@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { User, Mail, Phone, MapPin, CreditCard, LogOut, Edit, Save, X, Target, Dumbbell, ClipboardList, CheckCircle2, TrendingUp } from "lucide-react";
+import ProfilePhotoUpload from "@/components/ProfilePhotoUpload";
 
 export default function Profil() {
   const { user, logout } = useAuth();
@@ -43,6 +44,16 @@ export default function Profil() {
     load();
   };
 
+  const savePhoto = async (url) => {
+    await base44.entities.ClientProfile.update(profile.id, { photo_url: url });
+    load();
+  };
+
+  const removePhoto = async () => {
+    await base44.entities.ClientProfile.update(profile.id, { photo_url: "" });
+    load();
+  };
+
   if (!profile) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
   return (
@@ -50,6 +61,16 @@ export default function Profil() {
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-1">Profil</p>
         <h1 className="font-heading text-3xl font-bold text-foreground">Mon compte</h1>
+      </div>
+
+      <div className="bg-card border border-border rounded-2xl p-5">
+        <h2 className="font-heading font-semibold text-foreground mb-4">Photo de profil</h2>
+        <ProfilePhotoUpload
+          photoUrl={profile.photo_url}
+          name={profile.nom || user.full_name}
+          onSaved={savePhoto}
+          onRemoved={removePhoto}
+        />
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-5">

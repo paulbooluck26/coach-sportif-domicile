@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Users, Mail, Phone, MapPin, Target, Edit, X, Save, TrendingUp } from "lucide-react";
 import ClientDetail from "@/components/coach/ClientDetail";
+import ClientAvatar from "@/components/ClientAvatar";
 
 export default function CoachClients() {
   const [clients, setClients] = useState(null);
@@ -56,9 +57,12 @@ export default function CoachClients() {
             return (
               <div key={c.id} className="bg-card border border-border rounded-lg p-6">
                 <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-heading font-semibold text-lg text-foreground">{c.nom || "Sans nom"}</h3>
-                    {c.objectif && <p className="text-sm text-accent mt-1 flex items-center gap-1.5"><Target className="w-3.5 h-3.5" /> {c.objectif}</p>}
+                  <div className="flex items-center gap-3">
+                    <ClientAvatar name={c.nom} photoUrl={c.photo_url} size={48} />
+                    <div>
+                      <h3 className="font-heading font-semibold text-lg text-foreground">{c.nom || "Sans nom"}</h3>
+                      {c.objectif && <p className="text-sm text-accent mt-1 flex items-center gap-1.5"><Target className="w-3.5 h-3.5" /> {c.objectif}</p>}
+                    </div>
                   </div>
                   <button onClick={() => { setEditing(c); setForm({ nom: c.nom, email: c.email, telephone: c.telephone, adresse: c.adresse, objectif: c.objectif, notes: c.notes }); }} className="text-muted-foreground hover:text-accent p-1"><Edit className="w-4 h-4" /></button>
                 </div>

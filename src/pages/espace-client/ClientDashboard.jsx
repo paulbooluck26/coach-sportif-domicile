@@ -4,27 +4,31 @@ import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import { loadClientProjection } from "@/lib/projection";
 import { Play, CalendarDays, Clock, MapPin, Flame, Trophy, TrendingUp, ChevronRight, Dumbbell, CalendarPlus } from "lucide-react";
+import ClientAvatar from "@/components/ClientAvatar";
 
 export default function ClientDashboard() {
   const { user } = useAuth();
   const [seances, setSeances] = useState(null);
   const [executions, setExecutions] = useState(null);
   const [projections, setProjections] = useState(null);
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       try {
-        const [allSeances, execs] = await Promise.all([
+        const [allSeances, execs, profiles] = await Promise.all([
           base44.entities.Seance.filter({ client_user_id: user.id }, "date"),
           base44.entities.ExecutionSeance.filter({ client_id: user.id }, "-date_execution", 100),
+          base44.entities.ClientProfile.filter({ user_id: user.id }),
         ]);
         setSeances(allSeances);
         setExecutions(execs);
+        setProfile(profiles[0] || null);
         const projs = await loadClientProjection(user.id);
         setProjections(projs);
       } catch {
-        setSeances([]); setExecutions([]); setProjections([]);
+        setSeances([]); setExecutions([]); setProjections([]); setProfile(null);
       }
     })();
   }, [user]);
@@ -55,9 +59,12 @@ export default function ClientDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-sm text-muted-foreground">{getGreeting()}</p>
-        <h1 className="font-heading text-3xl font-bold text-foreground mt-0.5">Bonjour {prenom} 👋</h1>
+      <div className="flex items-center gap-4">
+        <ClientAvatar name={user.full_name} photoUrl={profile?.photo_url} size={56} />
+        <div>
+          <p className="text-sm text-muted-foreground">{getGreeting()}</p>
+          <h1 className="font-heading text-3xl font-bold text-foreground mt-0.5">Bonjour {prenom} 👋</h1>
+        </div>
       </div>
 
       {hasTodaySession ? (

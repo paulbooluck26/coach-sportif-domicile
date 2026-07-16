@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { useCreneaux } from "@/hooks/useCreneaux";
 import { creneauxDisponibles, parseDateLocal } from "@/lib/creneaux";
 import { finaliserSeancePayante } from "@/lib/reservationFlow";
+import { acheterCarnet, estPonctuel, nbSeancesPourOffre } from "@/lib/carnetSeances";
 import CalendrierDispo from "@/components/CalendrierDispo";
 import { FORGE_OFFRES, prixDisplay } from "@/lib/forgeOffres";
 import { Link } from "react-router-dom";
@@ -49,6 +50,7 @@ export default function Domicile() {
   }, [user]);
 
   const offre = offreId ? FORGE_OFFRES[offreId] : null;
+  const ponctuel = offreId ? estPonctuel(offreId) : false;
   const slots = date ? creneauxDisponibles(parseDateLocal(date), recurrentes, reservees) : [];
 
   const choisir = (id) => {
@@ -56,23 +58,28 @@ export default function Domicile() {
     setOffreId(id);
     setDate(null);
     setHeure(null);
-    setStep("creneau");
+    setStep(estPonctuel(id) ? "creneau" : "paiement");
   };
 
   const payer = async () => {
     setPaying(true);
     try {
-      const { seance } = await finaliserSeancePayante({
-        user,
-        sessionType: SESSION_TYPE[offreId],
-        date,
-        heure,
-        duree: 60,
-        prix: offre.prix,
-        location: adresse || "Domicile",
-        prestationLabel: offre.titre,
-      });
-      setDone({ seance, offre, date, heure });
+      if (ponctuel) {
+        const { seance } = await finaliserSeancePayante({
+          user,
+          sessionType: SESSION_TYPE[offreId],
+          date,
+          heure,
+          duree: 60,
+          prix: offre.prix,
+          location: adresse || "Domicile",
+          prestationLabel: offre.titre,
+        });
+        setDone({ type: "ponctuel", seance, offre, date, heure });
+      } else {
+        const carnet = await acheterCarnet({ user, offreId });
+        setDone({ type: "carnet", offre, carnet });
+      }
     } catch (e) {
       alert("Erreur lors du paiement. Veuillez réessayer.");
     } finally {
@@ -83,6 +90,24 @@ export default function Domicile() {
   if (diagDone === null) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
   if (done) {
+    if (done.type === "carnet") {
+      const { offre, carnet } = done;
+      return (
+        <div className="space-y-6">
+          <div className="bg-card border border-border rounded-2xl p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-5"><CheckCircle2 className="w-8 h-8 text-accent" /></div>
+            <h2 className="font-heading text-2xl font-bold text-foreground mb-2">Crédit de séances activé</h2>
+            <p className="text-foreground/60 mb-6">Paiement de <strong className="text-foreground">{offre.prix}€</strong> validé. <strong className="text-foreground">{carnet.nb_seances_total} séances</strong> sont désormais disponibles dans votre espace.</p>
+            <div className="bg-secondary/10 rounded-xl p-5 text-left space-y-2 mb-6">
+              <p className="flex items-center gap-2 text-sm text-foreground/80"><Flame className="w-4 h-4 text-accent" /> {offre.titre} — {prixDisplay(offre)}</p>
+              <p className="flex items-center gap-2 text-sm text-foreground/80"><CalendarDays className="w-4 h-4 text-accent" /> {carnet.nb_seances_total} séances à réserver à votre rythme</p>
+              {adresse && <p className="flex items-center gap-2 text-sm text-foreground/80"><MapPin className="w-4 h-4 text-accent" /> {adresse}</p>}
+            </div>
+            <Link to="/espace-client/seances" className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm w-full">Réserver mes séances</Link>
+          </div>
+        </div>
+      );
+    }
     const { offre, date, heure } = done;
     return (
       <div className="space-y-6">
@@ -96,7 +121,7 @@ export default function Domicile() {
             <p className="flex items-center gap-2 text-sm text-foreground/80"><Flame className="w-4 h-4 text-accent" /> {offre.titre} — {prixDisplay(offre)}</p>
             {adresse && <p className="flex items-center gap-2 text-sm text-foreground/80"><MapPin className="w-4 h-4 text-accent" /> {adresse}</p>}
           </div>
-          <Link to="/espace-client" className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm w-full">Mon espace</Link>
+          <Link to="/espace-client/seances" className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm w-full">Mon espace</Link>
         </div>
       </div>
     );
@@ -104,7 +129,7 @@ export default function Domicile() {
 
   return (
     <div className="space-y-6">
-      <Link to="/espace-client/reserver" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="w-4 h-4" /> Réserver</Link>
+      <Link to="/espace-client/seances" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="w-4 h-4" /> Séances</Link>
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-1">Coaching à domicile</p>
         <h1 className="font-heading text-3xl font-bold text-foreground">Réserver une séance</h1>
@@ -171,10 +196,15 @@ export default function Domicile() {
 
       {step === "paiement" && offre && (
         <div className="space-y-5">
-          <button onClick={() => setStep("creneau")} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="w-4 h-4" /> Retour</button>
+          <button onClick={() => setStep(ponctuel ? "creneau" : "catalogue")} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="w-4 h-4" /> Retour</button>
           <div className="bg-card border border-border rounded-2xl p-5">
             <div className="flex items-center justify-between pb-4 border-b border-border mb-4">
-              <div><p className="font-heading font-semibold text-foreground">{offre.titre}</p><p className="text-xs text-muted-foreground">{parseDateLocal(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · {heure}</p></div>
+              <div>
+                <p className="font-heading font-semibold text-foreground">{offre.titre}</p>
+                {ponctuel
+                  ? <p className="text-xs text-muted-foreground">{parseDateLocal(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · {heure}</p>
+                  : <p className="text-xs text-muted-foreground">{nbSeancesPourOffre(offreId)} séances · à réserver dans votre espace</p>}
+              </div>
               <p className="font-heading text-2xl font-bold text-foreground">{offre.prix}€</p>
             </div>
             <div className="space-y-3">

@@ -1,0 +1,84 @@
+{
+  "name": "CarnetSeances",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "title": "Client (user ID)"
+    },
+    "offre_id": {
+      "type": "string",
+      "enum": [
+        "transformation",
+        "performance",
+        "forge4",
+        "forge8"
+      ],
+      "title": "Offre"
+    },
+    "offre_titre": {
+      "type": "string",
+      "title": "Libell\u00e9 de l'offre"
+    },
+    "type_carnet": {
+      "type": "string",
+      "enum": [
+        "pack",
+        "abonnement"
+      ],
+      "title": "Type de carnet"
+    },
+    "nb_seances_total": {
+      "type": "number",
+      "title": "S\u00e9ances incluses"
+    },
+    "nb_seances_consommees": {
+      "type": "number",
+      "default": 0,
+      "title": "S\u00e9ances consomm\u00e9es"
+    },
+    "nb_seances_restantes": {
+      "type": "number",
+      "title": "S\u00e9ances restantes"
+    },
+    "prix": {
+      "type": "number",
+      "title": "Prix pay\u00e9 (\u20ac)"
+    },
+    "date_achat": {
+      "type": "string",
+      "format": "date",
+      "title": "Date d'achat"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "actif",
+        "epuise",
+        "expire",
+        "resilie"
+      ],
+      "default": "actif",
+      "title": "Statut"
+    },
+    "periode": {
+      "type": "string",
+      "title": "P\u00e9riode (abonnement, YYYY-MM)"
+    },
+    "date_fin": {
+      "type": "string",
+      "format": "date",
+      "title": "Fin de p\u00e9riode / validit\u00e9"
+    }
+  },
+  "required": [
+    "client_id",
+    "offre_id",
+    "offre_titre",
+    "type_carnet",
+    "nb_seances_total",
+    "nb_seances_restantes",
+    "prix",
+    "date_achat"
+  ]
+}

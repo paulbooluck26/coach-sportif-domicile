@@ -27,6 +27,7 @@ import MonProgramme from '@/pages/espace-client/MonProgramme';
 import BilanInitial from '@/pages/espace-client/BilanInitial';
 import SessionExecution from '@/pages/espace-client/SessionExecution';
 import MesPerformances from '@/pages/espace-client/MesPerformances';
+import Seances from '@/pages/espace-client/Seances';
 import AchatProgramme from '@/pages/site-web/AchatProgramme';
 import PublicReserver from '@/pages/site-web/Reserver';
 import Offres from '@/pages/site-web/Offres';
@@ -89,6 +90,7 @@ const AuthenticatedApp = () => {
           <Route path="/espace-client/messages" element={<Messages />} />
           <Route path="/espace-client/profil" element={<Profil />} />
           <Route path="/espace-client/performances" element={<MesPerformances />} />
+          <Route path="/espace-client/seances" element={<Seances />} />
         </Route>
         <Route path="/espace-client/seance/:seanceId" element={<SessionExecution />} />
       </Route>

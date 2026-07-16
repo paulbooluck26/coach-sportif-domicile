@@ -146,9 +146,9 @@ export default function ClientDashboard() {
       )}
 
       <div className="grid grid-cols-2 gap-3">
-        <Link to="/espace-client/reserver" className="bg-secondary/10 border border-secondary/20 rounded-2xl p-4 text-center hover:border-secondary/40 transition-colors">
-          <CalendarPlus className="w-6 h-6 text-secondary mx-auto mb-2" />
-          <p className="text-sm font-semibold text-foreground">Réserver</p>
+        <Link to="/espace-client/seances" className="bg-secondary/10 border border-secondary/20 rounded-2xl p-4 text-center hover:border-secondary/40 transition-colors">
+          <CalendarDays className="w-6 h-6 text-secondary mx-auto mb-2" />
+          <p className="text-sm font-semibold text-foreground">Séances</p>
         </Link>
         <Link to="/espace-client/programme" className="bg-secondary/10 border border-secondary/20 rounded-2xl p-4 text-center hover:border-secondary/40 transition-colors">
           <Dumbbell className="w-6 h-6 text-secondary mx-auto mb-2" />

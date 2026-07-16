@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { CalendarDays, Clock, MapPin, X, CheckCircle2, RotateCcw, StickyNote } from "lucide-react";
+import { CalendarDays, Clock, MapPin, X, CheckCircle2, RotateCcw, StickyNote, List, CalendarRange } from "lucide-react";
 import ClientDetail from "@/components/coach/ClientDetail";
+import CoachSeancesCalendar from "@/components/coach/CoachSeancesCalendar";
+import DemandeDetailModal from "@/components/coach/DemandeDetailModal";
 import { parseDateLocal } from "@/lib/creneaux";
+
+const APPELS_CONFIRMES = ["appel_confirme", "appel_realise"];
 
 const STATUTS = {
   booked: { label: "Confirmée", color: "bg-accent/15 text-accent", icon: CheckCircle2 },
@@ -13,15 +17,24 @@ const STATUTS = {
 
 export default function CoachSeances() {
   const [seances, setSeances] = useState(null);
+  const [demandes, setDemandes] = useState(null);
+  const [view, setView] = useState("liste");
   const [noteModal, setNoteModal] = useState(null);
   const [noteText, setNoteText] = useState("");
   const [detailClient, setDetailClient] = useState(null);
+  const [selectedDemande, setSelectedDemande] = useState(null);
 
   const load = async () => {
-    const data = await base44.entities.Seance.list("date");
+    const [data, dems] = await Promise.all([
+      base44.entities.Seance.list("date"),
+      base44.entities.DemandeContact.list("-created_date", 200),
+    ]);
     setSeances(data);
+    setDemandes(dems);
   };
   useEffect(() => { load().catch(() => {}); }, []);
+
+  const appels = (demandes || []).filter((d) => d.type_demande === "appel_decouverte" && APPELS_CONFIRMES.includes(d.statut));
 
   const updateStatut = async (id, status) => {
     await base44.entities.Seance.update(id, { status });
@@ -45,7 +58,7 @@ export default function CoachSeances() {
     }
   };
 
-  if (!seances) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
+  if (!seances || !demandes) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
   const today = new Date().toISOString().slice(0, 10);
   const aVenir = seances.filter(s => s.date >= today && s.status !== "cancelled" && s.status !== "completed").reverse();
@@ -53,11 +66,19 @@ export default function CoachSeances() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-2">Back-office</p>
-        <h1 className="font-heading text-3xl font-bold text-foreground">Agenda des séances</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-2">Back-office</p>
+          <h1 className="font-heading text-3xl font-bold text-foreground">Agenda des séances</h1>
+        </div>
+        <div className="inline-flex bg-card border border-border rounded-lg p-1">
+          <button onClick={() => setView("liste")} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${view === "liste" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}><List className="w-4 h-4" /> Liste</button>
+          <button onClick={() => setView("calendrier")} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${view === "calendrier" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}><CalendarRange className="w-4 h-4" /> Calendrier</button>
+        </div>
       </div>
 
+      {view === "liste" ? (
+        <>
       <div>
         <h2 className="font-heading text-lg font-semibold text-foreground mb-4 flex items-center gap-2"><CalendarDays className="w-5 h-5 text-accent" /> À venir ({aVenir.length})</h2>
         <div className="space-y-3">
@@ -73,6 +94,10 @@ export default function CoachSeances() {
           {passees.map(s => <SeanceRow key={s.id} seance={s} onStatus={updateStatut} onNote={(seance) => { setNoteModal(seance); setNoteText(seance.notes || ""); }} onOpenClient={openClient} past />)}
         </div>
       </div>
+        </>
+      ) : (
+        <CoachSeancesCalendar seances={seances} appels={appels} onOpenClient={openClient} onOpenDemande={setSelectedDemande} />
+      )}
 
       {noteModal && (
         <div className="fixed inset-0 z-50 bg-primary/40 flex items-center justify-center p-6" onClick={() => setNoteModal(null)}>
@@ -92,6 +117,7 @@ export default function CoachSeances() {
       )}
 
       {detailClient && <ClientDetail client={detailClient} onClose={() => setDetailClient(null)} />}
+      {selectedDemande && <DemandeDetailModal demande={selectedDemande} onClose={() => setSelectedDemande(null)} />}
     </div>
   );
 }

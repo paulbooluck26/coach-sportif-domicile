@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { loadClientProjection } from "@/lib/projection";
 import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
 import ClientBilan from "@/components/coach/ClientBilan";
+import CreditsTab from "@/components/coach/CreditsTab";
 import ClientAvatar from "@/components/ClientAvatar";
 
 const RESSENTI_LABELS = { plus_energique: "Plus énergique 💪", fatigue_satisfait: "Fatigué mais satisfait ✅", tres_fatigue: "Très fatigué 😴", douleur_inconfort: "Douleur / inconfort ⚠️" };
@@ -15,6 +16,7 @@ export default function ClientDetail({ client, onClose }) {
   const [feedbacks, setFeedbacks] = useState(undefined);
   const [perfByExercise, setPerfByExercise] = useState(undefined);
   const [records, setRecords] = useState(undefined);
+  const [credits, setCredits] = useState(undefined);
   const [projections, setProjections] = useState(undefined);
   const [selectedDay, setSelectedDay] = useState(null);
 
@@ -32,9 +34,11 @@ export default function ClientDetail({ client, onClose }) {
         setPerfByExercise(byExercise);
         const recs = await base44.entities.RecordPerso.filter({ client_id: client.user_id }, "-date_record");
         setRecords(recs);
+        const cars = await base44.entities.CarnetSeances.filter({ client_id: client.user_id }, "-date_achat");
+        setCredits(cars);
         const projs = await loadClientProjection(client.user_id);
         setProjections(projs);
-      } catch (e) { setFeedbacks([]); setPerfByExercise({}); setRecords([]); setProjections([]); }
+      } catch (e) { setFeedbacks([]); setPerfByExercise({}); setRecords([]); setCredits([]); setProjections([]); }
     })();
   }, [client]);
 
@@ -42,7 +46,7 @@ export default function ClientDetail({ client, onClose }) {
   (records || []).forEach(r => { if (!recordsByMouvement[r.mouvement]) recordsByMouvement[r.mouvement] = []; recordsByMouvement[r.mouvement].push(r); });
   Object.keys(recordsByMouvement).forEach(k => recordsByMouvement[k].sort((a, b) => new Date(b.date_record) - new Date(a.date_record)));
 
-  const isLoading = feedbacks === undefined || perfByExercise === undefined || records === undefined || projections === undefined;
+  const isLoading = feedbacks === undefined || perfByExercise === undefined || records === undefined || credits === undefined || projections === undefined;
   const stats = projections ? { faite: projections.filter(p => p.status === "faite").length, manquee: projections.filter(p => p.status === "manquee").length, a_venir: projections.filter(p => p.status === "a_venir").length } : { faite: 0, manquee: 0, a_venir: 0 };
 
   return (
@@ -60,6 +64,7 @@ export default function ClientDetail({ client, onClose }) {
             <button onClick={() => setTab("feedback")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "feedback" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Feedbacks</button>
             <button onClick={() => setTab("perf")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "perf" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Performances</button>
             <button onClick={() => setTab("rm")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "rm" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Records (RM)</button>
+            <button onClick={() => setTab("credits")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "credits" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Crédits</button>
             <button onClick={() => setTab("assiduite")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "assiduite" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Assiduité</button>
             <button onClick={() => setTab("bilan")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "bilan" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Bilan initial</button>
           </div>
@@ -194,6 +199,10 @@ export default function ClientDetail({ client, onClose }) {
                     })
                   )}
                 </div>
+              )}
+
+              {tab === "credits" && (
+                <CreditsTab credits={credits || []} />
               )}
 
               {tab === "assiduite" && (

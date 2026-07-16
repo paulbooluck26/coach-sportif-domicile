@@ -40,6 +40,7 @@ import CoachClients from '@/pages/admin/CoachClients';
 import CoachProgrammes from '@/pages/admin/CoachProgrammes';
 import CoachPaiements from '@/pages/admin/CoachPaiements';
 import CoachDisponibilites from '@/pages/admin/CoachDisponibilites';
+import CoachEmails from '@/pages/admin/CoachEmails';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -106,6 +107,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/commandes" element={<CoachCommandes />} />
           <Route path="/admin/paiements" element={<CoachPaiements />} />
           <Route path="/admin/disponibilites" element={<CoachDisponibilites />} />
+          <Route path="/admin/emails" element={<CoachEmails />} />
         </Route>
       </Route>
 

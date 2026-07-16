@@ -1,0 +1,73 @@
+{
+  "name": "EmailTemplate",
+  "type": "object",
+  "properties": {
+    "nom": {
+      "type": "string",
+      "title": "Identifiant interne",
+      "description": "Nom court unique servant de r\u00e9f\u00e9rence dans le code (ex : confirmation_reservation)"
+    },
+    "evenement": {
+      "type": "string",
+      "enum": [
+        "bienvenue",
+        "confirmation_reservation",
+        "rappel_24h",
+        "recu_paiement",
+        "achat_carnet",
+        "achat_programme",
+        "appel_decouverte",
+        "appel_demarrage",
+        "programme_disponible",
+        "rdv_modifie",
+        "rdv_annule",
+        "bilan_termine",
+        "etape_forge"
+      ],
+      "title": "\u00c9v\u00e9nement d\u00e9clencheur"
+    },
+    "sujet": {
+      "type": "string",
+      "title": "Sujet de l'email"
+    },
+    "corps_html": {
+      "type": "string",
+      "title": "Corps HTML",
+      "description": "Contenu HTML de l'email. Variables au format {{variable}}."
+    },
+    "corps_texte": {
+      "type": "string",
+      "title": "Corps texte brut",
+      "description": "Version texte brut envoy\u00e9e via SendEmail. Variables au format {{variable}}."
+    },
+    "variables_disponibles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Variables disponibles",
+      "description": "Liste des noms de variables utilisables (sans les {{ }})."
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "actif",
+        "inactif"
+      ],
+      "default": "actif",
+      "title": "Statut"
+    },
+    "description_admin": {
+      "type": "string",
+      "title": "Description (admin)",
+      "description": "Note interne expliquant le contexte d'envoi de cet email."
+    }
+  },
+  "required": [
+    "nom",
+    "evenement",
+    "sujet",
+    "corps_texte",
+    "statut"
+  ]
+}

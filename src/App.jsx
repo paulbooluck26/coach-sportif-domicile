@@ -18,6 +18,9 @@ import Reservation from '@/pages/espace-client/Reservation';
 import AppelDecouverte from '@/pages/site-web/AppelDecouverte';
 import ClientDashboard from '@/pages/espace-client/ClientDashboard';
 import Reserver from '@/pages/espace-client/Reserver';
+import ReserverDomicile from '@/pages/espace-client/reserver/Domicile';
+import ReserverProgramme from '@/pages/espace-client/reserver/Programme';
+import ReserverAppel from '@/pages/espace-client/reserver/Appel';
 import Messages from '@/pages/espace-client/Messages';
 import Profil from '@/pages/espace-client/Profil';
 import MonProgramme from '@/pages/espace-client/MonProgramme';
@@ -80,6 +83,9 @@ const AuthenticatedApp = () => {
           <Route path="/espace-client/programme" element={<MonProgramme />} />
           <Route path="/espace-client/bilan-initial" element={<BilanInitial />} />
           <Route path="/espace-client/reserver" element={<Reserver />} />
+          <Route path="/espace-client/reserver/domicile" element={<ReserverDomicile />} />
+          <Route path="/espace-client/reserver/programme" element={<ReserverProgramme />} />
+          <Route path="/espace-client/reserver/appel" element={<ReserverAppel />} />
           <Route path="/espace-client/messages" element={<Messages />} />
           <Route path="/espace-client/profil" element={<Profil />} />
           <Route path="/espace-client/performances" element={<MesPerformances />} />

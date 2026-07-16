@@ -42,7 +42,7 @@ export async function fetchDisponibilites() {
  */
 export async function fetchSeancesReservees() {
   try {
-    return await base44.entities.Seance.filter({ statut: "confirmee" });
+    return await base44.entities.Seance.filter({ status: "booked" });
   } catch {
     return [];
   }
@@ -91,8 +91,8 @@ export function creneauxDisponibles(date, recurrentes, reservees) {
   const ds = dateStr(date);
   const pris = new Set(
     reservees
-      .filter((s) => s.date === ds && s.statut !== "annulee")
-      .map((s) => s.heure)
+      .filter((s) => s.date === ds && s.status !== "cancelled")
+      .map((s) => s.time)
   );
   const now = new Date();
   const isToday = dateStr(now) === ds;

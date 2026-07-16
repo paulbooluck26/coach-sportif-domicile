@@ -46,9 +46,10 @@ export async function cloneSeance(seance, semaineId) {
   return newSe;
 }
 
-export async function cloneSemaine(semaine, programmeId, newNumero) {
+export async function cloneSemaine(semaine, programmeId, newNumero, phaseId) {
   const newSem = await base44.entities.Semaine.create({
     programme_id: programmeId,
+    phase_id: phaseId || semaine.phase_id,
     numero: newNumero,
     titre: semaine.titre ? `${semaine.titre} (copie)` : "",
     objectif: semaine.objectif,

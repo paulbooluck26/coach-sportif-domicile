@@ -1,42 +1,58 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Trash2, Edit, Calendar, Save, X, Copy } from "lucide-react";
+import { Plus, Trash2, Edit, Calendar, Save, X, Copy, ArrowRightLeft } from "lucide-react";
 import { cloneSemaine } from "@/lib/programmeClone";
 
-export default function SemainesPanel({ programmeId, onOpen }) {
-  const [items, setItems] = useState(null);
+export default function SemainesPanel({ programmeId, phase, onOpen }) {
+  const [all, setAll] = useState(null);
+  const [phases, setPhases] = useState([]);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ numero: 1, titre: "", objectif: "" });
+  const [form, setForm] = useState({ titre: "", objectif: "" });
   const [editId, setEditId] = useState(null);
+  const [moveId, setMoveId] = useState(null);
 
-  const load = async () => { setItems(await base44.entities.Semaine.filter({ programme_id: programmeId }, "numero")); };
-  useEffect(() => { load().catch(() => {}); }, [programmeId]);
+  const load = async () => {
+    const [sems, phs] = await Promise.all([
+      base44.entities.Semaine.filter({ programme_id: programmeId }, "numero"),
+      base44.entities.Phase.filter({ programme_id: programmeId }, "ordre"),
+    ]);
+    setAll(sems);
+    setPhases(phs);
+  };
+  useEffect(() => { load().catch(() => {}); }, [programmeId, phase?.id]);
+
+  const items = all ? all.filter(s => s.phase_id === phase.id) : null;
 
   const submit = async () => {
     if (editId) { await base44.entities.Semaine.update(editId, form); setEditId(null); }
-    else { await base44.entities.Semaine.create({ ...form, programme_id: programmeId }); }
-    setAdding(false); setForm({ numero: (items?.length || 0) + 1, titre: "", objectif: "" }); load();
+    else {
+      const numero = all.length ? Math.max(...all.map(s => s.numero || 0)) + 1 : 1;
+      await base44.entities.Semaine.create({ ...form, numero, programme_id: programmeId, phase_id: phase.id });
+    }
+    setAdding(false); setForm({ titre: "", objectif: "" }); load();
   };
-  const edit = (s) => { setEditId(s.id); setForm({ numero: s.numero, titre: s.titre || "", objectif: s.objectif || "" }); setAdding(true); };
+  const edit = (s) => { setEditId(s.id); setForm({ titre: s.titre || "", objectif: s.objectif || "" }); setAdding(true); };
   const remove = async (id) => { if (confirm("Supprimer cette semaine et tout son contenu ?")) { await base44.entities.Semaine.delete(id); load(); } };
-
-  const duplicate = async (s) => { await cloneSemaine(s, programmeId, (items.length || 0) + 1); load(); };
+  const duplicate = async (s) => { await cloneSemaine(s, programmeId, (all.length || 0) + 1, phase.id); load(); };
+  const move = async (id, targetId) => { await base44.entities.Semaine.update(id, { phase_id: targetId }); setMoveId(null); load(); };
 
   if (!items) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
+
+  const otherPhases = phases.filter(p => p.id !== phase.id);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading text-xl font-bold text-foreground">Semaines du programme</h2>
-        {!adding && <button onClick={() => { setAdding(true); setForm({ numero: (items.length || 0) + 1, titre: "", objectif: "" }); }} className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-semibold flex items-center gap-1.5"><Plus className="w-4 h-4" /> Semaine</button>}
+        <div>
+          <h2 className="font-heading text-xl font-bold text-foreground">{phase.nom}</h2>
+          {phase.description && <p className="text-sm text-muted-foreground">{phase.description}</p>}
+        </div>
+        {!adding && <button onClick={() => { setAdding(true); setForm({ titre: "", objectif: "" }); setEditId(null); }} className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-semibold flex items-center gap-1.5"><Plus className="w-4 h-4" /> Semaine</button>}
       </div>
 
       {adding && (
         <div className="bg-card border border-accent/40 rounded-lg p-5 space-y-3">
-          <div className="grid grid-cols-3 gap-3">
-            <div><label className="block text-xs font-medium text-muted-foreground mb-1">N°</label><input type="number" value={form.numero} onChange={e => setForm({ ...form, numero: parseInt(e.target.value) || 1 })} className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
-            <div className="col-span-2"><label className="block text-xs font-medium text-muted-foreground mb-1">Titre</label><input value={form.titre} onChange={e => setForm({ ...form, titre: e.target.value })} placeholder="Ex: Semaine d'introduction" className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
-          </div>
+          <div><label className="block text-xs font-medium text-muted-foreground mb-1">Titre</label><input value={form.titre} onChange={e => setForm({ ...form, titre: e.target.value })} placeholder="Ex: Semaine d'introduction" className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
           <div><label className="block text-xs font-medium text-muted-foreground mb-1">Objectif de la semaine</label><input value={form.objectif} onChange={e => setForm({ ...form, objectif: e.target.value })} className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
           <div className="flex gap-2">
             <button onClick={submit} className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-semibold flex items-center gap-1.5"><Save className="w-4 h-4" /> {editId ? "Modifier" : "Ajouter"}</button>
@@ -48,7 +64,7 @@ export default function SemainesPanel({ programmeId, onOpen }) {
       {items.length === 0 && !adding ? (
         <div className="bg-card border border-border rounded-lg p-10 text-center">
           <Calendar className="w-8 h-8 text-secondary mx-auto mb-3" />
-          <p className="text-muted-foreground text-sm">Aucune semaine. Ajoutez votre première semaine ci-dessus.</p>
+          <p className="text-muted-foreground text-sm">Aucune semaine dans cette phase. Ajoutez votre première semaine ci-dessus.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -58,10 +74,20 @@ export default function SemainesPanel({ programmeId, onOpen }) {
                 <p className="font-heading font-semibold text-foreground">Semaine {s.numero}{s.titre ? ` — ${s.titre}` : ""}</p>
                 {s.objectif && <p className="text-sm text-muted-foreground mt-0.5">{s.objectif}</p>}
               </button>
-              <div className="flex gap-1.5">
-                <button onClick={() => duplicate(s)} className="p-1.5 text-muted-foreground hover:text-accent" title="Dupliquer"><Copy className="w-4 h-4" /></button>
-                <button onClick={() => edit(s)} className="p-1.5 text-muted-foreground hover:text-accent"><Edit className="w-4 h-4" /></button>
-                <button onClick={() => remove(s.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+              <div className="flex gap-1.5 items-center">
+                {moveId === s.id ? (
+                  <select defaultValue="" onChange={e => { if (e.target.value) move(s.id, e.target.value); }} onBlur={() => setMoveId(null)} className="border border-border rounded-md px-2 py-1 text-xs bg-background">
+                    <option value="">Déplacer vers…</option>
+                    {otherPhases.map(p => <option key={p.id} value={p.id}>{p.nom}</option>)}
+                  </select>
+                ) : (
+                  <>
+                    {otherPhases.length > 0 && <button onClick={() => setMoveId(s.id)} className="p-1.5 text-muted-foreground hover:text-accent" title="Déplacer vers une autre phase"><ArrowRightLeft className="w-4 h-4" /></button>}
+                    <button onClick={() => duplicate(s)} className="p-1.5 text-muted-foreground hover:text-accent" title="Dupliquer"><Copy className="w-4 h-4" /></button>
+                    <button onClick={() => edit(s)} className="p-1.5 text-muted-foreground hover:text-accent"><Edit className="w-4 h-4" /></button>
+                    <button onClick={() => remove(s.id)} className="p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                  </>
+                )}
               </div>
             </div>
           ))}

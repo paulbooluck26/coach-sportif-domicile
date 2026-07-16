@@ -7,6 +7,7 @@ import { loadClientProjection } from "@/lib/projection";
 import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
 import RescheduleSession from "@/components/programme/RescheduleSession";
 import AddToCalendarButton from "@/components/programme/AddToCalendarButton";
+import PhaseProgression from "@/components/programme/PhaseProgression";
 
 const STATUS_CFG = { faite: { icon: CheckCircle2, color: "text-secondary", label: "Faite" }, manquee: { icon: XCircle, color: "text-destructive", label: "À rattraper" }, a_venir: { icon: Clock, color: "text-accent", label: "À venir" } };
 
@@ -161,6 +162,11 @@ export default function MonProgramme() {
             </div>
           </div>
         )}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-heading text-xl font-bold text-foreground">Progression du parcours</h2>
+        <PhaseProgression programmeId={programme.id} projections={projections} />
       </section>
 
       <section className="space-y-3">

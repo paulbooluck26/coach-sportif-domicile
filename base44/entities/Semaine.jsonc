@@ -6,6 +6,10 @@
       "type": "string",
       "title": "Programme"
     },
+    "phase_id": {
+      "type": "string",
+      "title": "Phase"
+    },
     "numero": {
       "type": "number",
       "default": 1,

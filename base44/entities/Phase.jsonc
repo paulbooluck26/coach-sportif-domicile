@@ -1,0 +1,35 @@
+{
+  "name": "Phase",
+  "type": "object",
+  "properties": {
+    "programme_id": {
+      "type": "string",
+      "title": "Programme"
+    },
+    "nom": {
+      "type": "string",
+      "title": "Nom de la phase"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "ordre": {
+      "type": "number",
+      "default": 0,
+      "title": "Ordre dans le programme"
+    },
+    "nb_semaines": {
+      "type": "number",
+      "title": "Nombre de semaines pr\u00e9vu"
+    },
+    "couleur": {
+      "type": "string",
+      "title": "Couleur d'affichage"
+    }
+  },
+  "required": [
+    "programme_id",
+    "nom"
+  ]
+}

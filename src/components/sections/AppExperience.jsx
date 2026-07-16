@@ -33,7 +33,7 @@ const PILLARS = [
 
 export default function AppExperience() {
   return (
-    <section className="py-24 lg:py-32 bg-muted/30">
+    <section id="application" className="py-24 lg:py-32 bg-muted/30">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-16">
           <div className="max-w-xl">

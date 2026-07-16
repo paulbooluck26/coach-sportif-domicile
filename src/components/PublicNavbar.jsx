@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 const navLinks = [
   { label: "Le Coach", href: "/#about" },
   { label: "Services", href: "/#services" },
+  { label: "App Mobile", href: "/#application" },
   { label: "Témoignages", href: "/#testimonials" },
   { label: "Contact", href: "/#contact" },
 ];

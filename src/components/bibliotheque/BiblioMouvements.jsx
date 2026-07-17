@@ -1,26 +1,29 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, Search } from "lucide-react";
-
-const MOUV_CATEG = { push: "Push", jambes: "Jambes", tirage: "Tirage", gainage: "Gainage", dos: "Dos", epaules: "Épaules", cardio: "Cardio", mobilite: "Mobilité", autre: "Autre" };
-const NIVEAU = { debutant: "Débutant", intermediaire: "Intermédiaire", avance: "Avancé" };
+import { ArrowLeft, Search, Star } from "lucide-react";
+import { MOUV_CATEG, NIVEAU, TYPES_MOUVEMENT } from "@/lib/mouvementReferentiel";
 
 export default function BiblioMouvements({ mouvements, onSelect, onBack }) {
   const [q, setQ] = useState("");
   const [fCateg, setFCateg] = useState("");
+  const [fType, setFType] = useState("");
   const [fMateriel, setFMateriel] = useState("");
   const [fMuscle, setFMuscle] = useState("");
 
   const materiels = useMemo(() => [...new Set(mouvements.flatMap(m => m.materiel || []))].sort(), [mouvements]);
-  const muscles = useMemo(() => [...new Set(mouvements.flatMap(m => m.muscles || []))].sort(), [mouvements]);
+  const muscles = useMemo(
+    () => [...new Set(mouvements.flatMap(m => [...(m.muscles || []), ...(m.muscles_secondaires || [])]))].sort(),
+    [mouvements]
+  );
   const categories = useMemo(() => [...new Set(mouvements.map(m => m.categorie))], [mouvements]);
 
   const filtered = mouvements.filter(m => {
     if (fCateg && m.categorie !== fCateg) return false;
+    if (fType && (m.type_mouvement || "polyarticulaire") !== fType) return false;
     if (fMateriel && !(m.materiel || []).includes(fMateriel)) return false;
-    if (fMuscle && !(m.muscles || []).includes(fMuscle)) return false;
+    if (fMuscle && !(m.muscles || []).includes(fMuscle) && !(m.muscles_secondaires || []).includes(fMuscle)) return false;
     if (q.trim()) {
       const s = q.toLowerCase();
-      const hay = [m.nom, m.description, ...(m.mots_cles || []), ...(m.muscles || [])].join(" ").toLowerCase();
+      const hay = [m.nom, m.description, m.objectif, m.famille, ...(m.mots_cles || []), ...(m.muscles || []), ...(m.points_cles || [])].join(" ").toLowerCase();
       if (!hay.includes(s)) return false;
     }
     return true;
@@ -41,6 +44,7 @@ export default function BiblioMouvements({ mouvements, onSelect, onBack }) {
 
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 mb-4">
         <FilterSelect label="Catégorie" value={fCateg} onChange={setFCateg} options={categories.map(c => ({ value: c, label: MOUV_CATEG[c] || c }))} />
+        <FilterSelect label="Type" value={fType} onChange={setFType} options={Object.entries(TYPES_MOUVEMENT).map(([v, l]) => ({ value: v, label: l }))} />
         <FilterSelect label="Matériel" value={fMateriel} onChange={setFMateriel} options={materiels.map(m => ({ value: m, label: m }))} />
         <FilterSelect label="Muscle" value={fMuscle} onChange={setFMuscle} options={muscles.map(m => ({ value: m, label: m }))} />
       </div>
@@ -55,6 +59,13 @@ export default function BiblioMouvements({ mouvements, onSelect, onBack }) {
               <div className="p-3">
                 <p className="font-semibold text-foreground text-sm leading-tight">{m.nom}</p>
                 <p className="text-xs text-muted-foreground mt-1">{MOUV_CATEG[m.categorie] || m.categorie} · {NIVEAU[m.niveau]}</p>
+                {m.difficulte_technique ? (
+                  <div className="flex items-center gap-0.5 mt-1.5">
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <Star key={n} className={`w-3 h-3 ${n <= m.difficulte_technique ? "fill-accent text-accent" : "text-muted-foreground/30"}`} />
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </button>
           ))}

@@ -49,7 +49,7 @@ export default function Bibliotheque() {
     return hay.includes(s);
   }) : [];
   const searchMvt = searching ? mouvements.filter(m => {
-    const hay = [m.nom, m.description, m.erreurs, m.conseils, ...(m.mots_cles || []), ...(m.muscles || [])].filter(Boolean).join(" ").toLowerCase();
+    const hay = [m.nom, m.description, m.objectif, m.famille, m.erreurs, m.conseils, ...(m.mots_cles || []), ...(m.muscles || []), ...(m.points_cles || [])].filter(Boolean).join(" ").toLowerCase();
     return hay.includes(s);
   }) : [];
 
@@ -117,7 +117,7 @@ export default function Bibliotheque() {
       ) : view === "mouvements" ? (
         <BiblioMouvements mouvements={mouvements} onSelect={(m) => { setSelMvt(m); setView("fiche"); }} onBack={() => setView("home")} />
       ) : view === "fiche" ? (
-        <BiblioMouvementFiche mouvement={selMvt} onBack={() => setView("mouvements")} />
+        <BiblioMouvementFiche mouvement={selMvt} mouvements={mouvements} onBack={() => setView("mouvements")} onSelectMouvement={(m) => { setSelMvt(m); setView("fiche"); }} />
       ) : null}
     </div>
   );

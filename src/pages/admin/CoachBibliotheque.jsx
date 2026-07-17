@@ -111,7 +111,7 @@ export default function CoachBibliotheque() {
 
       {editor?.key === "categories" && <CategorieEditor open initial={editor.initial} onClose={() => setEditor(null)} onSave={(d) => save("categories", d)} />}
       {editor?.key === "ressources" && <RessourceEditor open initial={editor.initial} categories={data.categories} onClose={() => setEditor(null)} onSave={(d) => save("ressources", d)} />}
-      {editor?.key === "mouvements" && <MouvementEditor open initial={editor.initial} onClose={() => setEditor(null)} onSave={(d) => save("mouvements", d)} />}
+      {editor?.key === "mouvements" && <MouvementEditor open initial={editor.initial} mouvements={data.mouvements} onClose={() => setEditor(null)} onSave={(d) => save("mouvements", d)} />}
     </div>
   );
 }

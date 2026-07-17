@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useId } from "react";
 import { X, Upload, Plus } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 // Champ réutilisable : liste de chaînes (mots-clés, URLs...).
 // type="file" ajoute un bouton d'upload vers le stockage de l'app.
-export default function ArrayField({ values = [], onChange, placeholder, type = "text" }) {
+// suggestions : liste contrôlée proposée en autocomplétion (datalist).
+export default function ArrayField({ values = [], onChange, placeholder, type = "text", suggestions }) {
   const [input, setInput] = useState("");
   const [uploading, setUploading] = useState(false);
+  const listId = useId();
 
   const add = () => {
     const v = input.trim();
@@ -35,8 +37,14 @@ export default function ArrayField({ values = [], onChange, placeholder, type = 
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
           placeholder={placeholder}
+          list={suggestions ? listId : undefined}
           className="flex-1 px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:border-secondary"
         />
+        {suggestions && (
+          <datalist id={listId}>
+            {suggestions.map(s => <option key={s} value={s} />)}
+          </datalist>
+        )}
         <button type="button" onClick={add} className="px-3 rounded-md border border-border text-sm hover:bg-muted flex items-center"><Plus className="w-4 h-4" /></button>
         {type === "file" && (
           <label className={`px-3 rounded-md border border-border text-sm hover:bg-muted cursor-pointer flex items-center ${uploading ? "opacity-50" : ""}`}>

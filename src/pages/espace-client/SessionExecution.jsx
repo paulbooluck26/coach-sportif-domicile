@@ -7,6 +7,7 @@ import ExecutionActive from "@/components/execution/ExecutionActive";
 import ExecutionComplete from "@/components/execution/ExecutionComplete";
 import ExecutionWelcome from "@/components/execution/ExecutionWelcome";
 import ExecutionBlocIntro from "@/components/execution/ExecutionBlocIntro";
+import ExecutionPerfCapture from "@/components/execution/ExecutionPerfCapture";
 
 export default function SessionExecution() {
   const { user } = useAuth();
@@ -21,6 +22,7 @@ export default function SessionExecution() {
   const [executionId, setExecutionId] = useState(null);
   const [perfData, setPerfData] = useState({});
   const startTimeRef = useRef(Date.now());
+  const perfSavedRef = useRef(false);
 
   const setPerf = (exId, field, value) => setPerfData(d => ({ ...d, [exId]: { ...d[exId], [field]: value } }));
 
@@ -36,6 +38,17 @@ export default function SessionExecution() {
             return { ...b, exercices };
           })
         );
+        let initPerf = {};
+        try {
+          const prevExecs = await base44.entities.ExecutionSeance.filter({ seance_programme_id: seanceId, statut: "termine" }, "-date_execution", 1);
+          if (prevExecs.length > 0) {
+            const prevPerf = await base44.entities.PerformanceExercice.filter({ execution_id: prevExecs[0].id });
+            prevPerf.forEach(p => {
+              if (p.exercice_id) initPerf[p.exercice_id] = { charge: p.actual_weight ? String(p.actual_weight) : "", reps: p.actual_reps || "" };
+            });
+          }
+        } catch (e) {}
+        setPerfData(initPerf);
         setSessionData({ seance, blocs: blocsWithEx });
         setExecState({ blocIndex: 0, round: 1, exerciseIndex: 0, phase: "welcome", restRemaining: 0, exerciseTimeRemaining: null, isPaused: false });
       } catch (e) {
@@ -74,7 +87,7 @@ export default function SessionExecution() {
 
   const handleNext = () => {
     setExecState(prev => {
-      if (!sessionData || prev.phase === "complete" || prev.phase === "welcome" || prev.phase === "bloc_intro") return prev;
+      if (!sessionData || prev.phase === "complete" || prev.phase === "welcome" || prev.phase === "bloc_intro" || prev.phase === "perf_capture") return prev;
       const blocs = sessionData.blocs;
       const bloc = blocs[prev.blocIndex];
       const exercises = bloc?.exercices || [];
@@ -85,17 +98,8 @@ export default function SessionExecution() {
 
       if (prev.phase === "exercise") {
         if (isLastExercise) {
-          if (!isLastRound) {
-            const restSecs = bloc.rest_between_rounds_unit === "minutes" ? (bloc.rest_between_rounds || 60) * 60 : (bloc.rest_between_rounds || 60);
-            playBeep();
-            return { ...prev, phase: "rest_between_rounds", restRemaining: restSecs, exerciseTimeRemaining: null };
-          } else if (!isLastBloc) {
-            playBeep();
-            return { ...prev, blocIndex: prev.blocIndex + 1, round: 1, exerciseIndex: 0, phase: "bloc_intro", restRemaining: 0, exerciseTimeRemaining: null };
-          } else {
-            playDoubleBeep();
-            return { ...prev, phase: "complete", restRemaining: 0, exerciseTimeRemaining: null };
-          }
+          playBeep();
+          return { ...prev, phase: "perf_capture", restRemaining: 0, exerciseTimeRemaining: null };
         } else {
           const exercise = exercises[prev.exerciseIndex];
           const restSecs = exercise?.rest_seconds || bloc.repos_entre_exercices || 60;
@@ -111,7 +115,33 @@ export default function SessionExecution() {
         playBeep();
         return { ...prev, round: prev.round + 1, exerciseIndex: 0, phase: "exercise", restRemaining: 0, exerciseTimeRemaining: computeNextTime(blocs, prev.blocIndex, 0) };
       }
+      if (prev.phase === "rest_between_blocs") {
+        playBeep();
+        return { ...prev, blocIndex: prev.blocIndex + 1, round: 1, exerciseIndex: 0, phase: "bloc_intro", restRemaining: 0, exerciseTimeRemaining: null };
+      }
       return prev;
+    });
+  };
+
+  const handlePerfValidate = () => {
+    setExecState(prev => {
+      if (!sessionData || prev.phase !== "perf_capture") return prev;
+      const blocs = sessionData.blocs;
+      const bloc = blocs[prev.blocIndex];
+      const rounds = bloc?.rounds || 1;
+      const isLastRound = prev.round >= rounds;
+      const isLastBloc = prev.blocIndex >= blocs.length - 1;
+      const restSecs = bloc.rest_between_rounds_unit === "minutes" ? (bloc.rest_between_rounds || 60) * 60 : (bloc.rest_between_rounds || 60);
+      if (!isLastRound) {
+        playBeep();
+        return { ...prev, phase: "rest_between_rounds", restRemaining: restSecs, exerciseTimeRemaining: null };
+      }
+      if (!isLastBloc) {
+        playBeep();
+        return { ...prev, phase: "rest_between_blocs", restRemaining: restSecs, exerciseTimeRemaining: null };
+      }
+      playDoubleBeep();
+      return { ...prev, phase: "complete", restRemaining: 0, exerciseTimeRemaining: null };
     });
   };
 
@@ -132,7 +162,15 @@ export default function SessionExecution() {
         return { ...prev, blocIndex: prev.blocIndex - 1, round: prevRound, exerciseIndex: prevExIdx, phase: "exercise", restRemaining: 0, exerciseTimeRemaining: t > 0 ? t : null };
       }
 
-      if (prev.phase === "rest" || prev.phase === "rest_between_rounds") {
+      if (prev.phase === "rest") {
+        const ex = exercises[prev.exerciseIndex];
+        const t = parseTimeFromReps(ex?.reps);
+        return { ...prev, phase: "exercise", restRemaining: 0, exerciseTimeRemaining: t > 0 ? t : null };
+      }
+      if (prev.phase === "rest_between_rounds" || prev.phase === "rest_between_blocs") {
+        return { ...prev, phase: "perf_capture", restRemaining: 0, exerciseTimeRemaining: null };
+      }
+      if (prev.phase === "perf_capture") {
         const ex = exercises[prev.exerciseIndex];
         const t = parseTimeFromReps(ex?.reps);
         return { ...prev, phase: "exercise", restRemaining: 0, exerciseTimeRemaining: t > 0 ? t : null };
@@ -165,7 +203,7 @@ export default function SessionExecution() {
 
   useEffect(() => {
     if (execState.isPaused || !sessionData || execState.phase === "complete" || execState.phase === "welcome" || execState.phase === "bloc_intro") return;
-    if ((execState.phase === "rest" || execState.phase === "rest_between_rounds") && execState.restRemaining > 0) {
+    if ((execState.phase === "rest" || execState.phase === "rest_between_rounds" || execState.phase === "rest_between_blocs") && execState.restRemaining > 0) {
       const timer = setTimeout(() => setExecState(prev => ({ ...prev, restRemaining: prev.restRemaining - 1 })), 1000);
       return () => clearTimeout(timer);
     }
@@ -179,7 +217,7 @@ export default function SessionExecution() {
   autoAdvanceRef.current = handleNext;
   useEffect(() => {
     if (execState.isPaused || !sessionData || execState.phase === "complete" || execState.phase === "welcome" || execState.phase === "bloc_intro") return;
-    if ((execState.phase === "rest" || execState.phase === "rest_between_rounds") && execState.restRemaining === 0) {
+    if ((execState.phase === "rest" || execState.phase === "rest_between_rounds" || execState.phase === "rest_between_blocs") && execState.restRemaining === 0) {
       const t = setTimeout(() => autoAdvanceRef.current(), 100);
       return () => clearTimeout(t);
     }
@@ -228,6 +266,25 @@ export default function SessionExecution() {
     })();
   }, [execState.phase, executionId, user, sessionData, seanceId]);
 
+  useEffect(() => {
+    if (execState.phase !== "complete" || !executionId || !sessionData || perfSavedRef.current) return;
+    perfSavedRef.current = true;
+    (async () => {
+      try {
+        const records = sessionData.blocs.flatMap(b => (b.exercices || []).map(ex => {
+          const v = perfData[ex.id];
+          if (!v || (!v.reps && !v.charge)) return null;
+          return {
+            execution_id: executionId, exercice_id: ex.id, exercice_name: ex.name,
+            planned_reps: ex.reps, planned_intensity: ex.intensity || "",
+            actual_reps: v.reps || "", actual_weight: v.charge ? parseFloat(v.charge) || 0 : 0, notes: "",
+          };
+        }).filter(Boolean));
+        if (records.length > 0) await base44.entities.PerformanceExercice.bulkCreate(records);
+      } catch (e) {}
+    })();
+  }, [execState.phase, executionId, sessionData, perfData]);
+
   if (!sessionData) return <div className="fixed inset-0 z-50 bg-primary flex items-center justify-center"><div className="w-10 h-10 border-4 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" /></div>;
 
   if (sessionData.error) return <div className="fixed inset-0 z-50 bg-primary flex items-center justify-center p-6"><div className="text-center text-primary-foreground"><p className="mb-4">Séance introuvable.</p><button onClick={() => navigate("/espace-client/programme")} className="bg-primary-foreground text-primary px-6 py-3 rounded-md font-semibold">Retour</button></div></div>;
@@ -236,7 +293,13 @@ export default function SessionExecution() {
 
   if (execState.phase === "welcome") return <ExecutionWelcome sessionData={sessionData} plannedDate={plannedDate} onStart={handleStart} onExit={() => navigate("/espace-client/programme")} />;
   if (execState.phase === "bloc_intro") return <ExecutionBlocIntro bloc={currentBloc} totalRounds={totalRounds} onContinue={handleContinueBloc} onPrev={execState.blocIndex > 0 ? handlePrev : undefined} onExit={() => navigate("/espace-client/programme")} />;
-  if (execState.phase === "complete") return <ExecutionComplete executionId={executionId} sessionData={sessionData} user={user} initialPerfData={perfData} onDone={() => navigate("/espace-client/programme")} />;
+  if (execState.phase === "perf_capture") {
+    const blocs = sessionData.blocs;
+    const isLastRound = execState.round >= (currentBloc?.rounds || 1);
+    const isLastBloc = execState.blocIndex >= blocs.length - 1;
+    return <ExecutionPerfCapture bloc={currentBloc} exercices={currentBloc?.exercices} perfData={perfData} onPerfChange={setPerf} onValidate={handlePerfValidate} onExit={() => navigate("/espace-client/programme")} isLastRound={isLastRound} isLastBloc={isLastBloc} />;
+  }
+  if (execState.phase === "complete") return <ExecutionComplete executionId={executionId} sessionData={sessionData} user={user} onDone={() => navigate("/espace-client/programme")} />;
 
   return (
     <ExecutionActive

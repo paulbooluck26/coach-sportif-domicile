@@ -1,5 +1,4 @@
 import { parseTimeFromReps } from "@/lib/executionAudio";
-import PerformanceCapture from "./PerformanceCapture";
 import { Pause, Play, SkipForward, SkipBack, X, Clock } from "lucide-react";
 
 export default function ExecutionActive({
@@ -14,7 +13,7 @@ export default function ExecutionActive({
     ? (currentExercise?.rest_seconds || currentBloc?.repos_entre_exercices || 60)
     : restBetweenRoundsSecs;
   const exerciseTotal = currentExercise ? parseTimeFromReps(currentExercise.reps) : 0;
-  const isRest = phase === "rest" || phase === "rest_between_rounds";
+  const isRest = phase === "rest" || phase === "rest_between_rounds" || phase === "rest_between_blocs";
 
   return (
     <div className="fixed inset-0 z-50 bg-primary text-primary-foreground flex flex-col overflow-hidden">
@@ -60,14 +59,13 @@ export default function ExecutionActive({
         {phase === "rest" && (
           <div className="flex flex-col items-center w-full">
             <CountdownRing remaining={restRemaining} total={restTotal} label="Repos" large />
-            <PerformanceCapture exercise={currentExercise} perf={perfData?.[currentExercise?.id]} onChange={(f, val) => onPerfChange(currentExercise?.id, f, val)} />
           </div>
         )}
 
-        {phase === "rest_between_rounds" && (
+        {(phase === "rest_between_rounds" || phase === "rest_between_blocs") && (
           <div className="flex flex-col items-center text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Récupération</p>
-            <h2 className="font-heading text-2xl md:text-4xl font-bold text-primary-foreground mb-10">Début du prochain tour dans</h2>
+            <h2 className="font-heading text-2xl md:text-4xl font-bold text-primary-foreground mb-10">Début du prochain {phase === "rest_between_blocs" ? "bloc" : "tour"} dans</h2>
             <div className="relative w-64 h-64 md:w-72 md:h-72 mb-2">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="3" className="text-primary-foreground/10" />
@@ -78,7 +76,6 @@ export default function ExecutionActive({
                 <span className="text-xs uppercase tracking-[0.2em] text-primary-foreground/50 mt-3">secondes</span>
               </div>
             </div>
-            <PerformanceCapture exercise={currentExercise} perf={perfData?.[currentExercise?.id]} onChange={(f, val) => onPerfChange(currentExercise?.id, f, val)} />
           </div>
         )}
       </div>

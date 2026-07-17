@@ -28,6 +28,7 @@ import BilanInitial from '@/pages/espace-client/BilanInitial';
 import SessionExecution from '@/pages/espace-client/SessionExecution';
 import MesPerformances from '@/pages/espace-client/MesPerformances';
 import Seances from '@/pages/espace-client/Seances';
+import Bibliotheque from '@/pages/espace-client/Bibliotheque';
 import AchatProgramme from '@/pages/site-web/AchatProgramme';
 import PublicReserver from '@/pages/site-web/Reserver';
 import Offres from '@/pages/site-web/Offres';
@@ -41,6 +42,7 @@ import CoachProgrammes from '@/pages/admin/CoachProgrammes';
 import CoachPaiements from '@/pages/admin/CoachPaiements';
 import CoachDisponibilites from '@/pages/admin/CoachDisponibilites';
 import CoachEmails from '@/pages/admin/CoachEmails';
+import CoachBibliotheque from '@/pages/admin/CoachBibliotheque';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -92,6 +94,7 @@ const AuthenticatedApp = () => {
           <Route path="/espace-client/profil" element={<Profil />} />
           <Route path="/espace-client/performances" element={<MesPerformances />} />
           <Route path="/espace-client/seances" element={<Seances />} />
+          <Route path="/espace-client/bibliotheque" element={<Bibliotheque />} />
         </Route>
         <Route path="/espace-client/seance/:seanceId" element={<SessionExecution />} />
       </Route>
@@ -108,6 +111,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/paiements" element={<CoachPaiements />} />
           <Route path="/admin/disponibilites" element={<CoachDisponibilites />} />
           <Route path="/admin/emails" element={<CoachEmails />} />
+          <Route path="/admin/bibliotheque" element={<CoachBibliotheque />} />
         </Route>
       </Route>
 

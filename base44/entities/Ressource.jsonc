@@ -1,0 +1,77 @@
+{
+  "name": "Ressource",
+  "type": "object",
+  "properties": {
+    "titre": {
+      "type": "string",
+      "title": "Titre"
+    },
+    "sous_titre": {
+      "type": "string",
+      "title": "Sous-titre (optionnel)"
+    },
+    "categorie_id": {
+      "type": "string",
+      "title": "Cat\u00e9gorie"
+    },
+    "contenu": {
+      "type": "string",
+      "title": "Contenu (HTML riche)",
+      "description": "Contenu \u00e9dit\u00e9 via l'\u00e9diteur WYSIWYG"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Images"
+    },
+    "videos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Vid\u00e9os"
+    },
+    "fichiers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Pi\u00e8ces jointes (PDF)"
+    },
+    "liens": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Liens externes"
+    },
+    "mots_cles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Mots-cl\u00e9s"
+    },
+    "ordre": {
+      "type": "number",
+      "default": 0,
+      "title": "Ordre d'affichage"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "brouillon",
+        "publie"
+      ],
+      "default": "brouillon",
+      "title": "Statut"
+    }
+  },
+  "required": [
+    "titre",
+    "categorie_id",
+    "statut"
+  ]
+}

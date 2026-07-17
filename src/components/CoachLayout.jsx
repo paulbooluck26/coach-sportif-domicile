@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
-import { LayoutDashboard, Users, CalendarDays, Dumbbell, Inbox, CreditCard, LogOut, Home, Clock, ShoppingBag, MessageCircle, Mail } from "lucide-react";
+import { LayoutDashboard, Users, CalendarDays, Dumbbell, Inbox, CreditCard, LogOut, Home, Clock, ShoppingBag, MessageCircle, Mail, Library } from "lucide-react";
 
 const nav = [
   { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
@@ -13,6 +13,7 @@ const nav = [
   { to: "/admin/disponibilites", label: "Disponibilités", icon: Clock },
   { to: "/admin/paiements", label: "Paiements", icon: CreditCard },
   { to: "/admin/emails", label: "Emails", icon: Mail },
+  { to: "/admin/bibliotheque", label: "Bibliothèque", icon: Library },
 ];
 
 export default function CoachLayout() {

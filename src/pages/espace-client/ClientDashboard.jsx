@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import { loadClientProjection } from "@/lib/projection";
 import { parseDateLocal } from "@/lib/creneaux";
-import { Play, CalendarDays, Clock, MapPin, Flame, Trophy, TrendingUp, ChevronRight, Dumbbell, CalendarPlus } from "lucide-react";
+import { Play, CalendarDays, Clock, MapPin, Flame, Trophy, TrendingUp, ChevronRight, Dumbbell, CalendarPlus, BookOpen } from "lucide-react";
 import ClientAvatar from "@/components/ClientAvatar";
 
 export default function ClientDashboard() {
@@ -144,6 +144,19 @@ export default function ClientDashboard() {
           </div>
         </div>
       )}
+
+      <Link to="/espace-client/bibliotheque" className="block bg-primary text-primary-foreground rounded-2xl p-5 hover:opacity-95 transition-opacity">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center flex-shrink-0">
+            <BookOpen className="w-6 h-6 text-secondary" />
+          </div>
+          <div className="flex-1">
+            <p className="font-heading font-semibold">Académie FORGE</p>
+            <p className="text-xs text-primary-foreground/70 mt-0.5">Guides, vocabulaire, techniques d'exécution et conseils pour progresser.</p>
+          </div>
+          <ChevronRight className="w-5 h-5 text-primary-foreground/60" />
+        </div>
+      </Link>
 
       <div className="grid grid-cols-2 gap-3">
         <Link to="/espace-client/seances" className="bg-secondary/10 border border-secondary/20 rounded-2xl p-4 text-center hover:border-secondary/40 transition-colors">

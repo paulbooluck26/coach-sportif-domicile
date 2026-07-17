@@ -1,0 +1,38 @@
+{
+  "name": "RessourceCategorie",
+  "type": "object",
+  "properties": {
+    "titre": {
+      "type": "string",
+      "title": "Titre"
+    },
+    "emoji": {
+      "type": "string",
+      "title": "Emoji / ic\u00f4ne",
+      "description": "Emoji affich\u00e9 sur la carte de cat\u00e9gorie (ex : \ud83d\udcd6)"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "article",
+        "mouvement"
+      ],
+      "default": "article",
+      "title": "Type de cat\u00e9gorie",
+      "description": "article = ressources texte riche ; mouvement = biblioth\u00e8que des mouvements structur\u00e9e"
+    },
+    "ordre": {
+      "type": "number",
+      "default": 0,
+      "title": "Ordre d'affichage"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description (optionnel)"
+    }
+  },
+  "required": [
+    "titre",
+    "type"
+  ]
+}

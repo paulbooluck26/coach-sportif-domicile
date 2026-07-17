@@ -1,0 +1,97 @@
+{
+  "name": "Mouvement",
+  "type": "object",
+  "properties": {
+    "nom": {
+      "type": "string",
+      "title": "Nom du mouvement"
+    },
+    "categorie": {
+      "type": "string",
+      "enum": [
+        "push",
+        "jambes",
+        "tirage",
+        "gainage",
+        "dos",
+        "epaules",
+        "cardio",
+        "mobilite",
+        "autre"
+      ],
+      "default": "push",
+      "title": "Cat\u00e9gorie de mouvement"
+    },
+    "muscles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Muscles travaill\u00e9s"
+    },
+    "materiel": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Mat\u00e9riel n\u00e9cessaire"
+    },
+    "niveau": {
+      "type": "string",
+      "enum": [
+        "debutant",
+        "intermediaire",
+        "avance"
+      ],
+      "default": "debutant",
+      "title": "Niveau de difficult\u00e9"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description technique"
+    },
+    "erreurs": {
+      "type": "string",
+      "title": "Erreurs fr\u00e9quentes"
+    },
+    "conseils": {
+      "type": "string",
+      "title": "Conseils du coach"
+    },
+    "video_url": {
+      "type": "string",
+      "title": "Vid\u00e9o / GIF (URL)"
+    },
+    "image_url": {
+      "type": "string",
+      "title": "Image (URL)"
+    },
+    "mots_cles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "title": "Mots-cl\u00e9s"
+    },
+    "ordre": {
+      "type": "number",
+      "default": 0,
+      "title": "Ordre d'affichage"
+    },
+    "statut": {
+      "type": "string",
+      "enum": [
+        "brouillon",
+        "publie"
+      ],
+      "default": "publie",
+      "title": "Statut"
+    }
+  },
+  "required": [
+    "nom",
+    "categorie",
+    "niveau",
+    "statut"
+  ]
+}

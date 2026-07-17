@@ -53,7 +53,7 @@ export default function ExecutionWelcome({ sessionData, plannedDate, onStart, on
                 <div className="flex items-center gap-3">
                   <span className="w-7 h-7 rounded bg-secondary/20 text-secondary flex items-center justify-center text-sm font-bold flex-shrink-0">{i + 1}</span>
                   <span className="font-medium">{b.titre}</span>
-                  {((b.nb_series && b.nb_series > 1) || b.rounds > 1) && <span className="text-xs text-primary-foreground/40 ml-auto">{[b.nb_series > 1 && `${b.nb_series} séries`, b.rounds > 1 && `${b.rounds} tours`].filter(Boolean).join(" · ")}</span>}
+                  {b.rounds > 1 && <span className="text-xs text-primary-foreground/40 ml-auto">{b.rounds} tours</span>}
                 </div>
                 {b.exercices?.length > 0 && (
                   <ul className="mt-2 ml-10 space-y-1">

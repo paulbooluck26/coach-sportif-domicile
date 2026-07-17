@@ -14,7 +14,7 @@ export default function ExecutionBlocIntro({ bloc, totalRounds, onContinue, onPr
       <div className="flex-1 flex flex-col items-center justify-center px-6 pb-10 overflow-y-auto">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-4">Prochain bloc</p>
         <h1 className="font-heading text-5xl md:text-6xl font-bold text-center mb-3">{bloc?.titre}</h1>
-        <p className="text-primary-foreground/60 mb-2">{bloc?.nb_series || 1} série{(bloc?.nb_series || 1) > 1 ? "s" : ""}{totalRounds > 1 ? ` · ${totalRounds} tours` : ""}</p>
+        <p className="text-primary-foreground/60 mb-2">{totalRounds} tour{totalRounds > 1 ? "s" : ""}</p>
 
         {exercices.length > 0 && (
           <div className="w-full max-w-md mb-2 mt-4">

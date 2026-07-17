@@ -36,7 +36,7 @@ export default function ExecutionComplete({ executionId, sessionData, user, onDo
     return init;
   });
 
-  const allExercises = sessionData.blocs.flatMap(b => b.exercices.map(ex => ({ ...ex, bloc_titre: b.titre, bloc_nb_series: b.nb_series })));
+  const allExercises = sessionData.blocs.flatMap(b => b.exercices.map(ex => ({ ...ex, bloc_titre: b.titre })));
 
   const submitFeedback = async () => {
     setSaving(true);
@@ -70,11 +70,11 @@ export default function ExecutionComplete({ executionId, sessionData, user, onDo
     setSaving(true);
     try {
       const records = allExercises
-        .filter(ex => perfData[ex.id] && (perfData[ex.id].actual_sets || perfData[ex.id].actual_reps || perfData[ex.id].actual_weight))
+        .filter(ex => perfData[ex.id] && (perfData[ex.id].actual_reps || perfData[ex.id].actual_weight))
         .map(ex => ({
           execution_id: executionId, exercice_id: ex.id, exercice_name: ex.name,
-          planned_sets: ex.sets, planned_reps: ex.reps, planned_intensity: ex.intensity || "",
-          actual_sets: perfData[ex.id]?.actual_sets || 0, actual_reps: perfData[ex.id]?.actual_reps || "",
+          planned_reps: ex.reps, planned_intensity: ex.intensity || "",
+          actual_reps: perfData[ex.id]?.actual_reps || "",
           actual_weight: perfData[ex.id]?.actual_weight || 0, notes: perfData[ex.id]?.notes || "",
         }));
       if (records.length > 0 && executionId) {
@@ -167,9 +167,8 @@ export default function ExecutionComplete({ executionId, sessionData, user, onDo
                   <span className="w-6 h-6 rounded bg-secondary/20 text-secondary flex items-center justify-center text-xs font-bold flex-shrink-0">{i + 1}</span>
                   <p className="font-semibold text-sm">{ex.name}</p>
                 </div>
-                <p className="text-xs text-primary-foreground/40 mb-3 pl-8">Prévu: {ex.bloc_nb_series || ex.sets || "—"} séries × {ex.reps || "—"}{ex.intensity ? ` · ${ex.intensity}` : ""}</p>
-                <div className="grid grid-cols-3 gap-2 pl-8">
-                  <input type="number" placeholder="Séries réelles" value={perfData[ex.id]?.actual_sets || ""} onChange={e => setPerf(ex.id, "actual_sets", parseInt(e.target.value) || 0)} className="bg-primary-foreground/5 border border-primary-foreground/15 rounded px-3 py-2 text-sm placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary" />
+                <p className="text-xs text-primary-foreground/40 mb-3 pl-8">Prévu: {ex.reps || "—"}{ex.intensity ? ` · ${ex.intensity}` : ""}</p>
+                <div className="grid grid-cols-2 gap-2 pl-8">
                   <input type="text" placeholder="Reps réelles" value={perfData[ex.id]?.actual_reps || ""} onChange={e => setPerf(ex.id, "actual_reps", e.target.value)} className="bg-primary-foreground/5 border border-primary-foreground/15 rounded px-3 py-2 text-sm placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary" />
                   <input type="number" placeholder="Poids (kg)" value={perfData[ex.id]?.actual_weight || ""} onChange={e => setPerf(ex.id, "actual_weight", parseFloat(e.target.value) || 0)} className="bg-primary-foreground/5 border border-primary-foreground/15 rounded px-3 py-2 text-sm placeholder:text-primary-foreground/30 focus:outline-none focus:border-secondary" />
                 </div>

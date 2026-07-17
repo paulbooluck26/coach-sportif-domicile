@@ -9,7 +9,6 @@ export default function ExecutionActive({
 }) {
   const { phase, round, exerciseIndex, restRemaining, exerciseTimeRemaining, isPaused } = execState;
   const blocTitle = currentBloc?.titre || `Bloc ${execState.blocIndex + 1}`;
-  const nbSeries = currentBloc?.nb_series || currentExercise?.sets || null;
 
   const restTotal = phase === "rest"
     ? (currentExercise?.rest_seconds || currentBloc?.repos_entre_exercices || 60)
@@ -40,16 +39,9 @@ export default function ExecutionActive({
             {currentExercise?.media_url && <img src={currentExercise.media_url} alt={currentExercise?.name} className="w-full max-w-sm h-48 object-cover rounded-xl mb-6" />}
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-3">Exercice en cours</p>
             <h1 className="font-heading text-4xl md:text-5xl font-bold mb-6">{currentExercise?.name}</h1>
-            <div className="flex items-center justify-center gap-8 mb-6">
-              <div>
-                <p className="text-xs text-primary-foreground/50 uppercase tracking-wider mb-1">Séries</p>
-                <p className="font-heading text-4xl font-bold">{nbSeries || "—"}</p>
-              </div>
-              <div className="text-primary-foreground/20 text-4xl font-heading">×</div>
-              <div>
-                <p className="text-xs text-primary-foreground/50 uppercase tracking-wider mb-1">Répétitions</p>
-                <p className="font-heading text-4xl font-bold">{currentExercise?.reps || "—"}</p>
-              </div>
+            <div className="mb-6">
+              <p className="text-xs text-primary-foreground/50 uppercase tracking-wider mb-1">Répétitions</p>
+              <p className="font-heading text-5xl font-bold">{currentExercise?.reps || "—"}</p>
             </div>
             {currentExercise?.intensity && (
               <div className="inline-block bg-secondary/20 px-4 py-2 rounded-full mb-4">

@@ -1,14 +1,19 @@
-import { createClient } from '@base44/sdk';
-import { appParams } from '@/lib/app-params';
+// Drop-in replacement de src/api/base44Client.js.
+// Objectif : les 57 fichiers existants qui font
+//   import { base44 } from '@/api/base44Client'
+//   base44.entities.Client.filter(...)
+//   base44.auth.me()
+//   base44.integrations.Core.SendEmail(...)
+// continuent de fonctionner SANS AUCUNE MODIFICATION.
+// Seule l'implémentation change : Supabase au lieu du SDK Base44.
 
-const { appId, token, functionsVersion, appBaseUrl } = appParams;
+import { buildEntities } from './entityClient';
+import { authClient } from './authClient';
+import { integrationsClient } from './integrationsClient';
+import { KNOWN_ENTITIES } from './entityTables';
 
-//Create a client with authentication required
-export const base44 = createClient({
-  appId,
-  token,
-  functionsVersion,
-  serverUrl: '',
-  requiresAuth: false,
-  appBaseUrl
-});
+export const base44 = {
+  entities: buildEntities(KNOWN_ENTITIES),
+  auth: authClient,
+  integrations: integrationsClient,
+};

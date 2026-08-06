@@ -83,24 +83,47 @@ export function creneauxPourJour(date, recurrentes) {
 }
 
 /**
- * Retourne les créneaux finaux disponibles pour une date :
- * dispo récurrentes - créneaux déjà réservés.
+ * Battement obligatoire entre deux séances (temps de trajet/préparation
+ * du coach entre deux domiciles). Modifiable ici si besoin plus tard.
  */
-export function creneauxDisponibles(date, recurrentes, reservees) {
+const BUFFER_MIN = 30;
+
+/**
+ * Retourne les créneaux finaux disponibles pour une date :
+ * dispo récurrentes - créneaux déjà réservés - créneaux trop proches
+ * d'une séance existante (moins de BUFFER_MIN minutes d'écart).
+ */
+export function creneauxDisponibles(date, recurrentes, reservees, dureeMinutes = 60) {
   const slots = creneauxPourJour(date, recurrentes);
   const ds = dateStr(date);
-  const pris = new Set(
-    reservees
-      .filter((s) => s.date === ds && s.status !== "cancelled")
-      .map((s) => s.time)
-  );
   const now = new Date();
   const isToday = dateStr(now) === ds;
   const nowMin = now.getHours() * 60 + now.getMinutes();
+
+  // Fenêtres occupées ce jour-là (avec leur propre durée), pour vérifier
+  // le battement — pas seulement l'égalité stricte de l'heure de début.
+  const occupees = reservees
+    .filter((s) => s.date === ds && s.status !== "cancelled")
+    .map((s) => {
+      const start = toMinutes(s.time);
+      const duree = s.duration_minutes || 60;
+      return { start, end: start + duree };
+    });
+
   return slots.filter((s) => {
-    if (pris.has(s)) return false;
-    if (isToday && toMinutes(s) < nowMin) return false;
-    return true;
+    const start = toMinutes(s);
+    const end = start + dureeMinutes;
+    if (isToday && start < nowMin) return false;
+
+    // Un créneau candidat est refusé s'il chevauche une séance existante,
+    // OU si l'écart avec elle est inférieur au battement requis, dans
+    // un sens comme dans l'autre.
+    const conflit = occupees.some((o) => {
+      const finAvantDebutOK = end + BUFFER_MIN <= o.start;
+      const debutApresFinOK = o.end + BUFFER_MIN <= start;
+      return !(finAvantDebutOK || debutApresFinOK);
+    });
+    return !conflit;
   });
 }
 

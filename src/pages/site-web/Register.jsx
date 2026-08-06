@@ -4,13 +4,16 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
+import { UserPlus, Mail, Lock, Loader2, User, Phone } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
 
 export default function Register() {
+  const [prenom, setPrenom] = useState("");
+  const [nom, setNom] = useState("");
+  const [telephone, setTelephone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -28,7 +31,7 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await base44.auth.register({ email, password });
+      await base44.auth.register({ email, password, prenom, nom, telephone });
       setShowOtp(true);
     } catch (err) {
       setError(err.message || "Inscription échouée");
@@ -163,6 +166,56 @@ export default function Register() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label htmlFor="prenom">Prénom</Label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <Input
+                id="prenom"
+                type="text"
+                autoComplete="given-name"
+                placeholder="Jean"
+                value={prenom}
+                onChange={(e) => setPrenom(e.target.value)}
+                className="pl-10 h-12"
+                required
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="nom">Nom</Label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <Input
+                id="nom"
+                type="text"
+                autoComplete="family-name"
+                placeholder="Dupont"
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
+                className="pl-10 h-12"
+                required
+              />
+            </div>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="telephone">Téléphone</Label>
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              id="telephone"
+              type="tel"
+              autoComplete="tel"
+              placeholder="06 12 34 56 78"
+              value={telephone}
+              onChange={(e) => setTelephone(e.target.value)}
+              className="pl-10 h-12"
+              required
+            />
+          </div>
+        </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
 

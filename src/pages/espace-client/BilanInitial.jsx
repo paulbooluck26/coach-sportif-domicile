@@ -32,7 +32,7 @@ export default function BilanInitial() {
     if (!user) return;
     (async () => {
       try {
-        const list = await base44.entities.BilanInitial.filter({ created_by_id: user.id });
+        const list = await base44.entities.BilanInitial.filter({ client_id: user.id });
         if (list.length) {
           const b = list[0];
           setBilan({ ...emptyBilan, ...b });
@@ -76,7 +76,7 @@ export default function BilanInitial() {
       if (isTermine) payload.date_remplissage = new Date().toISOString().split("T")[0];
       let rec;
       if (bilanId) rec = await base44.entities.BilanInitial.update(bilanId, payload);
-      else { rec = await base44.entities.BilanInitial.create({ ...payload, statut: "en_cours" }); setBilanId(rec.id); }
+      else { rec = await base44.entities.BilanInitial.create({ ...payload, client_id: user.id, statut: "en_cours" }); setBilanId(rec.id); }
       setBilan({ ...emptyBilan, ...rec });
       if (isTermine) setTermine(true);
       else setStep(nextStep);

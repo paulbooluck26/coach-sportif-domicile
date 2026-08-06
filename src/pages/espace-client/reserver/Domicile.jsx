@@ -8,7 +8,8 @@ import { acheterCarnet, estPonctuel, nbSeancesPourOffre } from "@/lib/carnetSean
 import CalendrierDispo from "@/components/CalendrierDispo";
 import { FORGE_OFFRES, prixDisplay } from "@/lib/forgeOffres";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Clock, MapPin, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, Flame } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, MapPin, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, CalendarPlus, Flame } from "lucide-react";
+import { downloadICS } from "@/lib/calendarExport";
 
 const CATALOGUE = ["diagnostic", "transformation", "performance", "forge4", "forge8", "decouverte"];
 const SESSION_TYPE = {
@@ -64,6 +65,15 @@ export default function Domicile() {
   const payer = async () => {
     setPaying(true);
     try {
+      // Sauvegarde l'adresse dans le profil pour ne plus avoir à la
+      // ressaisir la prochaine fois.
+      try {
+        const profiles = await base44.entities.ClientProfile.filter({ user_id: user.id });
+        if (profiles[0] && profiles[0].adresse !== adresse) {
+          await base44.entities.ClientProfile.update(profiles[0].id, { adresse });
+        }
+      } catch (_) {}
+
       if (ponctuel) {
         const { seance } = await finaliserSeancePayante({
           user,
@@ -121,6 +131,18 @@ export default function Domicile() {
             <p className="flex items-center gap-2 text-sm text-foreground/80"><Flame className="w-4 h-4 text-accent" /> {offre.titre} — {prixDisplay(offre)}</p>
             {adresse && <p className="flex items-center gap-2 text-sm text-foreground/80"><MapPin className="w-4 h-4 text-accent" /> {adresse}</p>}
           </div>
+          <button
+            onClick={() => downloadICS({
+              title: `Séance Lab Forge — ${offre.titre}`,
+              start: `${date}T${heure}:00`,
+              durationMin: 60,
+              description: `Séance ${offre.titre} avec votre coach Lab Forge.`,
+              location: adresse || "Domicile",
+            }, `seance-${date}.ics`)}
+            className="inline-flex items-center justify-center gap-2 border border-border text-foreground px-6 py-3 rounded-xl font-medium text-sm w-full mb-3"
+          >
+            <CalendarPlus className="w-4 h-4" /> Ajouter à mon calendrier
+          </button>
           <Link to="/espace-client/seances" className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm w-full">Mon espace</Link>
         </div>
       </div>
@@ -208,6 +230,19 @@ export default function Domicile() {
               <p className="font-heading text-2xl font-bold text-foreground">{offre.prix}€</p>
             </div>
             <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Adresse de la séance</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <input
+                    required
+                    value={adresse}
+                    onChange={(e) => setAdresse(e.target.value)}
+                    placeholder="12 rue Exemple, 68000 Colmar"
+                    className="w-full border border-border rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-accent"
+                  />
+                </div>
+              </div>
               <div><label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Nom sur la carte</label><input value={card.name} onChange={e => setCard({ ...card, name: e.target.value })} placeholder="Jean Dupont" className="w-full border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent" /></div>
               <div><label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Numéro de carte</label><div className="relative"><CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" /><input value={card.number} onChange={e => setCard({ ...card, number: e.target.value })} placeholder="4242 4242 4242 4242" className="w-full border border-border rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-accent" /></div></div>
               <div className="grid grid-cols-2 gap-3">
@@ -217,7 +252,7 @@ export default function Domicile() {
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lock className="w-3.5 h-3.5" /> Paiement chiffré · Annulation gratuite jusqu'à 24h avant</div>
-          <button onClick={payer} disabled={paying} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Traitement...</> : <><Lock className="w-4 h-4" /> Payer {offre.prix}€</>}</button>
+          <button onClick={payer} disabled={paying || !adresse.trim()} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Traitement...</> : <><Lock className="w-4 h-4" /> Payer {offre.prix}€</>}</button>
         </div>
       )}
     </div>

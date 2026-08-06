@@ -49,6 +49,13 @@ export default function BilanInitial() {
 
   const sanitize = (data) => {
     const out = { ...data };
+    // Toute valeur "" (question pas encore répondue) est retirée plutôt
+    // qu'envoyée telle quelle — la base de données accepte l'absence de
+    // valeur (null) mais pas une chaîne vide sur les champs à choix
+    // limité (ex: "oui"/"non").
+    Object.keys(out).forEach((k) => {
+      if (out[k] === "") delete out[k];
+    });
     NUMBER_FIELDS.forEach((k) => {
       const v = out[k];
       if (v === "" || v === null || v === undefined) { delete out[k]; return; }

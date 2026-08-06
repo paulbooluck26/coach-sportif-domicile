@@ -9,7 +9,7 @@ export default function ClientBilan({ user_id }) {
     let active = true;
     (async () => {
       try {
-        const list = await base44.entities.BilanInitial.filter({ created_by_id: user_id });
+        const list = await base44.entities.BilanInitial.filter({ client_id: user_id });
         if (active) setBilan(list[0] || null);
       } catch {
         if (active) setBilan(null);

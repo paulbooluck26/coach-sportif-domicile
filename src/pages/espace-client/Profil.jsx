@@ -27,11 +27,11 @@ export default function Profil() {
         setProfile(np);
         setForm({ nom: user.full_name || "", telephone: "", adresse: "", objectif: "" });
       }
-      const pays = await base44.entities.Paiement.filter({ client_user_id: user.id }, "-created_date", 20).catch(() => []);
+      const pays = await base44.entities.Paiement.filter({ client_id: user.id }, "-created_date", 20).catch(() => []);
       setPaiements(pays);
       const allProgs = await base44.entities.Programme.filter({ statut: "actif" });
       setProgrammes(allProgs.filter(p => p.client_ids?.includes(user.id)));
-      const bilans = await base44.entities.BilanInitial.filter({ created_by_id: user.id }).catch(() => []);
+      const bilans = await base44.entities.BilanInitial.filter({ client_id: user.id }).catch(() => []);
       setBilan(bilans[0] || null);
     } catch {}
   };

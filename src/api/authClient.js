@@ -22,9 +22,22 @@ async function me() {
     .eq('id', user.id)
     .maybeSingle();
 
+  // On récupère aussi prénom/nom depuis client_profile pour reconstituer
+  // full_name — plusieurs pages existantes (avatar, salutation d'accueil)
+  // s'appuient sur ce champ, présent automatiquement chez Base44 mais
+  // absent chez Supabase.
+  const { data: clientProfile } = await supabase
+    .from('client_profile')
+    .select('prenom, nom')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  const full_name = [clientProfile?.prenom, clientProfile?.nom].filter(Boolean).join(' ') || undefined;
+
   return {
     id: user.id,
     email: user.email,
+    full_name,
     role: profile?.role || 'user',
     ...profile,
   };
@@ -71,8 +84,12 @@ async function loginWithProvider(provider, redirectTo) {
   return data;
 }
 
-async function register({ email, password }) {
-  const { data, error } = await supabase.auth.signUp({ email, password });
+async function register({ email, password, prenom, nom, telephone }) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { prenom, nom, telephone } },
+  });
   if (error) throw new Error(error.message);
   return data;
 }

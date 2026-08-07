@@ -47,7 +47,7 @@ export async function acheterCarnet({ user, offreId }) {
     date_fin: estAbonnement(offreId) ? finDeMois() : null,
   });
   await base44.entities.Paiement.create({
-    seance_id: "carnet-" + carnet.id,
+    carnet_id: carnet.id,
     client_id: user.id,
     client_name: user.full_name || user.email,
     amount: o.prix,
@@ -57,7 +57,7 @@ export async function acheterCarnet({ user, offreId }) {
     date_paiement: todayStr(),
   });
   await upsertClientProfile(user);
-  await envoyerRecuPaiement({ email: user.email, prestation: o.titre, montant: o.prix, isProgramme: true });
+  await envoyerRecuPaiement({ email: user.email, prenom: user.full_name?.split(" ")[0] || "", prestation: o.titre, montant: o.prix, evenement: "achat_carnet" });
   return carnet;
 }
 

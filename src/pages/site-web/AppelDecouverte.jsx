@@ -5,6 +5,7 @@ import { useCreneaux } from "@/hooks/useCreneaux";
 import { creneauxDisponibles, parseDateLocal } from "@/lib/creneaux";
 import CalendrierDispo from "@/components/CalendrierDispo";
 import { ArrowLeft, CheckCircle2, Loader2, Phone, Clock, CalendarDays, User, Mail, MessageSquare } from "lucide-react";
+import { envoyerEmail } from "@/lib/emailSender";
 
 export default function AppelDecouverte() {
   const navigate = useNavigate();
@@ -37,10 +38,11 @@ export default function AppelDecouverte() {
       });
 
       try {
-        await base44.integrations.Core.SendEmail({
-          to: form.email,
-          subject: "Confirmation de votre appel découverte — The Lab Forge",
-          body: `Bonjour ${form.nom},\n\nVotre appel découverte de 30 minutes est programmé pour le ${parseDateLocal(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} à ${heure}.\n\nUn appel téléphonique ou en visio, au choix — je vous contacterai au numéro indiqué.\n\nÀ très vite,\nPaul Booluck, Fondateur The Lab Forge`,
+        await envoyerEmail("appel_decouverte", form.email, {
+          client_prenom: form.nom,
+          date: parseDateLocal(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }),
+          heure,
+          telephone: form.phone,
         });
       } catch {}
 

@@ -16,10 +16,10 @@ async function UploadFile({ file }) {
 // Resend). Pour l'instant, ça log un avertissement clair au lieu de
 // planter silencieusement les parcours qui l'appellent (réservation,
 // contact, etc.).
-async function SendEmail({ to, subject, body }) {
+async function SendEmail({ to, subject, body, html }) {
   try {
     const { data, error } = await supabase.functions.invoke('send-email', {
-      body: { to, subject, body },
+      body: { to, subject, body, html },
     });
     if (error) throw error;
     return data;

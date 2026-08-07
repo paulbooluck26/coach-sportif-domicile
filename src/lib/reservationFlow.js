@@ -1,5 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { parseDateLocal } from "@/lib/creneaux";
+import { envoyerEmail } from "@/lib/emailSender";
 
 const todayStr = () => new Date().toISOString().split("T")[0];
 
@@ -25,20 +26,18 @@ export async function upsertClientProfile(user, extra = {}) {
   return existing;
 }
 
-// Envoie un email de reçu (prestation, date, montant) au client.
-export async function envoyerRecuPaiement({ email, prestation, date, heure, montant, isProgramme = false }) {
+// Envoie l'email de confirmation (réservation, carnet ou programme) au
+// client, via le template configuré dans l'admin (EmailTemplate).
+export async function envoyerRecuPaiement({ email, prenom, prestation, date, heure, montant, evenement = "confirmation_reservation" }) {
   if (!email) return;
   const dateStr = date ? parseDateLocal(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
-  const body = isProgramme
-    ? `Bonjour,\n\nVotre commande "${prestation}" a bien été validée. Montant payé : ${montant}€.\n\nVotre coach prépare votre programme personnalisé. Vous serez notifié dès qu'il sera disponible dans votre espace.\n\nMerci de votre confiance,\nThe Lab Forge`
-    : `Bonjour,\n\nVotre réservation a bien été confirmée.\n\nPrestation : ${prestation}\nDate : ${dateStr}${heure ? ` à ${heure}` : ""}\nMontant payé : ${montant}€\n\nMerci de votre confiance,\nThe Lab Forge`;
-  try {
-    await base44.integrations.Core.SendEmail({
-      to: email,
-      subject: "Confirmation de paiement — The Lab Forge",
-      body,
-    });
-  } catch {}
+  await envoyerEmail(evenement, email, {
+    client_prenom: prenom || "",
+    prestation,
+    date: dateStr,
+    heure: heure || "",
+    montant,
+  });
 }
 
 // Finalise une réservation de séance payante : Seance + Paiement + ClientProfile + email reçu.
@@ -65,17 +64,18 @@ export async function finaliserSeancePayante({ user, sessionType, date, heure, d
     date_paiement: todayStr(),
   });
   await upsertClientProfile(user, location ? { adresse: location } : {});
-  await envoyerRecuPaiement({ email: user.email, prestation: prestationLabel, date, heure, montant: prix });
+  await envoyerRecuPaiement({ email: user.email, prenom: user.full_name?.split(" ")[0] || "", prestation: prestationLabel, date, heure, montant: prix });
   return { seance, paiement };
 }
 
 // Finalise un achat de programme : Paiement + ClientProfile + email reçu (+ CommandeProgramme si fourni).
 export async function finaliserAchatProgramme({ user, programmeNom, prix, commandePayload }) {
+  let commande = null;
   if (commandePayload) {
-    await base44.entities.CommandeProgramme.create(commandePayload);
+    commande = await base44.entities.CommandeProgramme.create(commandePayload);
   }
   await base44.entities.Paiement.create({
-    seance_id: "programme-" + Date.now(),
+    commande_id: commande?.id || null,
     client_id: user.id,
     client_name: user.full_name || user.email,
     amount: prix,
@@ -85,5 +85,5 @@ export async function finaliserAchatProgramme({ user, programmeNom, prix, comman
     date_paiement: todayStr(),
   });
   await upsertClientProfile(user);
-  await envoyerRecuPaiement({ email: user.email, prestation: programmeNom, montant: prix, isProgramme: true });
+  await envoyerRecuPaiement({ email: user.email, prenom: user.full_name?.split(" ")[0] || "", prestation: programmeNom, montant: prix, evenement: "achat_programme" });
 }

@@ -55,11 +55,10 @@ export default function Domicile() {
   const slots = date ? creneauxDisponibles(parseDateLocal(date), recurrentes, reservees) : [];
 
   const choisir = (id) => {
-    if (!diagDone && id !== "diagnostic") return;
     setOffreId(id);
     setDate(null);
     setHeure(null);
-    setStep(estPonctuel(id) ? "creneau" : "paiement");
+    setStep("detail");
   };
 
   const payer = async () => {
@@ -157,36 +156,60 @@ export default function Domicile() {
         <h1 className="font-heading text-3xl font-bold text-foreground">Réserver une séance</h1>
       </div>
 
-      {!diagDone && (
-        <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-5">
-          <p className="font-heading font-semibold text-foreground mb-1">Commencez par le Diagnostic FORGE</p>
-          <p className="text-sm text-muted-foreground">Le Diagnostic est l'étape obligatoire avant d'accéder aux autres formules. Les autres offres deviendront réservables dès qu'il sera effectué.</p>
-        </div>
-      )}
-
       {step === "catalogue" && (
         <div className="space-y-3">
           {CATALOGUE.map(id => {
             const o = FORGE_OFFRES[id];
-            const locked = !diagDone && id !== "diagnostic";
             return (
-              <button key={id} onClick={() => choisir(id)} disabled={locked}
-                className={`w-full text-left bg-card border rounded-2xl p-5 transition-all ${locked ? "border-border opacity-70 cursor-not-allowed" : "border-border hover:border-accent"}`}>
+              <button key={id} onClick={() => choisir(id)}
+                className="w-full text-left bg-card border rounded-2xl p-5 transition-all border-border hover:border-accent">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-heading font-semibold text-foreground">{o.titre}</p>
-                      {locked && <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
                     </div>
                     {(o.sousTitre || o.duree) && <p className="text-xs text-muted-foreground mt-0.5">{o.sousTitre || o.duree}</p>}
                     {o.inclus && <p className="text-xs text-muted-foreground mt-1 truncate">{o.inclus.join(" · ")}</p>}
                   </div>
                   <p className="font-heading text-lg font-bold text-foreground whitespace-nowrap">{prixDisplay(o)}</p>
                 </div>
-                {locked && <p className="text-xs text-accent mt-3">Disponible après le Diagnostic FORGE</p>}
               </button>
             );
           })}
+        </div>
+      )}
+
+      {step === "detail" && offre && (
+        <div className="space-y-5">
+          <button onClick={() => setStep("catalogue")} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="w-4 h-4" /> Autres offres</button>
+          <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                {offre.badge && <p className="text-xs font-semibold uppercase tracking-wider text-accent mb-1">{offre.badge}</p>}
+                <h2 className="font-heading text-2xl font-bold text-foreground">{offre.titre}</h2>
+                <p className="text-sm text-muted-foreground mt-1">{offre.sousTitre || offre.duree || "60 min"}</p>
+              </div>
+              <p className="font-heading text-2xl font-bold text-foreground whitespace-nowrap">{prixDisplay(offre)}</p>
+            </div>
+            {(offre.accroche || offre.description) && (
+              <p className="text-sm text-foreground/80 leading-relaxed">{offre.accroche || offre.description}</p>
+            )}
+            {offre.inclus && (
+              <ul className="space-y-2">
+                {offre.inclus.map((item, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm text-foreground/80">
+                    <CheckCircle2 className="w-4 h-4 text-accent shrink-0" /> {item}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <button
+            onClick={() => setStep(estPonctuel(offreId) ? "creneau" : "paiement")}
+            className="w-full bg-primary text-primary-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
+          >
+            {offre.cta || "Continuer"} <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       )}
 

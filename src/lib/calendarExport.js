@@ -15,16 +15,16 @@ function escapeICS(text) {
     .replace(/\n/g, "\\n");
 }
 
-// `event` : { title, start (ISO string yyyy-mm-dd or Date), durationMin, description, location, url }
+// `event` : { title, start (ISO string yyyy-mm-dd or Date), durationMin, description, location, url, reminders (array de minutes avant l'événement, ex: [1440, 120]) }
 export function buildICS(event) {
   const start = new Date(event.start);
   const end = new Date(start.getTime() + (event.durationMin || 45) * 60000);
   const now = new Date();
-  const uid = `thelabforge-${now.getTime()}-${start.getTime()}@thelabforge`;
+  const uid = `physiscoaching-${now.getTime()}-${start.getTime()}@physiscoaching`;
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//The Lab Forge//Programme//FR",
+    "PRODID:-//PHYSIS COACHING//Programme//FR",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
@@ -37,7 +37,16 @@ export function buildICS(event) {
   ];
   if (event.location) lines.push(`LOCATION:${escapeICS(event.location)}`);
   if (event.url) lines.push(`URL:${escapeICS(event.url)}`);
-  lines.push("BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:Rappel séance The Lab Forge", "TRIGGER:-PT30M", "END:VALARM");
+
+  // Un ou plusieurs rappels — par défaut : 1 jour avant + 2h avant.
+  const reminders = event.reminders && event.reminders.length ? event.reminders : [1440, 120];
+  reminders.forEach((minutesBefore) => {
+    const label = minutesBefore >= 1440
+      ? `Rappel séance PHYSIS COACHING — J-${Math.round(minutesBefore / 1440)}`
+      : `Rappel séance PHYSIS COACHING — dans ${Math.round(minutesBefore / 60)}h`;
+    lines.push("BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${escapeICS(label)}`, `TRIGGER:-PT${minutesBefore}M`, "END:VALARM");
+  });
+
   lines.push("END:VEVENT", "END:VCALENDAR");
   return lines.join("\r\n");
 }

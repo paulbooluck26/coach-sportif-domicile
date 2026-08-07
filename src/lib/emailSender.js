@@ -28,8 +28,9 @@ export async function envoyerEmail(evenement, destinataire, variables = {}) {
 
     const sujet = interpolate(template.sujet, variables);
     const body = interpolate(template.corps_texte, variables);
+    const html = template.corps_html ? interpolate(template.corps_html, variables) : undefined;
 
-    await base44.integrations.Core.SendEmail({ to: destinataire, subject: sujet, body });
+    await base44.integrations.Core.SendEmail({ to: destinataire, subject: sujet, body, html });
     return { sent: true, template, sujet, body };
   } catch (e) {
     return { sent: false, error: e?.message || "Erreur d'envoi" };

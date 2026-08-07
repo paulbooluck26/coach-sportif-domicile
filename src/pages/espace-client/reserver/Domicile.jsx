@@ -132,10 +132,29 @@ export default function Domicile() {
           </div>
           <button
             onClick={() => downloadICS({
-              title: `Séance Lab Forge — ${offre.titre}`,
+              title: `Séance PHYSIS COACHING — ${offre.titre}`,
               start: `${date}T${heure}:00`,
               durationMin: 60,
-              description: `Séance ${offre.titre} avec votre coach Lab Forge.`,
+              description: `🔥 Séance PHYSIS COACHING — Coaching à domicile
+Préparez-vous à donner le meilleur de vous-même 💪
+
+Avant la séance :
+• Prévoyez une tenue de sport confortable.
+• Préparez un espace suffisant pour bouger librement.
+• Gardez une bouteille d'eau à proximité.
+• Soyez prêt(e) quelques minutes avant le début de la séance.
+
+La régularité fait la progression : chaque séance est une étape de plus vers vos objectifs.
+
+Besoin d'annuler ou de reporter ?
+Merci de prévenir au minimum 24h à l'avance.
+
+📱 Contact :
+• Via votre espace client / application PHYSIS COACHING
+• Par téléphone ou SMS : 06 98 18 14 28
+
+À très bientôt pour votre séance 🔥
+Paul BOOLUCK - PHYSIS COACHING`,
               location: adresse || "Domicile",
             }, `seance-${date}.ics`)}
             className="inline-flex items-center justify-center gap-2 border border-border text-foreground px-6 py-3 rounded-xl font-medium text-sm w-full mb-3"

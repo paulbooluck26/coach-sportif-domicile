@@ -75,6 +75,7 @@ export async function reserverSeanceAvecCredit({ user, carnetId, date, heure, lo
     price: 0,
     status: "booked",
     location: location || "Domicile",
+    carnet_id: carnet.id,
   });
   const consommees = (carnet.nb_seances_consommees || 0) + 1;
   const restantes = Math.max(0, carnet.nb_seances_restantes - 1);

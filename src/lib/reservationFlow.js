@@ -28,7 +28,7 @@ export async function upsertClientProfile(user, extra = {}) {
 
 // Envoie l'email de confirmation (réservation, carnet ou programme) au
 // client, via le template configuré dans l'admin (EmailTemplate).
-export async function envoyerRecuPaiement({ email, prenom, prestation, date, heure, montant, evenement = "confirmation_reservation" }) {
+export async function envoyerRecuPaiement({ email, prenom, prestation, date, heure, montant, lieu, evenement = "confirmation_reservation" }) {
   if (!email) return;
   const dateStr = date ? parseDateLocal(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "";
   await envoyerEmail(evenement, email, {
@@ -36,11 +36,12 @@ export async function envoyerRecuPaiement({ email, prenom, prestation, date, heu
     prestation,
     date: dateStr,
     heure: heure || "",
+    lieu: lieu || "",
     montant,
   });
 }
 
-// Finalise une réservation de séance payante : Seance + Paiement + ClientProfile + email reçu.
+// Finalise une réservation de séance payante : Seance + Paiement + ClientProfile + emails (confirmation + reçu).
 export async function finaliserSeancePayante({ user, sessionType, date, heure, duree, prix, location, prestationLabel }) {
   const seance = await base44.entities.Seance.create({
     client_id: user.id,
@@ -64,7 +65,11 @@ export async function finaliserSeancePayante({ user, sessionType, date, heure, d
     date_paiement: todayStr(),
   });
   await upsertClientProfile(user, location ? { adresse: location } : {});
-  await envoyerRecuPaiement({ email: user.email, prenom: user.full_name?.split(" ")[0] || "", prestation: prestationLabel, date, heure, montant: prix });
+  const prenom = user.full_name?.split(" ")[0] || "";
+  // Deux emails distincts : la confirmation du rendez-vous, et le reçu de
+  // la transaction — ce sont deux besoins différents pour le client.
+  await envoyerRecuPaiement({ email: user.email, prenom, prestation: prestationLabel, date, heure, lieu: location, montant: prix, evenement: "confirmation_reservation" });
+  await envoyerRecuPaiement({ email: user.email, prenom, prestation: prestationLabel, date, heure, montant: prix, evenement: "recu_paiement" });
   return { seance, paiement };
 }
 

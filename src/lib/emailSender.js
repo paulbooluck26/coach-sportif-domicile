@@ -52,6 +52,7 @@ export function variablesDisponiblesPour(evenement) {
     achat_carnet: [...COMMON, "offre", "nb_seances", "montant"],
     achat_programme: [...COMMON, "programme", "duree_semaines", "montant"],
     appel_decouverte: [...COMMON, "date", "heure", "telephone"],
+    rappel_appel_decouverte: [...COMMON, "date", "heure", "telephone"],
     appel_demarrage: [...COMMON, "programme", "date", "heure", "telephone"],
     programme_disponible: [...COMMON, "programme", "duree_semaines"],
     rdv_modifie: [...COMMON, "prestation", "ancienne_date", "nouvelle_date", "heure"],

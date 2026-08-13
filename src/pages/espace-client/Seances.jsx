@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { listerCarnetsActifs, renouvelerAbonnementsSiBesoin } from "@/lib/carnetSeances";
 import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
 import ReservationCredit from "@/components/seances/ReservationCredit";
+import SeanceManageModal from "@/components/seances/SeanceManageModal";
 import { parseDateLocal } from "@/lib/creneaux";
 import { Link } from "react-router-dom";
 import { CalendarDays, Clock, MapPin, CheckCircle2, CalendarPlus, ShoppingBag, X, Flame } from "lucide-react";
@@ -22,6 +23,7 @@ export default function Seances() {
   const [profile, setProfile] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [showResa, setShowResa] = useState(false);
+  const [seanceGeree, setSeanceGeree] = useState(null);
 
   const load = async () => {
     if (!user) return;
@@ -131,15 +133,21 @@ export default function Seances() {
             <div className="space-y-2">
               {dayEvents.map((ev) => {
                 const badge = STATUT_BADGE[ev.data.status] || STATUT_BADGE.booked;
+                const gerable = ev.data.status === "booked" || ev.data.status === "rescheduled";
                 return (
-                  <div key={ev.data.id} className="flex items-center gap-3 p-3 bg-secondary/10 rounded-xl">
+                  <button
+                    key={ev.data.id}
+                    onClick={() => gerable && setSeanceGeree(ev.data)}
+                    disabled={!gerable}
+                    className={`w-full flex items-center gap-3 p-3 bg-secondary/10 rounded-xl text-left ${gerable ? "hover:bg-secondary/20 transition-colors" : "cursor-default"}`}
+                  >
                     <span className="text-xs font-semibold text-muted-foreground w-14">{ev.time}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground">{ev.titre}</p>
                       {ev.data.location && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" /> {ev.data.location}</p>}
                     </div>
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${badge.cls}`}>{badge.label}</span>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -153,6 +161,14 @@ export default function Seances() {
           adresse={profile?.adresse}
           onClose={() => setShowResa(false)}
           onReserved={() => { setShowResa(false); load(); }}
+        />
+      )}
+
+      {seanceGeree && (
+        <SeanceManageModal
+          seance={seanceGeree}
+          onClose={() => setSeanceGeree(null)}
+          onUpdated={load}
         />
       )}
     </div>

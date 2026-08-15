@@ -55,11 +55,17 @@ export default function CoachMessages() {
     userMap[u.id] = u;
   });
 
+  const profileMap = {};
+  clientProfiles.forEach((p) => {
+    if (p.user_id) profileMap[p.user_id] = p;
+  });
+  const nomComplet = (p) => [p?.prenom, p?.nom].filter(Boolean).join(" ") || p?.email || "Client";
+
   let clients = Object.values(clientsMap).map((c) => ({
     ...c,
     user: userMap[c.client_id],
     unread: unreadByClient[c.client_id] || 0,
-    name: userMap[c.client_id]?.full_name || userMap[c.client_id]?.email || c.client_id,
+    name: profileMap[c.client_id] ? nomComplet(profileMap[c.client_id]) : c.client_id,
   }));
   clients.sort((a, b) => new Date(b.lastDate) - new Date(a.lastDate));
 
@@ -287,9 +293,9 @@ export default function CoachMessages() {
                           onClick={() => { setPicked(p); setNewSearch(""); }}
                           className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-muted/50 text-left transition"
                         >
-                          <ClientAvatar name={p.nom} photoUrl={p.photo_url} size={40} />
+                          <ClientAvatar name={nomComplet(p)} photoUrl={p.photo_url} size={40} />
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-foreground truncate">{p.nom || "Sans nom"}</p>
+                            <p className="text-sm font-medium text-foreground truncate">{nomComplet(p)}</p>
                             <p className="text-xs text-muted-foreground truncate">{p.email}</p>
                           </div>
                         </button>
@@ -301,9 +307,9 @@ export default function CoachMessages() {
               {picked && (
                 <div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 mb-4">
-                    <ClientAvatar name={picked.nom} photoUrl={picked.photo_url} size={40} />
+                    <ClientAvatar name={nomComplet(picked)} photoUrl={picked.photo_url} size={40} />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-foreground truncate">{picked.nom || "Sans nom"}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{nomComplet(picked)}</p>
                       <p className="text-xs text-muted-foreground truncate">{picked.email}</p>
                     </div>
                     <button onClick={() => setPicked(null)} className="text-muted-foreground hover:text-foreground text-xs">Changer</button>

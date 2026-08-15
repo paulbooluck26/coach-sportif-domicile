@@ -46,7 +46,8 @@ export default function CoachProgrammes() {
 
   const save = async () => {
     const clientNames = form.client_ids.map(id => clients.find(c => c.user_id === id)?.nom).filter(Boolean).join(", ");
-    const payload = { ...form, client_names: clientNames };
+    const { date_debut, ...formSansDate } = form;
+    const payload = { ...formSansDate, client_names: clientNames };
     let programmeId;
     if (editing.id) {
       await base44.entities.Programme.update(editing.id, payload);

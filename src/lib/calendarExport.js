@@ -57,7 +57,7 @@ export function downloadICS(event, filename) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = filename || "seance-thelabforge.ics";
+  a.download = filename || "seance-PHYSISCOACHING.ics";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

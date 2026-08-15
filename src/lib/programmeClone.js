@@ -10,7 +10,7 @@ export async function cloneExercice(exercice, blocId) {
     intensity: exercice.intensity,
     media_url: exercice.media_url,
     description: exercice.description,
-    order: exercice.order,
+    ordre: exercice.ordre,
   });
 }
 
@@ -24,7 +24,7 @@ export async function cloneBloc(bloc, seanceId) {
     rest_between_rounds: bloc.rest_between_rounds,
     rest_between_rounds_unit: bloc.rest_between_rounds_unit,
   });
-  const exos = await base44.entities.Exercice.filter({ bloc_id: bloc.id }, "order");
+  const exos = await base44.entities.Exercice.filter({ bloc_id: bloc.id }, "ordre");
   for (const ex of exos) {
     await cloneExercice(ex, newBloc.id);
   }

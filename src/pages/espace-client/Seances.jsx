@@ -5,7 +5,7 @@ import { listerCarnetsActifs, renouvelerAbonnementsSiBesoin } from "@/lib/carnet
 import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
 import ReservationCredit from "@/components/seances/ReservationCredit";
 import SeanceManageModal from "@/components/seances/SeanceManageModal";
-import { parseDateLocal } from "@/lib/creneaux";
+import { parseDateLocal, typeLabelSeance as typeLabel } from "@/lib/creneaux";
 import { Link } from "react-router-dom";
 import { CalendarDays, Clock, MapPin, CheckCircle2, CalendarPlus, ShoppingBag, X, Flame } from "lucide-react";
 
@@ -175,9 +175,7 @@ export default function Seances() {
   );
 }
 
-function typeLabel(t) {
-  return { seance_individuelle: "Séance individuelle", programme_personnalise: "Programme personnalisé", evaluation: "Diagnostic FORGE", bilan_initial: "Bilan initial" }[t] || "Séance";
-}
+
 
 function formatPeriode(p) {
   const [y, m] = p.split("-").map(Number);

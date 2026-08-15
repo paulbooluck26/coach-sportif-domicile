@@ -49,7 +49,7 @@ export default function ClientDashboard() {
   const futureProgSeances = projections.filter(p => p.date > today && p.status === "a_venir");
   const allFuture = [
     ...futureHomeSeances.map(s => ({ type: "home", date: s.date, titre: typeLabel(s.session_type), lieu: s.location })),
-    ...futureProgSeances.map(p => ({ type: "prog", date: p.date, titre: p.seance.titre, lieu: "Autonomie" })),
+    ...futureProgSeances.map(p => ({ type: "prog", date: p.date, titre: p.seance.titre, lieu: "Autonomie", seanceId: p.seance.id })),
   ].sort((a, b) => a.date.localeCompare(b.date));
   const nextSession = allFuture[0];
 
@@ -127,7 +127,7 @@ export default function ClientDashboard() {
       {nextSession && (
         <div>
           <h2 className="font-heading text-lg font-semibold text-foreground mb-3">Prochaine séance</h2>
-          <div className="bg-card border border-border rounded-2xl p-5">
+          <Link to={nextSession.type === "home" ? "/espace-client/seances" : `/espace-client/seance/${nextSession.seanceId}`} className="block bg-card border border-border rounded-2xl p-5 hover:border-accent/40 transition-colors">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center flex-shrink-0">
                 <CalendarDays className="w-6 h-6 text-secondary" />
@@ -146,7 +146,7 @@ export default function ClientDashboard() {
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </div>
-          </div>
+          </Link>
         </div>
       )}
 
@@ -166,7 +166,7 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-2 gap-3">
         <Link to="/espace-client/seances" className="bg-secondary/10 border border-secondary/20 rounded-2xl p-4 text-center hover:border-secondary/40 transition-colors">
           <CalendarDays className="w-6 h-6 text-secondary mx-auto mb-2" />
-          <p className="text-sm font-semibold text-foreground">Séances</p>
+          <p className="text-sm font-semibold text-foreground">Séances à domicile</p>
         </Link>
         <Link to="/espace-client/programme" className="bg-secondary/10 border border-secondary/20 rounded-2xl p-4 text-center hover:border-secondary/40 transition-colors">
           <Dumbbell className="w-6 h-6 text-secondary mx-auto mb-2" />

@@ -7,6 +7,18 @@ function toHtml(html) {
   return isHtml ? html : html.replace(/\n/g, "<br/>");
 }
 
+// Convertit un lien YouTube/Vimeo classique en URL "embed" utilisable dans
+// un iframe. Retourne null si ce n'est pas reconnu (dans ce cas on tente
+// une lecture directe via <video>, pour les fichiers mp4/webm par exemple).
+function toEmbedUrl(url) {
+  if (!url) return null;
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  const vimeo = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  return null;
+}
+
 export default function BiblioMouvementFiche({ mouvement, mouvements = [], onBack, onSelectMouvement }) {
   const m = mouvement;
 
@@ -54,7 +66,21 @@ export default function BiblioMouvementFiche({ mouvement, mouvements = [], onBac
         {m.materiel?.length > 0 && <Info icon={Wrench} label="Matériel nécessaire" value={m.materiel.join(", ")} />}
       </div>
 
-      {m.video_url && <video src={m.video_url} controls className="w-full rounded-2xl mb-6" />}
+      {m.video_url && (
+        toEmbedUrl(m.video_url) ? (
+          <div className="w-full rounded-2xl overflow-hidden mb-6" style={{ aspectRatio: "16/9" }}>
+            <iframe
+              src={toEmbedUrl(m.video_url)}
+              title={m.nom}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            />
+          </div>
+        ) : (
+          <video src={m.video_url} controls className="w-full rounded-2xl mb-6" />
+        )
+      )}
 
       {m.description && (
         <Section icon={Dumbbell} title="Exécution">

@@ -16,7 +16,7 @@ export default function ClientLayout() {
       <header className="bg-primary text-primary-foreground sticky top-0 z-30">
         <div className="max-w-md mx-auto px-5 h-14 flex items-center justify-between">
           <Link to="/espace-client" className="font-heading font-bold text-base tracking-tight">
-            THE LAB FORGE
+            PHYSIS COACHING
           </Link>
           <NotificationsBell />
         </div>

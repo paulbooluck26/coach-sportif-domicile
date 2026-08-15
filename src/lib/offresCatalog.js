@@ -1,4 +1,4 @@
-// Catalogue des offres The Lab Forge — source de vérité unique pour les règles commerciales.
+// Catalogue des offres PHYSIS COACHING — source de vérité unique pour les règles commerciales.
 // Modifier ce fichier pour faire évoluer les règles sans toucher au code métier.
 
 export const OFFRES = {
@@ -34,7 +34,7 @@ export const OFFRES = {
   },
 };
 
-// Types de parcours The Lab Forge (extensible).
+// Types de parcours PHYSIS COACHING (extensible).
 export const TYPES_PARCOURS = [
   { id: "transformation", label: "Transformation" },
   { id: "performance", label: "Performance" },
@@ -56,7 +56,7 @@ export const REGLE_CREDIT = {
   applique_si_offre_immédiate: true, // crédit uniquement vers le niveau immédiatement supérieur
 };
 
-// Étiquettes de statut de cycle (pour l'affichage "Parcours The Lab Forge").
+// Étiquettes de statut de cycle (pour l'affichage "Parcours PHYSIS COACHING").
 export const STATUT_CYCLE = {
   en_attente_programme: { label: "En attente de programme", couleur: "muted" },
   a_venir: { label: "À venir", couleur: "accent" },

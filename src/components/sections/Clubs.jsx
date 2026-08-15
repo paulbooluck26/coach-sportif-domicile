@@ -51,7 +51,7 @@ export default function Clubs() {
             </div>
             <h3 className="text-xl font-heading font-semibold text-primary-foreground mb-2">Performance Online</h3>
             <p className="text-sm text-primary-foreground/60 leading-relaxed mb-4">
-              Programmation personnalisée à distance, accès à l'application The Lab Forge, suivi des performances et ajustements réguliers.
+              Programmation personnalisée à distance, accès à l'application PHYSIS COACHING, suivi des performances et ajustements réguliers.
             </p>
             <p className="text-sm font-semibold text-secondary">Sur devis</p>
           </div>

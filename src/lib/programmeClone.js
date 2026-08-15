@@ -60,3 +60,49 @@ export async function cloneSemaine(semaine, programmeId, newNumero, phaseId) {
   }
   return newSem;
 }
+
+/**
+ * Duplique un programme entier (phases, semaines, séances, blocs, exercices)
+ * vers un nouveau programme — utilisé pour déployer un modèle de
+ * bibliothèque vers un client réel.
+ */
+export async function cloneProgramme(programme, overrides = {}) {
+  const newProgramme = await base44.entities.Programme.create({
+    name: programme.name,
+    duration_weeks: programme.duration_weeks,
+    objective: programme.objective,
+    description: programme.description,
+    offre: programme.offre,
+    statut: "brouillon",
+    est_modele: false,
+    client_ids: [],
+    client_names: "",
+    ...overrides,
+  });
+
+  const phases = await base44.entities.Phase.filter({ programme_id: programme.id }, "ordre");
+  if (phases.length > 0) {
+    for (const phase of phases) {
+      const newPhase = await base44.entities.Phase.create({
+        programme_id: newProgramme.id,
+        nom: phase.nom,
+        description: phase.description,
+        ordre: phase.ordre,
+        nb_semaines: phase.nb_semaines,
+        couleur: phase.couleur,
+      });
+      const semaines = await base44.entities.Semaine.filter({ programme_id: programme.id, phase_id: phase.id });
+      for (const sem of semaines) {
+        await cloneSemaine(sem, newProgramme.id, sem.numero, newPhase.id);
+      }
+    }
+  } else {
+    // Programme sans phases (semaines directement rattachées au programme).
+    const semaines = await base44.entities.Semaine.filter({ programme_id: programme.id });
+    for (const sem of semaines) {
+      await cloneSemaine(sem, newProgramme.id, sem.numero, null);
+    }
+  }
+
+  return newProgramme;
+}

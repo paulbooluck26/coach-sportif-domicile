@@ -17,7 +17,6 @@ import Register from '@/pages/site-web/Register';
 import Reservation from '@/pages/espace-client/Reservation';
 import AppelDecouverte from '@/pages/site-web/AppelDecouverte';
 import ClientDashboard from '@/pages/espace-client/ClientDashboard';
-import Reserver from '@/pages/espace-client/Reserver';
 import ReserverDomicile from '@/pages/espace-client/reserver/Domicile';
 import ReserverProgramme from '@/pages/espace-client/reserver/Programme';
 import ReserverAppel from '@/pages/espace-client/reserver/Appel';
@@ -86,7 +85,6 @@ const AuthenticatedApp = () => {
           <Route path="/espace-client" element={<ClientDashboard />} />
           <Route path="/espace-client/programme" element={<MonProgramme />} />
           <Route path="/espace-client/bilan-initial" element={<BilanInitial />} />
-          <Route path="/espace-client/reserver" element={<Reserver />} />
           <Route path="/espace-client/reserver/domicile" element={<ReserverDomicile />} />
           <Route path="/espace-client/reserver/programme" element={<ReserverProgramme />} />
           <Route path="/espace-client/reserver/appel" element={<ReserverAppel />} />

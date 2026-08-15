@@ -6,7 +6,8 @@ import { CheckCircle2, X } from "lucide-react";
 // perfData (accumulé durant la séance et pré-chargé depuis l'exécution précédente).
 export default function ExecutionPerfCapture({ bloc, exercices, perfData, onPerfChange, onValidate, onExit, isLastRound, isLastBloc }) {
   const exos = exercices || [];
-  const bouton = isLastBloc ? "Terminer la séance" : "Lancer le repos";
+  const isVraimentLaFin = isLastBloc && isLastRound;
+  const bouton = isVraimentLaFin ? "Terminer la séance" : "Lancer le repos";
 
   return (
     <div className="fixed inset-0 z-50 bg-primary text-primary-foreground flex flex-col overflow-y-auto">
@@ -72,7 +73,7 @@ export default function ExecutionPerfCapture({ bloc, exercices, perfData, onPerf
         >
           <CheckCircle2 className="w-5 h-5" /> {bouton}
         </button>
-        {!isLastBloc && (
+        {!isVraimentLaFin && (
           <p className="text-center text-xs text-primary-foreground/40 mt-3">
             {isLastRound ? "Le repos entre les blocs démarrera automatiquement." : "Le repos entre les tours démarrera automatiquement."}
           </p>

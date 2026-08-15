@@ -8,16 +8,18 @@ export default function CoachDashboard() {
   const [seances, setSeances] = useState(null);
   const [paiements, setPaiements] = useState(null);
   const [clients, setClients] = useState(null);
+  const [commandes, setCommandes] = useState(null);
 
   useEffect(() => {
     const load = async () => {
-      const [d, s, p, c] = await Promise.all([
+      const [d, s, p, c, cmd] = await Promise.all([
         base44.entities.DemandeContact.list("-created_date", 50),
         base44.entities.Seance.list("date"),
         base44.entities.Paiement.list("-date_paiement", 50),
         base44.entities.ClientProfile.list("-created_date", 50),
+        base44.entities.CommandeProgramme.list("-created_date", 50),
       ]);
-      setDemandes(d); setSeances(s); setPaiements(p); setClients(c);
+      setDemandes(d); setSeances(s); setPaiements(p); setClients(c); setCommandes(cmd);
     };
     load().catch(() => {});
   }, []);
@@ -27,6 +29,7 @@ export default function CoachDashboard() {
   const today = new Date().toISOString().slice(0, 10);
   const aVenir = seances.filter(s => s.date >= today && s.status !== "cancelled" && s.status !== "completed");
   const nouvellesDemandes = demandes.filter(d => d.statut === "nouveau");
+  const commandesATraiter = (commandes || []).filter(c => (c.statut || "en_preparation") === "en_preparation");
   const revenuMois = paiements.filter(p => p.status === "paid" && p.date_paiement && new Date(p.date_paiement).getMonth() === new Date().getMonth()).reduce((sum, p) => sum + (p.amount || 0), 0);
 
   const stats = [
@@ -99,6 +102,28 @@ export default function CoachDashboard() {
                   <p className="font-medium text-foreground text-sm">{d.name}</p>
                   <p className="text-xs text-muted-foreground truncate">{d.goal || d.message}</p>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-heading text-lg font-semibold text-foreground">Commandes à traiter</h2>
+            <Link to="/admin/commandes" className="text-sm text-accent hover:underline">Voir tout →</Link>
+          </div>
+          {commandesATraiter.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">Aucune commande en attente.</p>
+          ) : (
+            <div className="space-y-3">
+              {commandesATraiter.slice(0, 5).map(c => (
+                <Link key={c.id} to={`/admin/programmes?client_id=${c.client_id}&duree=${c.duree_semaines}&commande_id=${c.id}`} className="flex items-center justify-between py-2 hover:opacity-70 transition-opacity">
+                  <div>
+                    <p className="font-medium text-foreground text-sm">{c.client_nom || "Client"}</p>
+                    <p className="text-xs text-muted-foreground">{c.offre?.toUpperCase()} · {c.duree_semaines} semaines</p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                </Link>
               ))}
             </div>
           )}

@@ -15,7 +15,7 @@ export default function ForgeHero({ onCommencer, onVoirOffres }) {
 
       <div className="relative z-10 mx-auto max-w-4xl px-6 pt-32 pb-20 text-center text-primary-foreground">
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-secondary mb-6 animate-fade-up">
-          Coaching à domicile · The Lab Forge
+          Coaching à domicile · PHYSIS COACHING
         </p>
         <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-bold tracking-display mb-6 animate-fade-up">
           Coaching sportif à domicile

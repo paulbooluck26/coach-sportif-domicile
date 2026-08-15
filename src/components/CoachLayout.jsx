@@ -1,24 +1,56 @@
+import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
+import { base44 } from "@/api/base44Client";
 import { LayoutDashboard, Users, CalendarDays, Dumbbell, Inbox, CreditCard, LogOut, Home, Clock, ShoppingBag, MessageCircle, Mail, Library } from "lucide-react";
 
 const nav = [
   { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
-  { to: "/admin/demandes", label: "Demandes", icon: Inbox },
-  { to: "/admin/messages", label: "Messages", icon: MessageCircle },
+  { to: "/admin/demandes", label: "Demandes", icon: Inbox, badgeKey: "demandes" },
+  { to: "/admin/messages", label: "Messages", icon: MessageCircle, badgeKey: "messages" },
   { to: "/admin/seances", label: "Agenda", icon: CalendarDays },
   { to: "/admin/clients", label: "Clients", icon: Users },
   { to: "/admin/programmes", label: "Programmes", icon: Dumbbell },
-  { to: "/admin/commandes", label: "Commandes", icon: ShoppingBag },
+  { to: "/admin/commandes", label: "Commandes", icon: ShoppingBag, badgeKey: "commandes" },
   { to: "/admin/disponibilites", label: "Disponibilités", icon: Clock },
   { to: "/admin/paiements", label: "Paiements", icon: CreditCard },
   { to: "/admin/emails", label: "Emails", icon: Mail },
   { to: "/admin/bibliotheque", label: "Bibliothèque", icon: Library },
 ];
 
+function Badge({ count }) {
+  if (!count) return null;
+  return (
+    <span className="ml-auto bg-secondary text-secondary-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center flex-shrink-0">
+      {count > 9 ? "9+" : count}
+    </span>
+  );
+}
+
 export default function CoachLayout() {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [counts, setCounts] = useState({});
+
+  useEffect(() => {
+    const loadCounts = async () => {
+      try {
+        const [demandes, commandes, messages] = await Promise.all([
+          base44.entities.DemandeContact.filter({ statut: "nouveau" }),
+          base44.entities.CommandeProgramme.list("-created_date", 200),
+          base44.entities.Message.filter({ sender: "client", lu: false }),
+        ]);
+        setCounts({
+          demandes: demandes.length,
+          commandes: commandes.filter((c) => (c.statut || "en_preparation") === "en_preparation").length,
+          messages: messages.length,
+        });
+      } catch {}
+    };
+    loadCounts();
+    const interval = setInterval(loadCounts, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   const isActive = (item) =>
     item.exact ? location.pathname === item.to : location.pathname.startsWith(item.to);
@@ -45,6 +77,7 @@ export default function CoachLayout() {
               >
                 <Icon className="w-4 h-4" />
                 {item.label}
+                {item.badgeKey && <Badge count={counts[item.badgeKey]} />}
               </Link>
             );
           })}
@@ -71,6 +104,7 @@ export default function CoachLayout() {
             return (
               <Link key={item.to} to={item.to} className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium whitespace-nowrap ${isActive(item) ? "bg-accent text-accent-foreground" : "text-primary-foreground/70"}`}>
                 <Icon className="w-3.5 h-3.5" /> {item.label}
+                {item.badgeKey && <Badge count={counts[item.badgeKey]} />}
               </Link>
             );
           })}

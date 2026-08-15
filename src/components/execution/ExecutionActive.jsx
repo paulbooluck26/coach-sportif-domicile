@@ -4,7 +4,7 @@ import { Pause, Play, SkipForward, SkipBack, X, Clock } from "lucide-react";
 export default function ExecutionActive({
   execState, currentBloc, currentExercise, totalRounds, totalBlocs, totalExercises,
   restBetweenRoundsSecs, onNext, onPrev, onTogglePause, onExit,
-  perfData, onPerfChange
+  perfData, onPerfChange, nextBloc
 }) {
   const { phase, round, exerciseIndex, restRemaining, exerciseTimeRemaining, isPaused } = execState;
   const blocTitle = currentBloc?.titre || `Bloc ${execState.blocIndex + 1}`;
@@ -32,10 +32,10 @@ export default function ExecutionActive({
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6">
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center px-6 py-6">
         {phase === "exercise" && (
           <div className="text-center max-w-lg">
-            {currentExercise?.media_url && <img src={currentExercise.media_url} alt={currentExercise?.name} className="w-full max-w-sm h-48 object-cover rounded-xl mb-6" />}
+            {currentExercise?.media_url && <img src={currentExercise.media_url} alt={currentExercise?.name} className="w-full max-w-sm h-48 object-contain bg-primary-foreground/5 rounded-xl mb-6" />}
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-3">Exercice en cours</p>
             <h1 className="font-heading text-4xl md:text-5xl font-bold mb-6">{currentExercise?.name}</h1>
             <div className="mb-6">
@@ -76,6 +76,19 @@ export default function ExecutionActive({
                 <span className="text-xs uppercase tracking-[0.2em] text-primary-foreground/50 mt-3">secondes</span>
               </div>
             </div>
+            {phase === "rest_between_blocs" && nextBloc?.exercices?.length > 0 && (
+              <div className="mt-4 w-full max-w-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-3 text-center">À suivre — {nextBloc.titre || "prochain bloc"}</p>
+                <div className="space-y-1.5">
+                  {nextBloc.exercices.map((ex, i) => (
+                    <div key={ex.id || i} className="flex items-center gap-2 bg-primary-foreground/5 rounded-lg px-3 py-2">
+                      <span className="w-5 h-5 rounded bg-secondary/20 text-secondary flex items-center justify-center text-[10px] font-bold flex-shrink-0">{i + 1}</span>
+                      <p className="text-sm text-primary-foreground/80 truncate">{ex.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

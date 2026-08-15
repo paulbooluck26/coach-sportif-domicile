@@ -36,8 +36,8 @@ export default function ProgrammeCallBooking({ programmeNom, userEmail, userName
       try {
         await base44.integrations.Core.SendEmail({
           to: userEmail,
-          subject: "Confirmation de votre appel de démarrage — The Lab Forge",
-          body: `Bonjour,\n\nVotre appel de démarrage pour le programme ${programmeNom} est programmé le ${new Date(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} à ${heure}.\n\nVotre coach vous contactera au numéro indiqué.\n\nÀ très vite,\nThe Lab Forge`,
+          subject: "Confirmation de votre appel de démarrage — PHYSIS COACHING",
+          body: `Bonjour,\n\nVotre appel de démarrage pour le programme ${programmeNom} est programmé le ${new Date(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} à ${heure}.\n\nVotre coach vous contactera au numéro indiqué.\n\nÀ très vite,\nPHYSIS COACHING`,
         });
       } catch {}
       setDone(true);

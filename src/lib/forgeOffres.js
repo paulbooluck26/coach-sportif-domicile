@@ -1,4 +1,4 @@
-// Source de vérité des offres "Coaching à domicile" — The Lab Forge.
+// Source de vérité des offres "Coaching à domicile" — PHYSIS COACHING.
 // Prépare la future connexion avec les offres commerciales (catalogue backend).
 // Champs `categorie` : "diagnostic" | "accompagnement" | "abonnement" | "secondaire".
 

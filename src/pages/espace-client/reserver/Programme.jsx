@@ -5,7 +5,9 @@ import { finaliserAchatProgramme } from "@/lib/reservationFlow";
 import { useCreneaux } from "@/hooks/useCreneaux";
 import { creneauxDisponibles, dateStr, parseDateLocal } from "@/lib/creneaux";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, CheckCircle2, Loader2, Sparkles, Check, Lock, Phone, Video } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle2, Loader2, Sparkles, Check, Lock, Phone, Video, CalendarPlus } from "lucide-react";
+import { downloadICS } from "@/lib/calendarExport";
+import { envoyerEmail } from "@/lib/emailSender";
 
 const OFFRES = [
   { id: "start", nom: "START", duree: 4, prix: 49, desc: "Construire de bonnes bases et reprendre une routine efficace.", inclus: ["Programme adapté à votre objectif", "Exercices expliqués en vidéo", "Appel de démarrage"] },
@@ -96,6 +98,16 @@ export default function Programme() {
         location: canal === "telephone" ? `Appel téléphonique — ${telephone}` : "Appel visio",
         canal,
       });
+      const dateStrFr = parseDateLocal(dateAppel).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+      try {
+        await envoyerEmail("confirmation_reservation", user.email, {
+          client_prenom: user.full_name?.split(" ")[0] || "",
+          prestation: "Appel de bilan — programme " + (offre?.nom || ""),
+          date: dateStrFr,
+          heure: heureAppel,
+          lieu: canal === "telephone" ? `Appel téléphonique au ${telephone}` : "Appel en visio (lien envoyé avant l'appel)",
+        });
+      } catch (_) {}
       setAppelConfirme(true);
     } catch (e) {
       alert("Erreur lors de la réservation de l'appel. Vous pourrez le faire depuis votre espace.");
@@ -112,6 +124,18 @@ export default function Programme() {
             <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-5"><CheckCircle2 className="w-8 h-8 text-accent" /></div>
             <h2 className="font-heading text-2xl font-bold text-foreground mb-2">Tout est prêt</h2>
             <p className="text-foreground/60 mb-6">Votre appel de bilan est réservé pour le {parseDateLocal(dateAppel).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} à {heureAppel}. Votre coach l'utilisera pour construire votre programme.</p>
+            <button
+              onClick={() => downloadICS({
+                title: `Appel de bilan PHYSIS COACHING — Programme ${offre?.nom || ""}`,
+                start: `${dateAppel}T${heureAppel}:00`,
+                durationMin: 60,
+                description: `Appel de bilan (${canal === "telephone" ? `téléphonique au ${telephone}` : "en visio"}) avec votre coach pour construire votre programme ${offre?.nom || ""}.\n\nContact : 06 98 18 14 28\n\nPaul BOOLUCK - PHYSIS COACHING`,
+                location: canal === "telephone" ? "Appel téléphonique" : "Appel visio",
+              }, `appel-bilan-${dateAppel}.ics`)}
+              className="inline-flex items-center justify-center gap-2 border border-border text-foreground px-6 py-3 rounded-xl font-medium text-sm w-full mb-3"
+            >
+              <CalendarPlus className="w-4 h-4" /> Ajouter à mon calendrier
+            </button>
             <Link to="/espace-client/programme" className="bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm inline-block">Mon espace</Link>
           </div>
         </div>
@@ -239,6 +263,9 @@ export default function Programme() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-1">Programmes en ligne</p>
         <h1 className="font-heading text-3xl font-bold text-foreground">Choisir un programme</h1>
         <p className="text-sm text-muted-foreground mt-2">Chaque programme est préparé sur mesure par votre coach après votre achat.</p>
+        <p className="text-sm text-foreground/70 mt-3 leading-relaxed">
+          Après votre achat, vous réservez un <strong>appel de bilan</strong> (téléphone ou visio) pour faire le point sur vos objectifs. Votre coach construit ensuite votre programme, disponible sous une semaine environ dans votre espace de suivi. Vous pourrez y consulter vos séances, suivre votre progression et échanger directement avec votre coach via la messagerie.
+        </p>
       </div>
 
       <div className="space-y-3">

@@ -310,6 +310,7 @@ export default function SessionExecution() {
       totalBlocs={sessionData.blocs.length}
       totalExercises={currentBloc?.exercices?.length || 0}
       restBetweenRoundsSecs={restBetweenRoundsSecs}
+      nextBloc={sessionData.blocs[execState.blocIndex + 1]}
       onNext={handleNext}
       onPrev={handlePrev}
       onTogglePause={togglePause}

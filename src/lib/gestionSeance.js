@@ -1,6 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { envoyerEmail } from "@/lib/emailSender";
-import { parseDateLocal } from "@/lib/creneaux";
+import { parseDateLocal, typeLabelSeance as typeLabel } from "@/lib/creneaux";
 
 /**
  * Règles métier :
@@ -96,8 +96,4 @@ export async function deplacerSeance({ seance, user, nouvelleDate, nouvelleHeure
     nouvelle_date: nouvelleDateStr,
     heure: nouvelleHeure,
   });
-}
-
-function typeLabel(t) {
-  return { seance_individuelle: "Séance individuelle", programme_personnalise: "Programme personnalisé", evaluation: "Diagnostic FORGE", bilan_initial: "Bilan initial" }[t] || "Séance";
 }

@@ -308,7 +308,7 @@ export default function BilanInitial() {
 
         {step === 7 && (
           <div className="space-y-4">
-            <Field label="Qu'attendez-vous de votre accompagnement avec The Lab Forge ?" full><textarea rows={3} className={inputCls} value={bilan.attentes_accompagnement} onChange={(e) => set("attentes_accompagnement", e.target.value)} /></Field>
+            <Field label="Qu'attendez-vous de votre accompagnement avec PHYSIS COACHING ?" full><textarea rows={3} className={inputCls} value={bilan.attentes_accompagnement} onChange={(e) => set("attentes_accompagnement", e.target.value)} /></Field>
             <Field label="Qu'est-ce qui pourrait vous dire dans quelques mois que cet accompagnement est une réussite ?" full><textarea rows={3} className={inputCls} value={bilan.critere_reussite} onChange={(e) => set("critere_reussite", e.target.value)} /></Field>
           </div>
         )}

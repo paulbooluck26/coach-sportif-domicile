@@ -17,7 +17,7 @@ export default function Footer() {
             <p className="text-xs font-semibold tracking-label text-secondary mb-4">Navigation</p>
             <div className="flex flex-col gap-3">
               <Link to="/" className="text-sm text-primary-foreground/70 hover:text-secondary transition-colors">Accueil</Link>
-              <Link to="/reservation" className="text-sm text-primary-foreground/70 hover:text-secondary transition-colors">Réserver</Link>
+              <Link to="/reserver" className="text-sm text-primary-foreground/70 hover:text-secondary transition-colors">Réserver</Link>
               <Link to="/login" className="text-sm text-primary-foreground/70 hover:text-secondary transition-colors">Espace client</Link>
               <Link to="/admin" className="text-sm text-primary-foreground/70 hover:text-secondary transition-colors">Espace coach</Link>
             </div>

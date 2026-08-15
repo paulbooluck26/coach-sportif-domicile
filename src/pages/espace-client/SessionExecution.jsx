@@ -102,7 +102,7 @@ export default function SessionExecution() {
           return { ...prev, phase: "perf_capture", restRemaining: 0, exerciseTimeRemaining: null };
         } else {
           const exercise = exercises[prev.exerciseIndex];
-          const restSecs = exercise?.rest_seconds || bloc.repos_entre_exercices || 60;
+          const restSecs = exercise?.rest_seconds ?? bloc.repos_entre_exercices ?? 60;
           playBeep();
           return { ...prev, phase: "rest", restRemaining: restSecs, exerciseTimeRemaining: null };
         }

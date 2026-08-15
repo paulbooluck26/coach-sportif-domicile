@@ -53,7 +53,7 @@ export default function AchatProgramme() {
       <div className="min-h-screen bg-background">
         {/* Header */}
         <header className="absolute top-0 inset-x-0 z-20 px-6 py-5 flex items-center justify-between">
-          <Link to="/" className="font-heading text-xl font-bold text-white">The Lab Forge</Link>
+          <Link to="/" className="font-heading text-xl font-bold text-white">PHYSIS COACHING</Link>
           <button onClick={() => navigate("/")} className="text-sm font-medium text-white/70 hover:text-white border border-white/20 px-4 py-1.5 rounded-md hover:bg-white/10 transition-colors">Retour à l'accueil</button>
         </header>
 
@@ -75,12 +75,12 @@ export default function AchatProgramme() {
           </div>
         </section>
 
-        {/* Pourquoi The Lab Forge */}
+        {/* Pourquoi PHYSIS COACHING */}
         <section className="py-20 px-6">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-2">La méthode The Lab Forge</p>
-              <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground">Pourquoi The Lab Forge ?</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-2">La méthode PHYSIS COACHING</p>
+              <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground">Pourquoi PHYSIS COACHING ?</h2>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {POURQUOI.map((p) => {
@@ -158,7 +158,7 @@ export default function AchatProgramme() {
         <section className="py-16 px-6 bg-primary text-center">
           <div className="max-w-2xl mx-auto">
             <h2 className="font-heading text-2xl md:text-3xl font-bold text-primary-foreground mb-4">Prêt à transformer votre entraînement ?</h2>
-            <p className="text-primary-foreground/70 mb-8">Rejoignez The Lab Forge et bénéficiez d'un accompagnement humain, où que vous soyez.</p>
+            <p className="text-primary-foreground/70 mb-8">Rejoignez PHYSIS COACHING et bénéficiez d'un accompagnement humain, où que vous soyez.</p>
             <a href="#offres" className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-8 py-4 rounded-full font-semibold hover:scale-105 transition-transform">
               Voir les programmes <ArrowRight className="w-5 h-5" />
             </a>

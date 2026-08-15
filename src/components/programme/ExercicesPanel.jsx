@@ -8,6 +8,7 @@ export default function ExercicesPanel({ blocId }) {
   const [items, setItems] = useState(null);
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ name: "", reps: "12", rest_seconds: 60, intensity: "", media_url: "", description: "" });
+  const [reposUnite, setReposUnite] = useState("secondes"); // secondes | minutes — juste pour l'affichage, converti avant sauvegarde
   const [editId, setEditId] = useState(null);
   const [uploading, setUploading] = useState(false);
 
@@ -28,9 +29,9 @@ export default function ExercicesPanel({ blocId }) {
   const submit = async () => {
     if (editId) { await base44.entities.Exercice.update(editId, form); setEditId(null); }
     else { await base44.entities.Exercice.create({ ...form, bloc_id: blocId, ordre: items?.length || 0 }); }
-    setAdding(false); setForm({ name: "", reps: "12", rest_seconds: 60, intensity: "", media_url: "", description: "" }); load();
+    setAdding(false); setForm({ name: "", reps: "12", rest_seconds: 60, intensity: "", media_url: "", description: "" }); setReposUnite("secondes"); load();
   };
-  const edit = (ex) => { setEditId(ex.id); setForm({ name: ex.name, reps: ex.reps || "", rest_seconds: ex.rest_seconds || 60, intensity: ex.intensity || "", media_url: ex.media_url || "", description: ex.description || "" }); setAdding(true); };
+  const edit = (ex) => { setEditId(ex.id); setForm({ name: ex.name, reps: ex.reps || "", rest_seconds: ex.rest_seconds ?? 60, intensity: ex.intensity || "", media_url: ex.media_url || "", description: ex.description || "" }); setReposUnite("secondes"); setAdding(true); };
   const remove = async (id) => { await base44.entities.Exercice.delete(id); load(); };
   const duplicate = async (ex) => { await cloneExercice(ex, blocId); load(); };
 
@@ -58,7 +59,41 @@ export default function ExercicesPanel({ blocId }) {
           <div><label className="block text-xs font-medium text-muted-foreground mb-1">Nom de l'exercice</label><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ex: Squat, Pompes, Gainage" className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><label className="block text-xs font-medium text-muted-foreground mb-1">Répétitions</label><input value={form.reps} onChange={e => setForm({ ...form, reps: e.target.value })} placeholder="12 ou 30s" className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
-            <div><label className="block text-xs font-medium text-muted-foreground mb-1">Repos (sec)</label><input type="number" value={form.rest_seconds} onChange={e => setForm({ ...form, rest_seconds: parseInt(e.target.value) || 60 })} className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Repos</label>
+              <div className="flex items-center gap-2 mb-1.5">
+                <input
+                  type="checkbox"
+                  id="pas-de-repos"
+                  checked={form.rest_seconds === 0}
+                  onChange={(e) => setForm({ ...form, rest_seconds: e.target.checked ? 0 : 60 })}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="pas-de-repos" className="text-xs text-muted-foreground">Aucun (enchaînement direct)</label>
+              </div>
+              {form.rest_seconds !== 0 && (
+                <div className="flex gap-1.5">
+                  <input
+                    type="number"
+                    min="0"
+                    value={reposUnite === "minutes" ? Math.round((form.rest_seconds || 0) / 60) : (form.rest_seconds || "")}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      setForm({ ...form, rest_seconds: reposUnite === "minutes" ? val * 60 : val });
+                    }}
+                    className="flex-1 border border-border rounded-md px-3 py-2 text-sm"
+                  />
+                  <select
+                    value={reposUnite}
+                    onChange={(e) => setReposUnite(e.target.value)}
+                    className="border border-border rounded-md px-2 py-2 text-sm bg-card"
+                  >
+                    <option value="secondes">sec</option>
+                    <option value="minutes">min</option>
+                  </select>
+                </div>
+              )}
+            </div>
           </div>
           <div><label className="block text-xs font-medium text-muted-foreground mb-1">Intensité (optionnel)</label><input value={form.intensity} onChange={e => setForm({ ...form, intensity: e.target.value })} placeholder={`Ex: "à 100%", "2 RIR", "à l'échec"`} className="w-full border border-border rounded-md px-3 py-2 text-sm" /></div>
           <div>
@@ -101,7 +136,7 @@ export default function ExercicesPanel({ blocId }) {
                             <span className="w-7 h-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-sm flex-shrink-0">{index + 1}</span>
                             <div className="flex-1 min-w-0">
                               <p className="font-heading font-semibold text-foreground">{ex.name}</p>
-                              <p className="text-sm text-muted-foreground">{ex.reps} · {ex.rest_seconds}s repos{ex.intensity ? ` · ${ex.intensity}` : ""}</p>
+                              <p className="text-sm text-muted-foreground">{ex.reps} · {ex.rest_seconds === 0 ? "aucun repos" : `${ex.rest_seconds >= 60 ? `${Math.round(ex.rest_seconds / 60)}min` : `${ex.rest_seconds}s`} repos`}{ex.intensity ? ` · ${ex.intensity}` : ""}</p>
                               {ex.description && <p className="text-sm text-foreground/60 mt-1">{ex.description}</p>}
                               {ex.media_url && <img src={ex.media_url} alt={ex.name} className="h-20 w-auto rounded-md mt-2" />}
                             </div>

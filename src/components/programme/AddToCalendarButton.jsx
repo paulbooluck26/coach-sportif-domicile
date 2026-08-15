@@ -8,7 +8,7 @@ export default function AddToCalendarButton({ seance, date, dureeMin, programmeN
   if (!seance || !date) return null;
 
   const handleAdd = () => {
-    const titre = `The Lab Forge - ${seance.titre || "Séance"}`;
+    const titre = `PHYSIS COACHING - ${seance.titre || "Séance"}`;
     const parts = [];
     if (programmeName) parts.push(`Programme : ${programmeName}`);
     if (seance.objectif || seance.description) parts.push(`Objectif : ${seance.objectif || seance.description}`);

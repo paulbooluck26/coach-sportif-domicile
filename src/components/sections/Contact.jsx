@@ -42,7 +42,7 @@ export default function Contact() {
               <span className="font-semibold text-primary">Téléphone :</span> 06 12 34 56 78
             </p>
             <p className="text-muted-foreground">
-              <span className="font-semibold text-primary">Email :</span> contact@thelabforge.fr
+              <span className="font-semibold text-primary">Email :</span> contact@PHYSISCOACHING.fr
             </p>
             <p className="text-muted-foreground">
               <span className="font-semibold text-primary">Zone :</span> Colmar et alentours (Haut-Rhin)

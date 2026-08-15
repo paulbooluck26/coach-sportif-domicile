@@ -34,7 +34,7 @@ export default function SessionExecution() {
         const blocs = await base44.entities.Bloc.filter({ seance_programme_id: seanceId }, "ordre");
         const blocsWithEx = await Promise.all(
           blocs.map(async (b) => {
-            const exercices = await base44.entities.Exercice.filter({ bloc_id: b.id }, "order");
+            const exercices = await base44.entities.Exercice.filter({ bloc_id: b.id }, "ordre");
             return { ...b, exercices };
           })
         );

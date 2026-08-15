@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { useCreneaux } from "@/hooks/useCreneaux";
-import { creneauxDisponibles, dateStr, parseDateLocal } from "@/lib/creneaux";
+import { creneauxDisponibles, dateStr, parseDateLocal, typeLabelSeance as typeLabel } from "@/lib/creneaux";
 import { annulerSeance, deplacerSeance, peutAnnulerAvecRemboursement, peutDeplacer } from "@/lib/gestionSeance";
 import { X, AlertTriangle, CheckCircle2, Loader2, MapPin, Calendar } from "lucide-react";
-
-function typeLabel(t) {
-  return { seance_individuelle: "Séance individuelle", programme_personnalise: "Programme personnalisé", evaluation: "Diagnostic FORGE", bilan_initial: "Bilan initial" }[t] || "Séance";
-}
 
 export default function SeanceManageModal({ seance, onClose, onUpdated }) {
   const { user } = useAuth();

@@ -177,7 +177,7 @@ function TemplateEditor({ template, onClose, onSave }) {
 
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Sujet</label>
-            <input value={form.sujet} onChange={(e) => update("sujet", e.target.value)} placeholder="Confirmation de réservation — The Lab Forge" className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm" />
+            <input value={form.sujet} onChange={(e) => update("sujet", e.target.value)} placeholder="Confirmation de réservation — PHYSIS COACHING" className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm" />
           </div>
 
           <div>

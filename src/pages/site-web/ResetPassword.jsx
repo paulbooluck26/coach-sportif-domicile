@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/api/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,13 +9,23 @@ import { Lock, Loader2, AlertTriangle } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 
 export default function ResetPassword() {
-  const [searchParams] = useSearchParams();
-  const resetToken = searchParams.get("token");
+  // Supabase transmet la validité du lien via une session temporaire
+  // établie automatiquement à l'ouverture de la page (pas un ?token=
+  // dans l'adresse, contrairement à l'ancienne convention Base44).
+  const [checkingLink, setCheckingLink] = useState(true);
+  const [linkValide, setLinkValide] = useState(false);
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setLinkValide(!!data?.session);
+      setCheckingLink(false);
+    });
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +36,7 @@ export default function ResetPassword() {
     }
     setLoading(true);
     try {
-      await base44.auth.resetPassword({ resetToken, newPassword });
+      await base44.auth.resetPassword({ newPassword });
       window.location.href = "/login";
     } catch (err) {
       setError(err.message || "Échec de la réinitialisation");
@@ -34,12 +45,22 @@ export default function ResetPassword() {
     }
   };
 
-  if (!resetToken) {
+  if (checkingLink) {
+    return (
+      <AuthLayout icon={Lock} title="Vérification du lien" subtitle="Un instant...">
+        <div className="flex justify-center py-6">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      </AuthLayout>
+    );
+  }
+
+  if (!linkValide) {
     return (
       <AuthLayout
         icon={AlertTriangle}
         title="Lien invalide"
-        subtitle="Ce lien de réinitialisation est manquant ou invalide"
+        subtitle="Ce lien de réinitialisation est manquant, invalide ou expiré"
         footer={
           <Link to="/forgot-password" className="text-primary font-medium hover:underline">
             Demander un nouveau lien
@@ -47,7 +68,7 @@ export default function ResetPassword() {
         }
       >
         <p className="text-sm text-foreground text-center">
-          Le lien que vous avez utilisé semble incomplet. Veuillez demander un nouvel email de réinitialisation.
+          Le lien que vous avez utilisé n'est plus valable (il expire après un certain temps, ou a peut-être déjà été utilisé). Veuillez demander un nouvel email de réinitialisation.
         </p>
       </AuthLayout>
     );

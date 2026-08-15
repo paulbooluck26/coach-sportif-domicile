@@ -74,8 +74,8 @@ export default function Reservation() {
       try {
         await base44.integrations.Core.SendEmail({
           to: user.email,
-          subject: "Confirmation de réservation — The Lab Forge",
-          body: `Bonjour ${clientRecord.full_name},\n\nVotre séance du ${selectedDate} à ${selectedTime} est confirmée. Paiement de ${sessionType.price}€ validé.\n\nÀ très vite,\nThe Lab Forge`,
+          subject: "Confirmation de réservation — PHYSIS COACHING",
+          body: `Bonjour ${clientRecord.full_name},\n\nVotre séance du ${selectedDate} à ${selectedTime} est confirmée. Paiement de ${sessionType.price}€ validé.\n\nÀ très vite,\nPHYSIS COACHING`,
         });
       } catch (_) {}
 

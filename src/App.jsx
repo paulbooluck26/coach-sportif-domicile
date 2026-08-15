@@ -14,6 +14,8 @@ import CoachLayout from '@/components/CoachLayout';
 import Home from '@/pages/site-web/Home';
 import Login from '@/pages/site-web/Login';
 import Register from '@/pages/site-web/Register';
+import ForgotPassword from '@/pages/site-web/ForgotPassword';
+import ResetPassword from '@/pages/site-web/ResetPassword';
 import Reservation from '@/pages/espace-client/Reservation';
 import AppelDecouverte from '@/pages/site-web/AppelDecouverte';
 import ClientDashboard from '@/pages/espace-client/ClientDashboard';
@@ -71,6 +73,8 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/appel-decouverte" element={<AppelDecouverte />} />

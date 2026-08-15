@@ -141,4 +141,17 @@ export function dateSelectable(date, recurrentes, blocages, reservees) {
   return creneauxDisponibles(d, recurrentes, reservees).length > 0;
 }
 
+// Traduction du type de séance en libellé lisible — une seule version
+// partagée par toute l'app (client, admin), pour éviter les oublis quand
+// un nouveau type est ajouté (ex: appel_bilan).
+export function typeLabelSeance(t) {
+  return {
+    seance_individuelle: "Séance individuelle",
+    programme_personnalise: "Programme personnalisé",
+    evaluation: "Diagnostic FORGE",
+    bilan_initial: "Bilan initial",
+    appel_bilan: "Appel de bilan",
+  }[t] || "Séance";
+}
+
 export { JOURS, dateStr };

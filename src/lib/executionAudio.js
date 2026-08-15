@@ -19,6 +19,17 @@ export function playDoubleBeep() {
   setTimeout(() => playBeep(900, 200), 250);
 }
 
+// Petit bip aigu et court — pour les 3 dernières secondes d'un repos.
+export function playCountdownTick() {
+  playBeep(1000, 100);
+}
+
+// Bip plus long et plus grave, distinct des ticks — signal de reprise
+// ("GO !") à la toute fin du décompte, comme sur les vraies applis sportives.
+export function playGoSignal() {
+  playBeep(500, 450);
+}
+
 export function parseTimeFromReps(reps) {
   if (!reps) return 0;
   const minMatch = reps.match(/(\d+)\s*min/i);

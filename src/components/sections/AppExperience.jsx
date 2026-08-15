@@ -37,12 +37,12 @@ export default function AppExperience() {
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-16">
           <div className="max-w-xl">
-            <p className="text-xs font-semibold tracking-label text-secondary mb-4">L'APPLICATION THE LAB FORGE</p>
+            <p className="text-xs font-semibold tracking-label text-secondary mb-4">L'APPLICATION PHYSIS COACHING</p>
             <h2 className="text-4xl lg:text-5xl font-heading font-bold text-primary leading-tight">
               Bien plus qu'un coach :<br />une expérience digitale premium.
             </h2>
             <p className="text-muted-foreground mt-6 leading-relaxed">
-              The Lab Forge ne se résume pas à des séances de coaching. Vous bénéficiez d'une application dédiée à votre suivi, pensée pour un accompagnement structuré, humain et permanent — accessible à tout moment, où que vous soyez.
+              PHYSIS COACHING ne se résume pas à des séances de coaching. Vous bénéficiez d'une application dédiée à votre suivi, pensée pour un accompagnement structuré, humain et permanent — accessible à tout moment, où que vous soyez.
             </p>
           </div>
           <div className="relative flex justify-center lg:justify-end">
@@ -51,7 +51,7 @@ export default function AppExperience() {
             </div>
             <img
               src="https://media.base44.com/images/public/6a4fa54adc116f80e1bcc475/3a4202c58_Design_sans_titre__4_-removebg-preview.png"
-              alt="Application mobile The Lab Forge sur iPhone"
+              alt="Application mobile PHYSIS COACHING sur iPhone"
               className="relative w-[240px] sm:w-[300px] lg:w-[360px] max-w-full h-auto object-contain drop-shadow-2xl animate-fade-up"
               loading="lazy"
             />

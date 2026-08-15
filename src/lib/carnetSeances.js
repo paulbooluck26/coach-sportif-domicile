@@ -50,6 +50,7 @@ export async function acheterCarnet({ user, offreId }) {
     carnet_id: carnet.id,
     client_id: user.id,
     client_name: user.full_name || user.email,
+    libelle: o.titre,
     amount: o.prix,
     method: "stripe",
     status: "paid",

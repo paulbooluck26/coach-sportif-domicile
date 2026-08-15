@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Send } from "lucide-react";
+import { Send, Image as ImageIcon, Smile, Loader2 } from "lucide-react";
+
+const EMOJIS = ["😀","😂","😍","👍","🙏","💪","🔥","🎉","👏","😅","😢","😮","❤️","✅","👌","🙌","😴","🤔","💯","👀","🥵","🏋️","🤝","😉"];
 
 export default function Messages() {
   const { user } = useAuth();
@@ -9,7 +11,10 @@ export default function Messages() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [showEmojis, setShowEmojis] = useState(false);
   const bottomRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const load = async () => {
     if (!user) return;
@@ -41,10 +46,34 @@ export default function Messages() {
         lu: false,
       });
       setInput("");
+      setShowEmojis(false);
       load();
     } catch {}
     setSending(false);
   };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.Message.create({
+        client_id: user.id,
+        sender: "client",
+        content: "",
+        image_url: file_url,
+        lu: false,
+      });
+      load();
+    } catch {
+      alert("Erreur lors de l'envoi de l'image. Vérifiez qu'elle fait moins de 5 Mo (JPEG, PNG ou WEBP).");
+    }
+    setUploading(false);
+  };
+
+  const addEmoji = (emoji) => setInput((v) => v + emoji);
 
   if (loading) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
@@ -64,7 +93,10 @@ export default function Messages() {
           messages.map(m => (
             <div key={m.id} className={`flex ${m.sender === "client" ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-sm ${m.sender === "client" ? "bg-primary text-primary-foreground rounded-br-md" : "bg-secondary/15 text-foreground rounded-bl-md"}`}>
-                <p className="whitespace-pre-wrap">{m.content}</p>
+                {m.image_url && (
+                  <img src={m.image_url} alt="" className="rounded-xl max-w-full max-h-64 object-contain mb-1.5" />
+                )}
+                {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
                 <p className={`text-[10px] mt-1 ${m.sender === "client" ? "text-primary-foreground/50" : "text-muted-foreground"}`}>
                   {new Date(m.created_date).toLocaleString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                 </p>
@@ -74,7 +106,32 @@ export default function Messages() {
         )}
         <div ref={bottomRef} />
       </div>
-      <div className="mt-3 flex gap-2">
+
+      {showEmojis && (
+        <div className="mt-2 bg-card border border-border rounded-xl p-2 grid grid-cols-8 gap-1">
+          {EMOJIS.map((e) => (
+            <button key={e} onClick={() => addEmoji(e)} className="text-xl p-1.5 hover:bg-muted rounded-lg transition-colors">{e}</button>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-3 flex gap-2 items-center">
+        <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} className="hidden" />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          title="Envoyer une photo"
+          className="border border-border text-muted-foreground hover:text-foreground p-3 rounded-xl flex items-center justify-center disabled:opacity-50"
+        >
+          {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
+        </button>
+        <button
+          onClick={() => setShowEmojis((v) => !v)}
+          title="Emojis"
+          className={`border border-border p-3 rounded-xl flex items-center justify-center ${showEmojis ? "text-accent border-accent" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          <Smile className="w-5 h-5" />
+        </button>
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
@@ -85,7 +142,7 @@ export default function Messages() {
         <button
           onClick={send}
           disabled={!input.trim() || sending}
-          className="bg-primary text-primary-foreground px-4 rounded-xl disabled:opacity-50 flex items-center justify-center"
+          className="bg-primary text-primary-foreground px-4 py-3 rounded-xl disabled:opacity-50 flex items-center justify-center"
         >
           <Send className="w-5 h-5" />
         </button>

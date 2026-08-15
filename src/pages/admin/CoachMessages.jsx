@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Send, Search, ArrowLeft, MessageCircle, Plus, X } from "lucide-react";
+import { Send, Search, ArrowLeft, MessageCircle, Plus, X, Image as ImageIcon, Smile, Loader2 } from "lucide-react";
 import ClientAvatar from "@/components/ClientAvatar";
+
+const EMOJIS = ["😀","😂","😍","👍","🙏","💪","🔥","🎉","👏","😅","😢","😮","❤️","✅","👌","🙌","😴","🤔","💯","👀","🥵","🏋️","🤝","😉"];
 
 export default function CoachMessages() {
   const [messages, setMessages] = useState([]);
@@ -9,6 +11,9 @@ export default function CoachMessages() {
   const [clientProfiles, setClientProfiles] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
   const [input, setInput] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [showEmojis, setShowEmojis] = useState(false);
+  const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [search, setSearch] = useState("");
@@ -104,10 +109,34 @@ export default function CoachMessages() {
         lu: false,
       });
       setInput("");
+      setShowEmojis(false);
       load();
     } catch {}
     setSending(false);
   };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !selectedClient) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.Message.create({
+        client_id: selectedClient,
+        sender: "coach",
+        content: "",
+        image_url: file_url,
+        lu: false,
+      });
+      load();
+    } catch {
+      alert("Erreur lors de l'envoi de l'image. Vérifiez qu'elle fait moins de 5 Mo (JPEG, PNG ou WEBP).");
+    }
+    setUploading(false);
+  };
+
+  const addEmoji = (emoji) => setInput((v) => v + emoji);
 
   const selectedName = clients.find((c) => c.client_id === selectedClient)?.name || "";
 
@@ -226,7 +255,10 @@ export default function CoachMessages() {
                 {conversation.map((m) => (
                   <div key={m.id} className={`flex ${m.sender === "coach" ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${m.sender === "coach" ? "bg-primary text-primary-foreground rounded-br-md" : "bg-secondary/15 text-foreground rounded-bl-md"}`}>
-                      <p className="whitespace-pre-wrap">{m.content}</p>
+                      {m.image_url && (
+                        <img src={m.image_url} alt="" className="rounded-xl max-w-full max-h-64 object-contain mb-1.5" />
+                      )}
+                      {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
                       <p className={`text-[10px] mt-1 ${m.sender === "coach" ? "text-primary-foreground/50" : "text-muted-foreground"}`}>
                         {new Date(m.created_date).toLocaleString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                       </p>
@@ -235,21 +267,46 @@ export default function CoachMessages() {
                 ))}
                 <div ref={bottomRef} />
               </div>
-              <div className="p-3 border-t border-border flex gap-2">
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && !sending && send()}
-                  placeholder="Écrivez votre message..."
-                  className="flex-1 border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent bg-background"
-                />
-                <button
-                  onClick={send}
-                  disabled={!input.trim() || sending}
-                  className="bg-primary text-primary-foreground px-4 rounded-xl disabled:opacity-50 flex items-center justify-center"
-                >
-                  <Send className="w-5 h-5" />
-                </button>
+              <div className="p-3 border-t border-border space-y-2">
+                {showEmojis && (
+                  <div className="bg-background border border-border rounded-xl p-2 grid grid-cols-8 gap-1">
+                    {EMOJIS.map((e) => (
+                      <button key={e} onClick={() => addEmoji(e)} className="text-xl p-1.5 hover:bg-muted rounded-lg transition-colors">{e}</button>
+                    ))}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} className="hidden" />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    title="Envoyer une photo"
+                    className="border border-border text-muted-foreground hover:text-foreground rounded-xl px-3 flex items-center justify-center disabled:opacity-50"
+                  >
+                    {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
+                  </button>
+                  <button
+                    onClick={() => setShowEmojis((v) => !v)}
+                    title="Emojis"
+                    className={`border border-border rounded-xl px-3 flex items-center justify-center ${showEmojis ? "text-accent border-accent" : "text-muted-foreground hover:text-foreground"}`}
+                  >
+                    <Smile className="w-5 h-5" />
+                  </button>
+                  <input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && !sending && send()}
+                    placeholder="Écrivez votre message..."
+                    className="flex-1 border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent bg-background"
+                  />
+                  <button
+                    onClick={send}
+                    disabled={!input.trim() || sending}
+                    className="bg-primary text-primary-foreground px-4 rounded-xl disabled:opacity-50 flex items-center justify-center"
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </>
           ) : (

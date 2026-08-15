@@ -56,7 +56,10 @@ export default function MonProgramme() {
         <div className="bg-card border border-border rounded-lg p-12 text-center">
           <Dumbbell className="w-12 h-12 text-secondary mx-auto mb-6" />
           <p className="text-foreground/60 mb-2">Votre coach n'a pas encore activé de programme.</p>
-          <p className="text-sm text-muted-foreground">Il apparaîtra ici dès qu'il sera prêt.</p>
+          <p className="text-sm text-muted-foreground mb-6">Il apparaîtra ici dès qu'il sera prêt.</p>
+          <Link to="/espace-client/reserver/programme" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm">
+            Découvrir les programmes en ligne
+          </Link>
         </div>
       </div>
     );

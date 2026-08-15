@@ -1,15 +1,33 @@
+// Un seul moteur audio réutilisé pour tous les bips, plutôt qu'un nouveau
+// à chaque appel — beaucoup plus fiable pour des sons déclenchés
+// automatiquement (pas par un clic direct), ce que la plupart des
+// navigateurs ont tendance à bloquer/retarder sinon.
+let sharedCtx = null;
+function getAudioContext() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+  if (!sharedCtx || sharedCtx.state === "closed") {
+    sharedCtx = new AudioContextClass();
+  }
+  if (sharedCtx.state === "suspended") {
+    sharedCtx.resume().catch(() => {});
+  }
+  return sharedCtx;
+}
+
 export function playBeep(frequency = 800, duration = 200) {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const ctx = new AudioContext();
+    const ctx = getAudioContext();
+    if (!ctx) return;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.frequency.value = frequency;
     gain.gain.value = 0.3;
-    osc.start();
-    setTimeout(() => { osc.stop(); ctx.close(); }, duration);
+    const now = ctx.currentTime;
+    osc.start(now);
+    osc.stop(now + duration / 1000);
   } catch (e) {}
   try { navigator.vibrate?.(200); } catch (e) {}
 }

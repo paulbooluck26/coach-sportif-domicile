@@ -11,7 +11,7 @@ export default function ExercicesPanel({ blocId }) {
   const [editId, setEditId] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  const load = async () => { setItems(await base44.entities.Exercice.filter({ bloc_id: blocId }, "order")); };
+  const load = async () => { setItems(await base44.entities.Exercice.filter({ bloc_id: blocId }, "ordre")); };
   useEffect(() => { load().catch(() => {}); }, [blocId]);
 
   const handleFileUpload = async (e) => {
@@ -27,7 +27,7 @@ export default function ExercicesPanel({ blocId }) {
 
   const submit = async () => {
     if (editId) { await base44.entities.Exercice.update(editId, form); setEditId(null); }
-    else { await base44.entities.Exercice.create({ ...form, bloc_id: blocId, order: items?.length || 0 }); }
+    else { await base44.entities.Exercice.create({ ...form, bloc_id: blocId, ordre: items?.length || 0 }); }
     setAdding(false); setForm({ name: "", reps: "12", rest_seconds: 60, intensity: "", media_url: "", description: "" }); load();
   };
   const edit = (ex) => { setEditId(ex.id); setForm({ name: ex.name, reps: ex.reps || "", rest_seconds: ex.rest_seconds || 60, intensity: ex.intensity || "", media_url: ex.media_url || "", description: ex.description || "" }); setAdding(true); };
@@ -40,7 +40,7 @@ export default function ExercicesPanel({ blocId }) {
     const [moved] = reordered.splice(result.source.index, 1);
     reordered.splice(result.destination.index, 0, moved);
     setItems(reordered);
-    try { await base44.entities.Exercice.bulkUpdate(reordered.map((ex, i) => ({ id: ex.id, order: i }))); }
+    try { await base44.entities.Exercice.bulkUpdate(reordered.map((ex, i) => ({ id: ex.id, ordre: i }))); }
     catch { load(); }
   };
 

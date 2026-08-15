@@ -29,7 +29,7 @@ export default function CoachLayout() {
     <div className="min-h-screen bg-secondary/20 flex">
       <aside className="hidden md:flex flex-col w-64 bg-primary text-primary-foreground fixed inset-y-0 left-0 z-30">
         <div className="px-6 py-8">
-          <Link to="/admin" className="font-heading text-xl font-bold tracking-tight">The Lab Forge</Link>
+          <Link to="/admin" className="font-heading text-xl font-bold tracking-tight">PHYSIS COACHING</Link>
           <p className="text-xs text-primary-foreground/50 mt-1">Espace coach</p>
         </div>
         <nav className="flex-1 px-3 space-y-1">
@@ -62,7 +62,7 @@ export default function CoachLayout() {
 
       <div className="flex-1 md:ml-64">
         <header className="md:hidden sticky top-0 z-20 glass-nav px-6 py-4 flex items-center justify-between">
-          <Link to="/admin" className="font-heading text-lg font-bold text-primary-foreground">The Lab Forge</Link>
+          <Link to="/admin" className="font-heading text-lg font-bold text-primary-foreground">PHYSIS COACHING</Link>
           <button onClick={handleLogout} className="text-primary-foreground/80"><LogOut className="w-5 h-5" /></button>
         </header>
         <nav className="md:hidden sticky top-[57px] z-10 bg-primary/95 backdrop-blur px-3 py-2 flex gap-1 overflow-x-auto no-scrollbar">

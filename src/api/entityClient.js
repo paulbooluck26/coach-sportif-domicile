@@ -75,6 +75,19 @@ function createEntityClient(entityName) {
       if (error) throw new Error(`[${error.code || 'supabase'}] ${error.message}`);
       return { success: true };
     },
+
+    // Pas d'équivalent SQL natif pour "mettre à jour plusieurs lignes avec
+    // des valeurs différentes chacune" en un seul appel — on boucle sur
+    // update() individuellement. Suffisant pour nos volumes (quelques
+    // dizaines de lignes, ex: réordonner des exercices).
+    async bulkUpdate(items) {
+      const results = [];
+      for (const item of items) {
+        const { id, ...payload } = item;
+        results.push(await this.update(id, payload));
+      }
+      return results;
+    },
   };
 }
 

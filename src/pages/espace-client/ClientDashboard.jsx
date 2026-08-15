@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Link } from "react-router-dom";
 import { loadClientProjection } from "@/lib/projection";
-import { parseDateLocal } from "@/lib/creneaux";
+import { parseDateLocal, typeLabelSeance as typeLabel } from "@/lib/creneaux";
 import { Play, CalendarDays, Clock, MapPin, Flame, Trophy, TrendingUp, ChevronRight, Dumbbell, CalendarPlus, BookOpen } from "lucide-react";
 import ClientAvatar from "@/components/ClientAvatar";
 
@@ -48,7 +48,7 @@ export default function ClientDashboard() {
   const futureHomeSeances = seances.filter(s => s.date >= today && s.status !== "cancelled" && s.status !== "completed");
   const futureProgSeances = projections.filter(p => p.date > today && p.status === "a_venir");
   const allFuture = [
-    ...futureHomeSeances.map(s => ({ type: "home", date: s.date, titre: typeLabel(s.type_seance), lieu: s.lieu })),
+    ...futureHomeSeances.map(s => ({ type: "home", date: s.date, titre: typeLabel(s.session_type), lieu: s.location })),
     ...futureProgSeances.map(p => ({ type: "prog", date: p.date, titre: p.seance.titre, lieu: "Autonomie" })),
   ].sort((a, b) => a.date.localeCompare(b.date));
   const nextSession = allFuture[0];
@@ -81,7 +81,7 @@ export default function ClientDashboard() {
           )}
           {todayHomeSeance && !todayProgSeances.length && (
             <>
-              <h2 className="font-heading text-xl font-semibold mb-3">{typeLabel(todayHomeSeance.type_seance)}</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3">{typeLabel(todayHomeSeance.session_type)}</h2>
               <div className="space-y-1.5 text-sm text-primary-foreground/80 mb-4">
                 <p className="flex items-center gap-2"><Clock className="w-4 h-4 text-accent" /> {todayHomeSeance.time} · {todayHomeSeance.duration_minutes || 60} min</p>
                 {todayHomeSeance.location && <p className="flex items-center gap-2"><MapPin className="w-4 h-4 text-accent" /> {todayHomeSeance.location}</p>}
@@ -133,7 +133,12 @@ export default function ClientDashboard() {
                 <CalendarDays className="w-6 h-6 text-secondary" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-foreground text-sm">{nextSession.titre}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-semibold text-foreground text-sm">{nextSession.titre}</p>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${nextSession.type === "home" ? "bg-accent/15 text-accent" : "bg-secondary/20 text-secondary"}`}>
+                    {nextSession.type === "home" ? "À domicile" : "Programme en ligne"}
+                  </span>
+                </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {parseDateLocal(nextSession.date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
                   {nextSession.lieu && ` · ${nextSession.lieu}`}
@@ -177,10 +182,6 @@ function getGreeting() {
   if (h < 12) return "Bonjour";
   if (h < 18) return "Bon après-midi";
   return "Bonsoir";
-}
-
-function typeLabel(t) {
-  return { seance_individuelle: "Séance individuelle", programme_personnalise: "Programme personnalisé", evaluation: "Évaluation" }[t] || "Séance";
 }
 
 function computeStreak(dates) {

@@ -40,7 +40,7 @@ export default function PublicNavbar() {
     >
       <nav className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between">
         <Link to="/" className={`font-heading font-bold text-lg tracking-display transition-colors ${solid ? "text-primary" : "text-primary-foreground"}`}>
-          The Lab Forge
+          PHYSIS COACHING
         </Link>
 
         <div className="hidden lg:flex items-center gap-10">

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
-import { playBeep, playDoubleBeep, parseTimeFromReps } from "@/lib/executionAudio";
+import { playBeep, playDoubleBeep, playCountdownTick, playGoSignal, parseTimeFromReps } from "@/lib/executionAudio";
 import ExecutionActive from "@/components/execution/ExecutionActive";
 import ExecutionComplete from "@/components/execution/ExecutionComplete";
 import ExecutionWelcome from "@/components/execution/ExecutionWelcome";
@@ -204,7 +204,12 @@ export default function SessionExecution() {
   useEffect(() => {
     if (execState.isPaused || !sessionData || execState.phase === "complete" || execState.phase === "welcome" || execState.phase === "bloc_intro") return;
     if ((execState.phase === "rest" || execState.phase === "rest_between_rounds" || execState.phase === "rest_between_blocs") && execState.restRemaining > 0) {
-      const timer = setTimeout(() => setExecState(prev => ({ ...prev, restRemaining: prev.restRemaining - 1 })), 1000);
+      const timer = setTimeout(() => setExecState(prev => {
+        const next = prev.restRemaining - 1;
+        if (next === 0) playGoSignal();
+        else if (next > 0 && next <= 3) playCountdownTick();
+        return { ...prev, restRemaining: next };
+      }), 1000);
       return () => clearTimeout(timer);
     }
     if (execState.phase === "exercise" && execState.exerciseTimeRemaining !== null && execState.exerciseTimeRemaining > 0) {

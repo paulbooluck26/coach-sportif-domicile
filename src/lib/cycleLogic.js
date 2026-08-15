@@ -1,4 +1,4 @@
-// Logique métier des cycles client The Lab Forge.
+// Logique métier des cycles client PHYSIS COACHING.
 // Pure fonctions + helpers de persistance (base44). Ne modifie aucun flux UI directement.
 
 import { base44 } from "@/api/base44Client";

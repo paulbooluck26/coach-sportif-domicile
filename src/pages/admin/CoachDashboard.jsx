@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { CalendarDays, Users, Inbox, CreditCard, TrendingUp, Clock, ArrowRight } from "lucide-react";
+import { typeLabelSeance as typeLabel } from "@/lib/creneaux";
 
 export default function CoachDashboard() {
   const [demandes, setDemandes] = useState(null);
@@ -131,8 +132,4 @@ export default function CoachDashboard() {
       </div>
     </div>
   );
-}
-
-function typeLabel(t) {
-  return { seance_individuelle: "Séance indiv.", programme_personnalise: "Programme", evaluation: "Évaluation" }[t] || "Séance";
 }

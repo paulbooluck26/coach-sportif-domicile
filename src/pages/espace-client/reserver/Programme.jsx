@@ -59,7 +59,7 @@ export default function Programme() {
 
   return (
     <div className="space-y-6">
-      <Link to="/espace-client/reserver" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="w-4 h-4" /> Réserver</Link>
+      <Link to="/espace-client/programme" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="w-4 h-4" /> Programmes</Link>
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-1">Programmes en ligne</p>
         <h1 className="font-heading text-3xl font-bold text-foreground">Choisir un programme</h1>

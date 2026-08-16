@@ -3,11 +3,11 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useCreneaux } from "@/hooks/useCreneaux";
 import { creneauxDisponibles, parseDateLocal } from "@/lib/creneaux";
-import { finaliserSeancePayante } from "@/lib/reservationFlow";
-import { acheterCarnet, estPonctuel, nbSeancesPourOffre } from "@/lib/carnetSeances";
+import { estPonctuel, nbSeancesPourOffre } from "@/lib/carnetSeances";
+import { redirigerVersStripe } from "@/lib/stripeCheckout";
 import CalendrierDispo from "@/components/CalendrierDispo";
 import { FORGE_OFFRES, prixDisplay } from "@/lib/forgeOffres";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Clock, MapPin, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, CalendarPlus, Flame } from "lucide-react";
 import { downloadICS } from "@/lib/calendarExport";
 
@@ -33,6 +33,8 @@ export default function Domicile() {
   const [card, setCard] = useState({ number: "", expiry: "", cvc: "", name: "" });
   const [paying, setPaying] = useState(false);
   const [done, setDone] = useState(null);
+  const [searchParams] = useSearchParams();
+  const stripeSessionId = searchParams.get("stripe_session_id");
 
   useEffect(() => {
     if (!user) return;
@@ -64,8 +66,7 @@ export default function Domicile() {
   const payer = async () => {
     setPaying(true);
     try {
-      // Sauvegarde l'adresse dans le profil pour ne plus avoir à la
-      // ressaisir la prochaine fois.
+      // Sauvegarde l'adresse dans le profil avant de partir sur Stripe.
       try {
         const profiles = await base44.entities.ClientProfile.filter({ user_id: user.id });
         if (profiles[0] && profiles[0].adresse !== adresse) {
@@ -74,27 +75,56 @@ export default function Domicile() {
       } catch (_) {}
 
       if (ponctuel) {
-        const { seance } = await finaliserSeancePayante({
-          user,
-          sessionType: SESSION_TYPE[offreId],
-          date,
-          heure,
-          duree: 60,
-          prix: offre.prix,
-          location: adresse || "Domicile",
-          prestationLabel: offre.titre,
+        await redirigerVersStripe({
+          nom: offre.titre,
+          montant: offre.prix,
+          metadata: {
+            type: "seance",
+            client_id: user.id,
+            session_type: SESSION_TYPE[offreId],
+            date,
+            time: heure,
+            duration_minutes: "60",
+            location: adresse || "Domicile",
+            prestation_label: offre.titre,
+          },
+          successPath: "/espace-client/reserver/domicile",
         });
-        setDone({ type: "ponctuel", seance, offre, date, heure });
       } else {
-        const carnet = await acheterCarnet({ user, offreId });
-        setDone({ type: "carnet", offre, carnet });
+        const total = nbSeancesPourOffre(offreId);
+        const abonnement = offreId === "forge4" || offreId === "forge8";
+        await redirigerVersStripe({
+          nom: offre.titre,
+          montant: offre.prix,
+          metadata: {
+            type: "carnet",
+            client_id: user.id,
+            offre_id: offreId,
+            offre_titre: offre.titre,
+            type_carnet: abonnement ? "abonnement" : "pack",
+            nb_seances_total: String(total),
+          },
+          successPath: "/espace-client/reserver/domicile",
+        });
       }
     } catch (e) {
-      alert("Erreur lors du paiement. Veuillez réessayer.");
-    } finally {
+      alert("Erreur lors de la préparation du paiement. Veuillez réessayer.");
       setPaying(false);
     }
   };
+
+  if (stripeSessionId) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-card border border-border rounded-2xl p-8 text-center">
+          <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-5"><CheckCircle2 className="w-8 h-8 text-accent" /></div>
+          <h2 className="font-heading text-2xl font-bold text-foreground mb-2">Paiement confirmé</h2>
+          <p className="text-foreground/60 mb-6">Merci ! Votre réservation est en cours de finalisation — retrouvez-la dans quelques instants dans votre espace.</p>
+          <Link to="/espace-client/seances" className="bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm inline-block">Voir mes séances</Link>
+        </div>
+      </div>
+    );
+  }
 
   if (diagDone === null) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
@@ -286,15 +316,10 @@ Paul BOOLUCK - PHYSIS COACHING`,
                 </div>
               </div>
               <div><label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Nom sur la carte</label><input value={card.name} onChange={e => setCard({ ...card, name: e.target.value })} placeholder="Jean Dupont" className="w-full border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent" /></div>
-              <div><label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Numéro de carte</label><div className="relative"><CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" /><input value={card.number} onChange={e => setCard({ ...card, number: e.target.value })} placeholder="4242 4242 4242 4242" className="w-full border border-border rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-accent" /></div></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Expiration</label><input value={card.expiry} onChange={e => setCard({ ...card, expiry: e.target.value })} placeholder="MM/AA" className="w-full border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent" /></div>
-                <div><label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">CVC</label><input value={card.cvc} onChange={e => setCard({ ...card, cvc: e.target.value })} placeholder="123" className="w-full border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent" /></div>
-              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lock className="w-3.5 h-3.5" /> Paiement chiffré · Annulation gratuite jusqu'à 24h avant</div>
-          <button onClick={payer} disabled={paying || !adresse.trim()} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Traitement...</> : <><Lock className="w-4 h-4" /> Payer {offre.prix}€</>}</button>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lock className="w-3.5 h-3.5" /> Paiement sécurisé via Stripe · Annulation gratuite jusqu'à 24h avant</div>
+          <button onClick={payer} disabled={paying || !adresse.trim()} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> Payer {offre.prix}€</>}</button>
         </div>
       )}
     </div>

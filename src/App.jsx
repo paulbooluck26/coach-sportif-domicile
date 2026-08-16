@@ -41,6 +41,8 @@ import CoachSeances from '@/pages/admin/CoachSeances';
 import CoachClients from '@/pages/admin/CoachClients';
 import CoachProgrammes from '@/pages/admin/CoachProgrammes';
 import CoachPaiements from '@/pages/admin/CoachPaiements';
+import CoachCatalogue from '@/pages/admin/CoachCatalogue';
+import CoachPromotions from '@/pages/admin/CoachPromotions';
 import CoachDisponibilites from '@/pages/admin/CoachDisponibilites';
 import CoachEmails from '@/pages/admin/CoachEmails';
 import CoachBibliotheque from '@/pages/admin/CoachBibliotheque';
@@ -111,6 +113,8 @@ const AuthenticatedApp = () => {
           <Route path="/admin/programmes" element={<CoachProgrammes />} />
           <Route path="/admin/commandes" element={<CoachCommandes />} />
           <Route path="/admin/paiements" element={<CoachPaiements />} />
+          <Route path="/admin/catalogue" element={<CoachCatalogue />} />
+          <Route path="/admin/promotions" element={<CoachPromotions />} />
           <Route path="/admin/disponibilites" element={<CoachDisponibilites />} />
           <Route path="/admin/emails" element={<CoachEmails />} />
           <Route path="/admin/bibliotheque" element={<CoachBibliotheque />} />

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { translateAuthError } from "@/api/authClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +35,7 @@ export default function Register() {
       await base44.auth.register({ email, password, prenom, nom, telephone });
       setShowOtp(true);
     } catch (err) {
-      setError(err.message || "Inscription échouée");
+      setError(translateAuthError(err.message));
     } finally {
       setLoading(false);
     }
@@ -50,7 +51,7 @@ export default function Register() {
       }
       window.location.href = "/";
     } catch (err) {
-      setError(err.message || "Code de vérification invalide");
+      setError(translateAuthError(err.message));
     } finally {
       setLoading(false);
     }
@@ -65,7 +66,7 @@ export default function Register() {
         description: "Vérifiez votre email pour le nouveau code.",
       });
     } catch (err) {
-      setError(err.message || "Échec du renvoi du code");
+      setError(translateAuthError(err.message));
     }
   };
 

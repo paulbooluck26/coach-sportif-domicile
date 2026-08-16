@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
 import { finaliserAchatProgramme } from "@/lib/reservationFlow";
@@ -10,9 +10,20 @@ import { downloadICS } from "@/lib/calendarExport";
 import { envoyerEmail } from "@/lib/emailSender";
 
 const OFFRES = [
-  { id: "start", nom: "START", duree: 4, prix: 49, desc: "Construire de bonnes bases et reprendre une routine efficace.", inclus: ["Programme adapté à votre objectif", "Exercices expliqués en vidéo", "Appel de démarrage"] },
   { id: "forge", nom: "FORGE", duree: 12, prix: 149, recommande: true, desc: "Le parcours idéal pour transformer votre physique et vos habitudes.", inclus: ["Programmation personnalisée", "Progression structurée", "Messagerie avec votre coach", "Appel de bilan"] },
+  { id: "start", nom: "START", duree: 4, prix: 49, desc: "Construire de bonnes bases et reprendre une routine efficace.", inclus: ["Programme adapté à votre objectif", "Exercices expliqués en vidéo", "Appel de démarrage"] },
   { id: "legacy", nom: "LEGACY", duree: 24, prix: 299, desc: "Une transformation complète et durable avec un accompagnement longue durée.", inclus: ["Suivi renforcé", "Ajustements réguliers", "Analyse de progression"] },
+];
+
+const OBJECTIFS = [
+  { emoji: "🔥", titre: "Perte de poids", accroche: "Brûlez, tonifiez, transformez votre silhouette" },
+  { emoji: "💪", titre: "Prise de muscle", accroche: "Construisez du volume, sans compromis sur la forme" },
+  { emoji: "🏋️", titre: "Force", accroche: "Progressez sur les mouvements fondamentaux" },
+  { emoji: "🌿", titre: "Longévité", accroche: "Bougez mieux, plus longtemps, sans douleur" },
+  { emoji: "🩹", titre: "Retour / post-blessure", accroche: "Reprenez en confiance, à votre rythme" },
+  { emoji: "🏠", titre: "À domicile", accroche: "Sans salle, sans excuse" },
+  { emoji: "🏢", titre: "En salle", accroche: "Exploitez tout le matériel à disposition" },
+  { emoji: "⚙️", titre: "Sans matériel", accroche: "Le poids du corps suffit" },
 ];
 
 export default function Programme() {
@@ -30,6 +41,23 @@ export default function Programme() {
   const [heureAppel, setHeureAppel] = useState(null);
   const [bookingAppel, setBookingAppel] = useState(false);
   const [appelConfirme, setAppelConfirme] = useState(false);
+  const [programmeActif, setProgrammeActif] = useState(null);
+  const [activeOfferIndex, setActiveOfferIndex] = useState(0);
+  const offersScrollRef = useRef(null);
+
+  const handleOffersScroll = () => {
+    const el = offersScrollRef.current;
+    if (!el || !el.children[0]) return;
+    const cardWidth = el.children[0].offsetWidth + 16; // + gap
+    const index = Math.round(el.scrollLeft / cardWidth);
+    setActiveOfferIndex(Math.max(0, Math.min(index, OFFRES.length - 1)));
+  };
+
+  const scrollToOffer = (i) => {
+    const el = offersScrollRef.current;
+    if (!el || !el.children[i]) return;
+    el.scrollTo({ left: el.children[i].offsetLeft - el.offsetLeft, behavior: "smooth" });
+  };
 
   const offre = OFFRES.find((o) => o.id === offreId);
 
@@ -39,6 +67,10 @@ export default function Programme() {
       const p = profiles[0];
       if (p?.telephone) setTelephone(p.telephone);
       if (p?.objectif) setObjectif(p.objectif);
+    }).catch(() => {});
+    base44.entities.Programme.filter({ statut: "actif" }).then((progs) => {
+      const mien = progs.find((p) => !p.est_modele && (p.client_ids || []).includes(user.id));
+      setProgrammeActif(mien || null);
     }).catch(() => {});
   }, [user]);
 
@@ -257,32 +289,83 @@ export default function Programme() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-2">
       <Link to="/espace-client/programme" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="w-4 h-4" /> Programmes</Link>
+
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-1">Programmes en ligne</p>
-        <h1 className="font-heading text-3xl font-bold text-foreground">Choisir un programme</h1>
-        <p className="text-sm text-muted-foreground mt-2">Chaque programme est préparé sur mesure par votre coach après votre achat.</p>
-        <p className="text-sm text-foreground/70 mt-3 leading-relaxed">
-          Après votre achat, vous réservez un <strong>appel de bilan</strong> (téléphone ou visio) pour faire le point sur vos objectifs. Votre coach construit ensuite votre programme, disponible sous une semaine environ dans votre espace de suivi. Vous pourrez y consulter vos séances, suivre votre progression et échanger directement avec votre coach via la messagerie.
-        </p>
+        <h1 className="font-heading text-3xl font-bold text-foreground">Découvrir un programme</h1>
+        <p className="text-sm text-muted-foreground mt-2">Chaque programme est préparé sur mesure par votre coach, quel que soit votre point de départ.</p>
       </div>
 
-      <div className="space-y-3">
-        {OFFRES.map((o) => (
-          <button key={o.id} onClick={() => choisir(o.id)} className={`w-full text-left bg-card rounded-2xl p-5 transition-all hover:border-accent ${o.recommande ? "border-2 border-secondary" : "border border-border"}`}>
-            {o.recommande && <span className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground text-xs font-semibold px-2.5 py-0.5 rounded-full mb-3"><Sparkles className="w-3 h-3" /> Recommandé</span>}
-            <div className="flex items-start justify-between gap-3">
+      {programmeActif && (
+        <div className="flex items-start gap-3 bg-secondary/10 border border-secondary/30 rounded-xl p-4">
+          <Sparkles className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
+          <p className="text-sm text-foreground/80">
+            Vous suivez déjà <strong>{programmeActif.name}</strong>. Vous pouvez explorer d'autres programmes ci-dessous, mais on vous recommande de vous concentrer sur un seul programme à la fois pour de meilleurs résultats.
+          </p>
+        </div>
+      )}
+
+      <div>
+        <h2 className="font-heading text-lg font-semibold text-foreground mb-3">Quel que soit votre objectif</h2>
+        <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory no-scrollbar">
+          {OBJECTIFS.map((obj) => (
+            <div
+              key={obj.titre}
+              className="snap-start shrink-0 w-[168px] rounded-2xl p-4 flex flex-col justify-between"
+              style={{ background: "linear-gradient(155deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 55%, hsl(var(--secondary)/0.35) 100%)", minHeight: "132px" }}
+            >
+              <span className="text-2xl">{obj.emoji}</span>
               <div>
-                <h2 className="font-heading text-xl font-bold text-foreground">{o.nom}</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">{o.duree} semaines</p>
+                <p className="font-heading text-sm font-bold text-primary-foreground uppercase tracking-wide leading-tight">{obj.titre}</p>
+                <p className="text-[11px] text-primary-foreground/60 mt-1 leading-snug">{obj.accroche}</p>
               </div>
-              <p className="font-heading text-2xl font-bold text-foreground">{o.prix}€</p>
             </div>
-            <p className="text-sm text-foreground/70 leading-relaxed mt-3">{o.desc}</p>
-          </button>
-        ))}
+          ))}
+        </div>
       </div>
+
+      <div>
+        <h2 className="font-heading text-lg font-semibold text-foreground mb-3">Nos programmes</h2>
+        <div
+          ref={offersScrollRef}
+          onScroll={handleOffersScroll}
+          className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory no-scrollbar"
+        >
+          {OFFRES.map((o) => (
+            <button
+              key={o.id}
+              onClick={() => choisir(o.id)}
+              className={`snap-center shrink-0 w-[82%] sm:w-[320px] text-left bg-card rounded-2xl p-5 transition-all hover:border-accent ${o.recommande ? "border-2 border-secondary" : "border border-border"}`}
+            >
+              {o.recommande && <span className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground text-xs font-semibold px-2.5 py-0.5 rounded-full mb-3"><Sparkles className="w-3 h-3" /> Recommandé</span>}
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="font-heading text-xl font-bold text-foreground">{o.nom}</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">{o.duree} semaines</p>
+                </div>
+                <p className="font-heading text-2xl font-bold text-foreground">{o.prix}€</p>
+              </div>
+              <p className="text-sm text-foreground/70 leading-relaxed mt-3">{o.desc}</p>
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center justify-center gap-1.5 mt-3">
+          {OFFRES.map((o, i) => (
+            <button
+              key={o.id}
+              onClick={() => scrollToOffer(i)}
+              aria-label={`Voir ${o.nom}`}
+              className={`h-1.5 rounded-full transition-all ${i === activeOfferIndex ? "w-5 bg-accent" : "w-1.5 bg-border"}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      <p className="text-[11px] text-muted-foreground/70 text-center leading-relaxed px-4">
+        Avertissement — Pratiquez les exercices en respectant la technique et les temps de repos. Arrêtez immédiatement en cas de douleur ou de blessure. Ce programme se suit sous votre propre responsabilité.
+      </p>
     </div>
   );
 }

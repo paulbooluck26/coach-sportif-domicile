@@ -38,7 +38,7 @@ const FAQ = [
 ];
 
 export default function AchatProgramme() {
-  const { user } = useAuth();
+  const { user, isLoadingAuth } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const offreId = searchParams.get("offre");
@@ -46,6 +46,27 @@ export default function AchatProgramme() {
   const [card, setCard] = useState({ number: "", expiry: "", cvc: "", name: "" });
   const [paying, setPaying] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+
+  // Achat toujours réalisé depuis l'espace client connecté (paiement Stripe
+  // réel) — cette page publique invite à créer un compte plutôt que de
+  // dupliquer le parcours de paiement.
+  if (!isLoadingAuth && !user) {
+    return (
+      <div className="max-w-md mx-auto text-center py-16 px-4">
+        <Sparkles className="w-10 h-10 text-secondary mx-auto mb-5" />
+        <h1 className="font-heading text-2xl font-bold text-foreground mb-3">Créez votre compte pour continuer</h1>
+        <p className="text-sm text-muted-foreground mb-8">L'achat d'un programme se fait depuis votre espace personnel — ça ne prend qu'une minute, et vous y retrouverez tout votre suivi ensuite.</p>
+        <div className="flex flex-col gap-3">
+          <Link to={`/register?redirect=/espace-client/reserver/programme`} className="bg-primary text-primary-foreground py-3 rounded-xl font-semibold text-sm">Créer mon compte</Link>
+          <Link to={`/login?redirect=/espace-client/reserver/programme`} className="text-sm text-muted-foreground hover:text-foreground">J'ai déjà un compte</Link>
+        </div>
+      </div>
+    );
+  }
+  if (user) {
+    navigate("/espace-client/reserver/programme", { replace: true });
+    return null;
+  }
 
   // --- Landing (no offre selected) ---
   if (!offreId || !offre) {

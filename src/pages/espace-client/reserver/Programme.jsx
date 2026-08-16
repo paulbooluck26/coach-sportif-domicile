@@ -363,9 +363,6 @@ export default function Programme() {
         </div>
       </div>
 
-      <p className="text-[11px] text-muted-foreground/70 text-center leading-relaxed px-4">
-        Avertissement — Pratiquez les exercices en respectant la technique et les temps de repos. Arrêtez immédiatement en cas de douleur ou de blessure. Ce programme se suit sous votre propre responsabilité.
-      </p>
     </div>
   );
 }

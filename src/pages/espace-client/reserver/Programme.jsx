@@ -51,7 +51,7 @@ export default function Programme() {
     const offreParam = searchParams.get("offre");
     if (stripeSessionId && offreParam) {
       setOffreId(offreParam);
-      setStep("appel");
+      setStep("confirmation");
     }
   }, []);
 
@@ -155,6 +155,22 @@ export default function Programme() {
     }
   };
 
+  if (step === "confirmation") {
+    return (
+      <div className="space-y-6">
+        <div className="bg-card border border-border rounded-2xl p-8 text-center">
+          <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-5"><CheckCircle2 className="w-8 h-8 text-accent" /></div>
+          <h2 className="font-heading text-2xl font-bold text-foreground mb-2">Paiement confirmé</h2>
+          <p className="text-foreground/60 mb-6">Merci ! Votre programme {offre?.nom} est en préparation. Réservez maintenant votre appel de bilan pour que votre coach construise votre programme sur mesure.</p>
+          <div className="flex flex-col gap-3">
+            <button onClick={() => setStep("appel")} className="bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm">Réserver mon appel de bilan</button>
+            <Link to="/espace-client/programme" className="text-sm text-muted-foreground hover:text-foreground">Retour à mes programmes</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (step === "appel") {
     if (appelConfirme) {
       return (
@@ -253,7 +269,7 @@ export default function Programme() {
             <textarea required value={objectif} onChange={(e) => setObjectif(e.target.value)} placeholder="Ex : perdre du poids, reprendre le sport après une pause, me préparer pour un événement..." rows={3} className="w-full border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent resize-none" />
             <p className="text-xs text-muted-foreground mt-1">Ça aide votre coach à construire un programme adapté dès le départ.</p>
           </div>
-          <div><label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Nom sur la carte</label><input value={card.name} onChange={e => setCard({ ...card, name: e.target.value })} placeholder="Jean Dupont" className="w-full border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent" /></div>
+
         </div>
 
         <button onClick={acheter} disabled={paying || !objectif.trim()} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">

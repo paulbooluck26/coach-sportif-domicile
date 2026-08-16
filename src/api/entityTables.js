@@ -16,13 +16,13 @@ export function tableNameFor(entityName) {
   return toSnakeCase(entityName);
 }
 
-// Liste des 29 entités Base44 connues, pour validation / autocomplétion.
+// Liste des entités Base44/PHYSIS COACHING connues, pour validation / autocomplétion.
 export const KNOWN_ENTITIES = [
-  'BilanInitial', 'Bloc', 'CarnetSeances', 'Client', 'ClientProfile',
+  'BilanInitial', 'Bloc', 'CarnetSeances', 'ClientProfile',
   'CommandeProgramme', 'CycleClient', 'DemandeContact', 'Disponibilite',
   'EmailTemplate', 'ExecutionSeance', 'Exercice', 'Message', 'Mouvement',
-  'Notification', 'Paiement', 'PaiementProgramme', 'PerformanceExercice',
+  'Notification', 'Paiement', 'PerformanceExercice',
   'Phase', 'Programme', 'ProgrammeAssignation', 'RecordPerso', 'Ressource',
   'RessourceCategorie', 'Seance', 'SeanceDeplacee', 'SeanceProgramme',
-  'Semaine', 'User',
+  'Semaine', 'User', 'Produit', 'CodePromo', 'UtilisationCodePromo',
 ];

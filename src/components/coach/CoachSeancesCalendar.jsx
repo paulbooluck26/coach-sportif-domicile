@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Clock, PhoneCall, Dumbbell } from "lucide-react";
 import { parseDateLocal, dateStr } from "@/lib/creneaux";
+import { styleFor } from "@/lib/agendaEvents";
 
 const JOURS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
@@ -8,12 +9,16 @@ export default function CoachSeancesCalendar({ seances = [], appels = [], onOpen
   const [cursor, setCursor] = useState(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); });
   const [selected, setSelected] = useState(() => dateStr(new Date()));
 
+  // Un rendez-vous annulé n'a plus sa place dans le calendrier — seule la
+  // vue Liste (onglet "Annulés") continue de le montrer.
+  const seancesActives = seances.filter((s) => s.status !== "cancelled");
+
   const year = cursor.getFullYear();
   const month = cursor.getMonth();
   const todayKey = dateStr(new Date());
 
   const seancesByDate = {};
-  seances.forEach(s => { if (s.date) (seancesByDate[s.date] ||= []).push(s); });
+  seancesActives.forEach(s => { if (s.date) (seancesByDate[s.date] ||= []).push(s); });
   const appelsByDate = {};
   appels.forEach(d => { if (d.date_souhaitee) (appelsByDate[d.date_souhaitee] ||= []).push(d); });
 
@@ -30,8 +35,8 @@ export default function CoachSeancesCalendar({ seances = [], appels = [], onOpen
   }
 
   const events = [
-    ...(seancesByDate[selected] || []).map(s => ({ type: "seance", time: s.time || "", label: s.client_name || "Client", data: s })),
-    ...(appelsByDate[selected] || []).map(a => ({ type: "appel", time: a.heure_souhaitee || "", label: a.name || "Client", data: a })),
+    ...(seancesByDate[selected] || []).map(s => ({ type: "seance", sessionType: s.session_type, time: s.time || "", label: s.client_name || "Client", data: s })),
+    ...(appelsByDate[selected] || []).map(a => ({ type: "appel", sessionType: "appel_decouverte", time: a.heure_souhaitee || "", label: a.name || "Client", data: a })),
   ].sort((a, b) => (a.time || "").localeCompare(b.time || ""));
 
   return (
@@ -77,23 +82,26 @@ export default function CoachSeancesCalendar({ seances = [], appels = [], onOpen
           <p className="text-sm text-muted-foreground">Aucun événement ce jour.</p>
         ) : (
           <div className="space-y-2">
-            {events.map((ev, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => ev.type === "seance" ? onOpenClient(ev.data) : onOpenDemande(ev.data)}
-                className="w-full flex items-center gap-3 bg-background border border-border rounded-lg p-3 text-left hover:border-accent/50 transition-colors"
-              >
-                <span className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${ev.type === "seance" ? "bg-secondary text-foreground" : "bg-accent text-accent-foreground"}`}>
-                  {ev.type === "seance" ? <Dumbbell className="w-4 h-4" /> : <PhoneCall className="w-4 h-4" />}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{ev.label}</p>
-                  <p className="text-xs text-muted-foreground">{ev.type === "seance" ? "Séance à domicile" : "Appel découverte"}</p>
-                </div>
-                {ev.time && <span className="flex items-center gap-1 text-sm text-foreground/70 shrink-0"><Clock className="w-3.5 h-3.5" /> {ev.time}</span>}
-              </button>
-            ))}
+            {events.map((ev, idx) => {
+              const st = styleFor(ev.sessionType);
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => ev.type === "seance" ? onOpenClient(ev.data) : onOpenDemande(ev.data)}
+                  className={`w-full flex items-center gap-3 border rounded-lg p-3 text-left hover:brightness-95 transition-all ${st.bg} ${st.border}`}
+                >
+                  <span className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${st.dot} text-white`}>
+                    {ev.type === "seance" ? <Dumbbell className="w-4 h-4" /> : <PhoneCall className="w-4 h-4" />}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{ev.label}</p>
+                    <p className="text-xs text-muted-foreground">{st.label}</p>
+                  </div>
+                  {ev.time && <span className="flex items-center gap-1 text-sm text-foreground/70 shrink-0"><Clock className="w-3.5 h-3.5" /> {ev.time}</span>}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

@@ -315,7 +315,7 @@ Paul BOOLUCK - PHYSIS COACHING`,
                   />
                 </div>
               </div>
-              <div><label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Nom sur la carte</label><input value={card.name} onChange={e => setCard({ ...card, name: e.target.value })} placeholder="Jean Dupont" className="w-full border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent" /></div>
+
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lock className="w-3.5 h-3.5" /> Paiement sécurisé via Stripe · Annulation gratuite jusqu'à 24h avant</div>

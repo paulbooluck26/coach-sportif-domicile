@@ -1,6 +1,6 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Camera, Trash2, Loader2, Upload } from "lucide-react";
+import { Camera, Trash2, Loader2, Pencil } from "lucide-react";
 import ClientAvatar from "@/components/ClientAvatar";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 Mo
@@ -41,9 +41,19 @@ function cropSquareAndCompress(dataUrl, size) {
 
 export default function ProfilePhotoUpload({ photoUrl, name, onSaved, onRemoved }) {
   const inputRef = useRef(null);
+  const menuRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const [dragOver, setDragOver] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [menuOpen]);
 
   const handleFile = async (file) => {
     setError("");
@@ -70,54 +80,47 @@ export default function ProfilePhotoUpload({ photoUrl, name, onSaved, onRemoved 
     }
   };
 
-  const onDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-    if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]);
-  };
-
   return (
     <div>
       <div className="flex items-center gap-5">
-        <ClientAvatar name={name} photoUrl={photoUrl} size={96} />
-        <div className="flex-1">
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={uploading}
-              onClick={() => inputRef.current?.click()}
-              className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-              {photoUrl ? "Changer la photo" : "Importer une photo"}
-            </button>
-            {photoUrl && !uploading && (
+        <div className="relative" ref={menuRef}>
+          <button
+            type="button"
+            onClick={() => !uploading && setMenuOpen((v) => !v)}
+            className="relative rounded-full focus:outline-none focus:ring-2 focus:ring-accent"
+            title="Modifier la photo de profil"
+          >
+            <ClientAvatar name={name} photoUrl={photoUrl} size={96} />
+            <span className="absolute bottom-0 right-0 bg-secondary text-secondary-foreground w-7 h-7 rounded-full flex items-center justify-center border-2 border-background">
+              {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Pencil className="w-3.5 h-3.5" />}
+            </span>
+          </button>
+
+          {menuOpen && (
+            <div className="absolute left-0 top-full mt-2 bg-card border border-border rounded-xl shadow-lg py-1.5 z-20 w-52">
               <button
                 type="button"
-                onClick={onRemoved}
-                className="inline-flex items-center gap-2 border border-border text-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-destructive/5 hover:text-destructive hover:border-destructive/40 transition-colors"
+                onClick={() => { setMenuOpen(false); inputRef.current?.click(); }}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-foreground hover:bg-secondary/10 transition-colors"
               >
-                <Trash2 className="w-4 h-4" /> Supprimer
+                <Camera className="w-4 h-4" /> {photoUrl ? "Modifier la photo" : "Ajouter une photo"}
               </button>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            JPG, PNG ou WEBP · 5 Mo max · recadrage carré automatique.
-          </p>
+              {photoUrl && (
+                <button
+                  type="button"
+                  onClick={() => { setMenuOpen(false); onRemoved(); }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-destructive hover:bg-destructive/5 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" /> Supprimer la photo
+                </button>
+              )}
+            </div>
+          )}
         </div>
-      </div>
-
-      <div
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={onDrop}
-        onClick={() => !uploading && inputRef.current?.click()}
-        className={`mt-4 border-2 border-dashed rounded-xl p-4 text-center text-sm cursor-pointer transition-colors ${
-          dragOver ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
-        }`}
-      >
-        <Upload className="w-5 h-5 mx-auto mb-1.5 text-muted-foreground" />
-        Glissez-déposez une photo ici, ou cliquez pour sélectionner.
+        <div className="flex-1">
+          <p className="text-sm font-medium text-foreground">Cliquez sur la photo pour la modifier</p>
+          <p className="text-xs text-muted-foreground mt-1">JPG, PNG ou WEBP · 5 Mo max · recadrage carré automatique.</p>
+        </div>
       </div>
 
       {error && <p className="text-xs text-destructive mt-2">{error}</p>}

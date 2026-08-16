@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/api/supabaseClient";
 import { CalendarDays, Plus, Trash2, Repeat, Ban, Loader2, X } from "lucide-react";
 import { JOURS } from "@/lib/creneaux";
 
@@ -16,11 +17,19 @@ export default function CoachDisponibilites() {
   };
   useEffect(() => {
     load().catch(() => {});
-    const params = new URLSearchParams(window.location.search);
-    const statut = params.get("google");
-    if (statut === "connecte") setGoogleConnecte(true);
-    if (statut === "erreur") setGoogleConnecte("erreur");
+    checkGoogleConnecte();
   }, []);
+
+  const checkGoogleConnecte = async () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("google") === "erreur") { setGoogleConnecte("erreur"); return; }
+    try {
+      const { data } = await supabase.from("coach_google_tokens").select("id").limit(1);
+      setGoogleConnecte(data && data.length > 0);
+    } catch {
+      setGoogleConnecte(false);
+    }
+  };
 
   const remove = async (id) => {
     if (!confirm("Supprimer cette disponibilité ?")) return;
@@ -47,9 +56,10 @@ export default function CoachDisponibilites() {
         <div>
           <h2 className="font-heading font-semibold text-foreground flex items-center gap-2"><CalendarDays className="w-5 h-5 text-accent" /> Google Agenda</h2>
           <p className="text-sm text-muted-foreground mt-1">
+            {googleConnecte === null && "Vérification..."}
             {googleConnecte === true && "Connecté — vos séances y apparaîtront automatiquement."}
             {googleConnecte === "erreur" && "La connexion a échoué, réessayez."}
-            {googleConnecte === null && "Connectez votre agenda pour y voir apparaître automatiquement vos séances."}
+            {googleConnecte === false && "Connectez votre agenda pour y voir apparaître automatiquement vos séances."}
           </p>
         </div>
         <a

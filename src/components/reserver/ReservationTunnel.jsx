@@ -14,7 +14,7 @@ const SESSION_TYPES = { diagnostic: "evaluation", decouverte: "seance_individuel
 const PONCTUEL = ["diagnostic", "decouverte"];
 
 export default function ReservationTunnel({ preselect }) {
-  const { user } = useAuth();
+  const { user, isLoadingAuth } = useAuth();
   const { recurrentes, blocages, reservees, loading: creneauxLoading } = useCreneaux();
   const [step, setStep] = useState(1);
   const [offreId, setOffreId] = useState(null);
@@ -23,6 +23,27 @@ export default function ReservationTunnel({ preselect }) {
   const [form, setForm] = useState({ name: "", email: "", phone: "", adresse: "" });
   const [card, setCard] = useState({ number: "", expiry: "", cvc: "", name: "" });
   const [zoneNote, setZoneNote] = useState("");
+
+  // Réservation toujours réalisée depuis l'espace client connecté (paiement
+  // Stripe réel) — on invite ici à créer un compte plutôt que de dupliquer
+  // le parcours de paiement sur le site public.
+  if (!isLoadingAuth && !user) {
+    return (
+      <div className="max-w-md mx-auto text-center py-16 px-4">
+        <Sparkles className="w-10 h-10 text-secondary mx-auto mb-5" />
+        <h1 className="font-heading text-2xl font-bold text-foreground mb-3">Créez votre compte pour réserver</h1>
+        <p className="text-sm text-muted-foreground mb-8">La réservation se fait depuis votre espace personnel — ça ne prend qu'une minute, et vous y retrouverez tout votre suivi ensuite.</p>
+        <div className="flex flex-col gap-3">
+          <Link to="/register?redirect=/espace-client/reserver/domicile" className="bg-primary text-primary-foreground py-3 rounded-xl font-semibold text-sm">Créer mon compte</Link>
+          <Link to="/login?redirect=/espace-client/reserver/domicile" className="text-sm text-muted-foreground hover:text-foreground">J'ai déjà un compte</Link>
+        </div>
+      </div>
+    );
+  }
+  if (user) {
+    window.location.href = "/espace-client/reserver/domicile";
+    return null;
+  }
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(null);
 

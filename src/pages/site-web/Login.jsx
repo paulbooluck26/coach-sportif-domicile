@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { translateAuthError } from "@/api/authClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +23,7 @@ export default function Login() {
       await base44.auth.loginViaEmailPassword(email, password);
       window.location.href = "/";
     } catch (err) {
-      setError(err.message || "Email ou mot de passe invalide");
+      setError(translateAuthError(err.message));
     } finally {
       setLoading(false);
     }

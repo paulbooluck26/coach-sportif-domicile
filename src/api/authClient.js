@@ -115,6 +115,25 @@ async function resendOtp(email) {
   return { sent: true };
 }
 
+// Supabase renvoie ses messages d'erreur en anglais — on les traduit ici
+// pour les messages les plus courants rencontrés par les clients.
+const MESSAGES_FR = {
+  'Invalid login credentials': 'Email ou mot de passe incorrect.',
+  'User already registered': 'Un compte existe déjà avec cet email.',
+  'Email not confirmed': "Veuillez confirmer votre email avant de vous connecter.",
+  'Password should be at least 6 characters': 'Le mot de passe doit contenir au moins 6 caractères.',
+  'Unable to validate email address: invalid format': 'Adresse email invalide.',
+  'New password should be different from the old password.': "Le nouveau mot de passe doit être différent de l'ancien.",
+};
+
+export function translateAuthError(message) {
+  if (!message) return "Une erreur est survenue. Veuillez réessayer.";
+  if (MESSAGES_FR[message]) return MESSAGES_FR[message];
+  const rateLimit = message.match(/after (\d+) seconds/);
+  if (rateLimit) return `Merci de patienter ${rateLimit[1]} secondes avant de réessayer.`;
+  return message;
+}
+
 export const authClient = {
   me,
   logout,

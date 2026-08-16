@@ -8,12 +8,19 @@ const HEURES = ["06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "
 export default function CoachDisponibilites() {
   const [dispos, setDispos] = useState(null);
   const [modal, setModal] = useState(null);
+  const [googleConnecte, setGoogleConnecte] = useState(null);
 
   const load = async () => {
     const data = await base44.entities.Disponibilite.list();
     setDispos(data);
   };
-  useEffect(() => { load().catch(() => {}); }, []);
+  useEffect(() => {
+    load().catch(() => {});
+    const params = new URLSearchParams(window.location.search);
+    const statut = params.get("google");
+    if (statut === "connecte") setGoogleConnecte(true);
+    if (statut === "erreur") setGoogleConnecte("erreur");
+  }, []);
 
   const remove = async (id) => {
     if (!confirm("Supprimer cette disponibilité ?")) return;
@@ -34,6 +41,23 @@ export default function CoachDisponibilites() {
           <h1 className="font-heading text-3xl font-bold text-foreground">Disponibilités</h1>
           <p className="text-sm text-muted-foreground mt-1">Définissez vos plages récurrentes et bloquez des dates ponctuelles.</p>
         </div>
+      </div>
+
+      <div className="bg-card border border-border rounded-lg p-6 flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="font-heading font-semibold text-foreground flex items-center gap-2"><CalendarDays className="w-5 h-5 text-accent" /> Google Agenda</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {googleConnecte === true && "Connecté — vos séances y apparaîtront automatiquement."}
+            {googleConnecte === "erreur" && "La connexion a échoué, réessayez."}
+            {googleConnecte === null && "Connectez votre agenda pour y voir apparaître automatiquement vos séances."}
+          </p>
+        </div>
+        <a
+          href="https://eppmrvywwsjckbwfepod.supabase.co/functions/v1/google-calendar-connect"
+          className="bg-primary text-primary-foreground px-4 py-2.5 rounded-md text-sm font-semibold whitespace-nowrap"
+        >
+          {googleConnecte === true ? "Reconnecter" : "Connecter Google Agenda"}
+        </a>
       </div>
 
       {/* Récurrentes */}

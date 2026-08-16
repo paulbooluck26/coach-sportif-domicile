@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { CalendarDays, Clock, MapPin, X, CheckCircle2, RotateCcw, StickyNote, List, CalendarRange, CalendarClock, Ban, UserX, PhoneCall } from "lucide-react";
 import ClientDetail from "@/components/coach/ClientDetail";
 import CoachSeancesCalendar from "@/components/coach/CoachSeancesCalendar";
+import { typeLabelSeance as typeLabel } from "@/lib/creneaux";
 import DemandeDetailModal from "@/components/coach/DemandeDetailModal";
 import { parseDateLocal } from "@/lib/creneaux";
 import { notifierRdv, fmtDate } from "@/lib/rdvNotifications";
@@ -234,6 +235,7 @@ function RdvRow({ rdv, onMove, onCancel, onComplete, onNoShow, onNote, onOpenCli
             {seance.location && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {seance.location}</span>}
           </div>
           {seance.notes && <p className="text-xs text-foreground/50 mt-2 italic">📝 {seance.notes}</p>}
+          {seance.status === "cancelled" && seance.motif_annulation && <p className="text-xs text-destructive/70 mt-2 italic">Motif : {seance.motif_annulation}</p>}
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -253,8 +255,4 @@ function RdvRow({ rdv, onMove, onCancel, onComplete, onNoShow, onNote, onOpenCli
       </div>
     </div>
   );
-}
-
-function typeLabel(t) {
-  return { seance_individuelle: "Séance indiv.", programme_personnalise: "Programme", evaluation: "Évaluation", bilan_initial: "Bilan initial" }[t] || "Séance";
 }

@@ -214,6 +214,10 @@ export default function MonProgramme() {
         </div>
       </section>
 
+      <p className="text-[11px] text-muted-foreground/70 text-center leading-relaxed px-4">
+        Avertissement — Pratiquez les exercices en respectant la technique et les temps de repos. Arrêtez immédiatement en cas de douleur ou de blessure. Ce programme se suit sous votre propre responsabilité.
+      </p>
+
       <Link
         to="/espace-client/reserver/programme"
         className="flex items-center justify-between gap-3 bg-card border border-border rounded-lg p-4 hover:border-accent/40 transition-colors"

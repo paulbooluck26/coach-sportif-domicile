@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Dumbbell, Target, Calendar, Play, CheckCircle2, XCircle, Clock, TrendingUp, RotateCcw } from "lucide-react";
+import { Dumbbell, Target, Calendar, Play, CheckCircle2, XCircle, Clock, TrendingUp, RotateCcw, Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { loadClientProjection } from "@/lib/projection";
 import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
@@ -213,6 +213,22 @@ export default function MonProgramme() {
           </div>
         </div>
       </section>
+
+      <Link
+        to="/espace-client/reserver/programme"
+        className="flex items-center justify-between gap-3 bg-card border border-border rounded-lg p-4 hover:border-accent/40 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-secondary/15 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-4 h-4 text-secondary" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-foreground">Envie d'explorer d'autres programmes ?</p>
+            <p className="text-xs text-muted-foreground">Découvrez ce que propose PHYSIS COACHING</p>
+          </div>
+        </div>
+        <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+      </Link>
     </div>
   );
 }

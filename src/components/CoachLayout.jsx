@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { LayoutDashboard, Users, CalendarDays, Dumbbell, Inbox, CreditCard, LogOut, Home, Clock, ShoppingBag, MessageCircle, Mail, Library } from "lucide-react";
+import { LayoutDashboard, Users, CalendarDays, Dumbbell, Inbox, CreditCard, LogOut, Home, Clock, ShoppingBag, MessageCircle, Mail, Library, Package, Tag } from "lucide-react";
 
 const nav = [
   { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
@@ -14,6 +14,8 @@ const nav = [
   { to: "/admin/commandes", label: "Commandes", icon: ShoppingBag, badgeKey: "commandes" },
   { to: "/admin/disponibilites", label: "Disponibilités", icon: Clock },
   { to: "/admin/paiements", label: "Paiements", icon: CreditCard },
+  { to: "/admin/catalogue", label: "Catalogue", icon: Package },
+  { to: "/admin/promotions", label: "Promotions", icon: Tag },
   { to: "/admin/emails", label: "Emails", icon: Mail },
   { to: "/admin/bibliotheque", label: "Bibliothèque", icon: Library },
 ];

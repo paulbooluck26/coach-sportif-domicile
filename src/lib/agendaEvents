@@ -1,0 +1,58 @@
+import { typeLabelSeance } from "@/lib/creneaux";
+
+// Une couleur cohérente par type de rendez-vous, réutilisée partout
+// (liste, jour, semaine, mois) — évite les incohérences entre les vues.
+export const TYPE_STYLES = {
+  seance_individuelle: { bg: "bg-secondary/25", border: "border-secondary", text: "text-foreground", dot: "bg-secondary", label: "Séance individuelle" },
+  programme_personnalise: { bg: "bg-accent/20", border: "border-accent", text: "text-foreground", dot: "bg-accent", label: "Programme personnalisé" },
+  evaluation: { bg: "bg-primary/10", border: "border-primary/40", text: "text-foreground", dot: "bg-primary/60", label: "Diagnostic FORGE" },
+  bilan_initial: { bg: "bg-muted", border: "border-border", text: "text-foreground", dot: "bg-muted-foreground", label: "Bilan initial" },
+  appel_bilan: { bg: "bg-secondary/40", border: "border-secondary", text: "text-foreground", dot: "bg-secondary", label: "Appel de bilan" },
+  appel_decouverte: { bg: "bg-accent/40", border: "border-accent", text: "text-foreground", dot: "bg-accent", label: "Appel découverte" },
+};
+
+export function styleFor(type) {
+  return TYPE_STYLES[type] || { bg: "bg-secondary/15", border: "border-border", text: "text-foreground", dot: "bg-secondary", label: typeLabelSeance(type) };
+}
+
+/**
+ * Construit une liste unifiée d'événements (séances + appels découverte
+ * confirmés) à partir des données brutes, en excluant systématiquement
+ * les rendez-vous annulés — un rendez-vous annulé n'a plus sa place dans
+ * les vues calendrier, seulement dans l'onglet "Annulés" de la liste.
+ */
+export function buildEvents(seances, appelsConfirmes, { includeCancelled = false } = {}) {
+  const seanceEvents = seances
+    .filter((s) => includeCancelled || s.status !== "cancelled")
+    .map((s) => ({
+      kind: "seance",
+      id: s.id,
+      date: s.date || "",
+      time: s.time || "",
+      duree: s.duration_minutes || 60,
+      type: s.session_type,
+      label: s.client_name || "Client",
+      status: s.status,
+      data: s,
+    }));
+
+  const appelEvents = appelsConfirmes.map((a) => ({
+    kind: "appel",
+    id: a.id,
+    date: a.date_souhaitee || "",
+    time: a.heure_souhaitee || "",
+    duree: 30,
+    type: "appel_decouverte",
+    label: a.name || "Client",
+    status: "confirme",
+    data: a,
+  }));
+
+  return [...seanceEvents, ...appelEvents];
+}
+
+export function timeToMinutes(t) {
+  if (!t) return 0;
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + (m || 0);
+}

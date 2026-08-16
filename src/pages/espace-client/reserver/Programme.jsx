@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { finaliserAchatProgramme } from "@/lib/reservationFlow";
+import { redirigerVersStripe } from "@/lib/stripeCheckout";
 import { useCreneaux } from "@/hooks/useCreneaux";
 import { creneauxDisponibles, dateStr, parseDateLocal } from "@/lib/creneaux";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, CheckCircle2, Loader2, Sparkles, Check, Lock, Phone, Video, CalendarPlus } from "lucide-react";
 import { downloadICS } from "@/lib/calendarExport";
 import { envoyerEmail } from "@/lib/emailSender";
@@ -44,6 +44,16 @@ export default function Programme() {
   const [programmeActif, setProgrammeActif] = useState(null);
   const [activeOfferIndex, setActiveOfferIndex] = useState(0);
   const offersScrollRef = useRef(null);
+  const [searchParams] = useSearchParams();
+  const stripeSessionId = searchParams.get("stripe_session_id");
+
+  useEffect(() => {
+    const offreParam = searchParams.get("offre");
+    if (stripeSessionId && offreParam) {
+      setOffreId(offreParam);
+      setStep("appel");
+    }
+  }, []);
 
   const handleOffersScroll = () => {
     const el = offersScrollRef.current;
@@ -84,25 +94,22 @@ export default function Programme() {
         if (profiles[0]) await base44.entities.ClientProfile.update(profiles[0].id, { objectif });
       } catch (_) {}
 
-      await finaliserAchatProgramme({
-        user,
-        programmeNom: offre.nom,
-        prix: offre.prix,
-        commandePayload: {
+      await redirigerVersStripe({
+        nom: `Programme ${offre.nom}`,
+        montant: offre.prix,
+        metadata: {
+          type: "programme",
           client_id: user.id,
-          client_nom: user.full_name || user.email,
-          client_email: user.email,
+          programme_nom: offre.nom,
           offre: offre.id,
-          duree_semaines: offre.duree,
-          montant: offre.prix,
-          date_achat: new Date().toISOString().split("T")[0],
-          statut: "en_preparation",
+          duree_semaines: String(offre.duree),
+          objectif,
         },
+        successPath: `/espace-client/reserver/programme?offre=${offre.id}`,
+        cancelPath: "/espace-client/reserver/programme",
       });
-      setStep("appel");
     } catch (e) {
-      alert("Erreur lors du paiement. Veuillez réessayer.");
-    } finally {
+      alert("Erreur lors de la préparation du paiement. Veuillez réessayer.");
       setPaying(false);
     }
   };
@@ -247,15 +254,10 @@ export default function Programme() {
             <p className="text-xs text-muted-foreground mt-1">Ça aide votre coach à construire un programme adapté dès le départ.</p>
           </div>
           <div><label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Nom sur la carte</label><input value={card.name} onChange={e => setCard({ ...card, name: e.target.value })} placeholder="Jean Dupont" className="w-full border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent" /></div>
-          <div><label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Numéro de carte</label><input value={card.number} onChange={e => setCard({ ...card, number: e.target.value })} placeholder="4242 4242 4242 4242" className="w-full border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent" /></div>
-          <div className="flex gap-3">
-            <div className="flex-1"><label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Expiration</label><input value={card.exp} onChange={e => setCard({ ...card, exp: e.target.value })} placeholder="MM/AA" className="w-full border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent" /></div>
-            <div className="flex-1"><label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">CVC</label><input value={card.cvc} onChange={e => setCard({ ...card, cvc: e.target.value })} placeholder="123" className="w-full border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent" /></div>
-          </div>
         </div>
 
         <button onClick={acheter} disabled={paying || !objectif.trim()} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">
-          {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Traitement...</> : <><Lock className="w-4 h-4" /> Payer {offre.prix}€</>}
+          {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> Payer {offre.prix}€</>}
         </button>
       </div>
     );

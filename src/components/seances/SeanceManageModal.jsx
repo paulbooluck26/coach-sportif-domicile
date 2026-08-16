@@ -14,6 +14,7 @@ export default function SeanceManageModal({ seance, onClose, onUpdated }) {
   const [loading, setLoading] = useState(false);
   const [resultat, setResultat] = useState(null);
   const [erreur, setErreur] = useState("");
+  const [motif, setMotif] = useState("");
 
   const remboursable = peutAnnulerAvecRemboursement(seance);
   const deplaçable = peutDeplacer(seance);
@@ -30,7 +31,7 @@ export default function SeanceManageModal({ seance, onClose, onUpdated }) {
     setLoading(true);
     setErreur("");
     try {
-      const res = await annulerSeance({ seance, user });
+      const res = await annulerSeance({ seance, user, motif: motif.trim() });
       setResultat({ type: "annulation", ...res });
     } catch (e) {
       setErreur(e.message || "Une erreur est survenue.");
@@ -119,6 +120,16 @@ export default function SeanceManageModal({ seance, onClose, onUpdated }) {
                 ? "Vous annulez à plus de 24h : remboursement intégral, ou crédit recrédité si la séance venait d'un carnet."
                 : "Vous annulez à moins de 24h : aucun remboursement ni crédit ne sera rendu."}
             </p>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Raison (facultatif)</label>
+              <textarea
+                value={motif}
+                onChange={(e) => setMotif(e.target.value)}
+                placeholder="Ex : imprévu, contretemps, changement de programme..."
+                rows={2}
+                className="w-full border border-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-accent resize-none"
+              />
+            </div>
             {erreur && <p className="text-sm text-destructive">{erreur}</p>}
             <div className="flex gap-3">
               <button onClick={() => setMode("details")} className="flex-1 py-3 rounded-xl font-medium text-sm border border-border text-muted-foreground">Retour</button>

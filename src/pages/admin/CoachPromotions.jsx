@@ -17,7 +17,7 @@ export default function CoachPromotions() {
   const load = async () => {
     const [c, u] = await Promise.all([
       base44.entities.CodePromo.list("-created_date"),
-      base44.entities.UtilisationCodePromo.list(),
+      base44.entities.UtilisationCodePromo.list("-date_utilisation"),
     ]);
     setCodes(c);
     setUtilisations(u);

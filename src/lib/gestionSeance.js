@@ -32,12 +32,12 @@ export function peutDeplacer(seance) {
 /**
  * Annule une séance. Retourne { remboursement: boolean, credit_rendu: boolean }.
  */
-export async function annulerSeance({ seance, user }) {
+export async function annulerSeance({ seance, user, motif }) {
   const remboursable = peutAnnulerAvecRemboursement(seance);
   let remboursement = false;
   let creditRendu = false;
 
-  await base44.entities.Seance.update(seance.id, { status: "cancelled" });
+  await base44.entities.Seance.update(seance.id, { status: "cancelled", motif_annulation: motif || null });
 
   if (remboursable) {
     // Séance payée à l'unité (liée à un Paiement direct).

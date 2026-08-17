@@ -101,7 +101,7 @@ export default function Programme() {
           type: "programme",
           client_id: user.id,
           programme_nom: offre.nom,
-          offre: offre.id,
+          offre_id: offre.id,
           duree_semaines: String(offre.duree),
           objectif,
         },

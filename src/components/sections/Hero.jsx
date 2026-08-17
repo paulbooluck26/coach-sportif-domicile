@@ -15,11 +15,11 @@ export default function Hero() {
 
       <div className="relative max-w-7xl mx-auto px-6 lg:px-10 w-full">
         <div className="max-w-2xl">
-          <p className="text-xs font-semibold tracking-[0.25em] text-accent mb-6 animate-fade-up uppercase" style={{ animationDelay: "0.1s", opacity: 0 }}>
+          <p className="text-sm md:text-base font-bold tracking-[0.2em] text-accent mb-6 animate-fade-up uppercase" style={{ animationDelay: "0.1s", opacity: 0 }}>
             PHYSIS COACHING
           </p>
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-heading font-bold text-primary-foreground leading-[1.05] uppercase animate-fade-up" style={{ animationDelay: "0.2s", opacity: 0 }}>
-            L'expertise au service de votre progression.
+            L'expertise au service de votre progression
           </h1>
           <p className="mt-8 text-lg text-primary-foreground/80 leading-relaxed max-w-lg animate-fade-up" style={{ animationDelay: "0.4s", opacity: 0 }}>
             Coaching sportif personnalisé à Colmar et alentours, à domicile, en ligne ou dans le cadre de votre club ou entreprise.

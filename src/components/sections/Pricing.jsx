@@ -70,7 +70,7 @@ export default function Pricing() {
     <section id="pricing" className="py-24 lg:py-32 max-w-7xl mx-auto px-6 lg:px-10">
       <div className="text-center max-w-2xl mx-auto mb-16">
         <p className="text-xs font-semibold tracking-label text-secondary mb-4">COACHING À DOMICILE</p>
-        <h2 className="text-4xl lg:text-5xl font-heading font-bold text-primary leading-tight mb-6">
+        <h2 className="text-6xl lg:text-8xl font-heading font-bold text-primary leading-tight mb-6">
           Une transparence totale.
         </h2>
         <p className="text-muted-foreground leading-relaxed">

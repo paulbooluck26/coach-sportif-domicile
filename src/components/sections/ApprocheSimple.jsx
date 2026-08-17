@@ -11,7 +11,7 @@ export default function ApprocheSimple() {
     <section className="py-24 lg:py-32 max-w-7xl mx-auto px-6 lg:px-10">
       <div className="grid lg:grid-cols-2 gap-16 items-center">
         <div>
-          <p className="text-xs font-semibold tracking-[0.25em] text-secondary mb-4 uppercase">Une approche simple</p>
+          <p className="text-sm md:text-base font-bold tracking-[0.2em] text-secondary mb-4 uppercase">Une approche simple</p>
           <p className="text-lg text-foreground/80 leading-relaxed max-w-md">
             Pas de programme standard. Pas de séance improvisée. Chaque accompagnement commence par comprendre votre situation, vos objectifs et votre niveau. Ensuite, on construit une progression adaptée et on l'ajuste au fil du temps.
           </p>

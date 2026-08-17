@@ -45,8 +45,8 @@ export default function Footer() {
             © {new Date().getFullYear()} Physis Coaching. Auto-entrepreneur — TVA non applicable, art. 293B CGI. Tous droits réservés.
           </p>
           <div className="flex gap-6 shrink-0">
-            <Link to="/" className="text-xs text-primary-foreground/40 hover:text-accent transition-colors">Mentions légales</Link>
-            <Link to="/" className="text-xs text-primary-foreground/40 hover:text-accent transition-colors">Confidentialité</Link>
+            <Link to="/mentions-legales" className="text-xs text-primary-foreground/40 hover:text-accent transition-colors">Mentions légales</Link>
+            <Link to="/confidentialite" className="text-xs text-primary-foreground/40 hover:text-accent transition-colors">Confidentialité</Link>
           </div>
         </div>
       </div>

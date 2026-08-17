@@ -33,8 +33,8 @@ export default function Services() {
     <section id="accompagnements" className="py-24 lg:py-32 bg-muted/30">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="max-w-2xl mb-16">
-          <p className="text-xs font-semibold tracking-[0.25em] text-secondary mb-4 uppercase">Les accompagnements</p>
-          <h2 className="text-4xl lg:text-5xl font-heading font-bold text-primary leading-tight uppercase">
+          <p className="text-sm md:text-base font-bold tracking-[0.2em] text-secondary mb-4 uppercase">Les accompagnements</p>
+          <h2 className="text-6xl lg:text-8xl font-heading font-bold text-primary leading-tight uppercase">
             Un accompagnement adapté à votre objectif.
           </h2>
           <p className="text-muted-foreground mt-4">La même expertise, adaptée à votre situation.</p>
@@ -58,7 +58,7 @@ export default function Services() {
                   <h3 className="text-xl font-heading font-semibold text-primary">{s.title}</h3>
                 </div>
                 <p className="text-muted-foreground leading-relaxed mb-6">{s.desc}</p>
-                <Link to={s.link} className="inline-flex items-center gap-2 text-sm font-semibold text-secondary hover:gap-3 transition-all">
+                <Link to={s.link} className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-5 py-2.5 rounded-full text-sm font-semibold hover:scale-105 transition-all duration-300">
                   {s.cta}
                   <ArrowRight className="w-4 h-4" />
                 </Link>

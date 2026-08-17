@@ -12,7 +12,7 @@ export default function CommentCaFonctionne() {
   return (
     <section className="py-24 lg:py-32 bg-primary">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
-        <h2 className="text-4xl lg:text-5xl font-heading font-bold text-primary-foreground leading-tight uppercase max-w-2xl mb-16">
+        <h2 className="text-6xl lg:text-8xl font-heading font-bold text-primary-foreground leading-tight uppercase max-w-2xl mb-16">
           Votre progression commence avant la première séance.
         </h2>
 

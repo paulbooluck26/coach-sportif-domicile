@@ -24,7 +24,7 @@ export default function Testimonials() {
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <p className="text-xs font-semibold tracking-label text-secondary mb-4">TÉMOIGNAGES</p>
-          <h2 className="text-4xl lg:text-5xl font-heading font-bold leading-tight">
+          <h2 className="text-6xl lg:text-8xl font-heading font-bold leading-tight">
             Ce qu'ils disent.
           </h2>
         </div>

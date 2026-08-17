@@ -39,7 +39,13 @@ export default function PublicNavbar() {
       }`}
     >
       <nav className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between">
-        <Link to="/" className={`font-heading font-bold text-lg tracking-display transition-colors ${solid ? "text-primary" : "text-primary-foreground"}`}>
+        <Link to="/" className={`flex items-center gap-2.5 font-heading font-bold text-lg tracking-display transition-colors ${solid ? "text-primary" : "text-primary-foreground"}`}>
+          <img
+            src="/logo-physis.png"
+            alt="Physis Coaching"
+            className="h-8 w-auto transition-all duration-300"
+            style={solid ? { filter: "invert(1)" } : undefined}
+          />
           PHYSIS COACHING
         </Link>
 

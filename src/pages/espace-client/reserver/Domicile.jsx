@@ -81,6 +81,7 @@ export default function Domicile() {
           metadata: {
             type: "seance",
             client_id: user.id,
+            offre_id: offreId,
             session_type: SESSION_TYPE[offreId],
             date,
             time: heure,

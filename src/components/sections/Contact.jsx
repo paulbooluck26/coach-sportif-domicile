@@ -39,10 +39,10 @@ export default function Contact() {
           </p>
           <div className="space-y-4 text-sm">
             <p className="text-muted-foreground">
-              <span className="font-semibold text-primary">Téléphone :</span> 06 12 34 56 78
+              <span className="font-semibold text-primary">Téléphone :</span> 06 98 18 14 28
             </p>
             <p className="text-muted-foreground">
-              <span className="font-semibold text-primary">Email :</span> contact@PHYSISCOACHING.fr
+              <span className="font-semibold text-primary">Email :</span> contact@physis-coaching.fr
             </p>
             <p className="text-muted-foreground">
               <span className="font-semibold text-primary">Zone :</span> Colmar et alentours (Haut-Rhin)

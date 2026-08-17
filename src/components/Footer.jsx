@@ -7,43 +7,46 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-16">
         <div className="grid md:grid-cols-3 gap-12">
           <div>
-            <p className="font-heading font-bold text-xl tracking-display mb-4">PHYSIS COACHING</p>
+            <p className="font-heading font-bold text-xl tracking-wide uppercase mb-4">PHYSIS COACHING</p>
             <p className="text-sm text-primary-foreground/60 leading-relaxed max-w-xs">
-              Coach sportif à domicile. La performance taillée sur mesure, dans le confort de votre espace.
+              Coaching sportif à domicile — Colmar et alentours.
             </p>
           </div>
 
           <div>
-            <p className="text-xs font-semibold tracking-label text-secondary mb-4">Navigation</p>
+            <p className="text-xs font-semibold tracking-[0.2em] text-accent mb-4 uppercase">Navigation</p>
             <div className="flex flex-col gap-3">
-              <Link to="/" className="text-sm text-primary-foreground/70 hover:text-secondary transition-colors">Accueil</Link>
-              <Link to="/reserver" className="text-sm text-primary-foreground/70 hover:text-secondary transition-colors">Réserver</Link>
-              <Link to="/login" className="text-sm text-primary-foreground/70 hover:text-secondary transition-colors">Espace client</Link>
-              <Link to="/admin" className="text-sm text-primary-foreground/70 hover:text-secondary transition-colors">Espace coach</Link>
+              <Link to="/" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors">Accueil</Link>
+              <a href="/#accompagnements" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors">Services</a>
+              <Link to="/reserver" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors">Tarifs</Link>
+              <a href="/#application" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors">App</a>
+              <a href="/#contact" className="text-sm text-primary-foreground/70 hover:text-accent transition-colors">Contact</a>
             </div>
           </div>
 
           <div>
-            <p className="text-xs font-semibold tracking-label text-secondary mb-4">Contact</p>
+            <p className="text-xs font-semibold tracking-[0.2em] text-accent mb-4 uppercase">Contact</p>
             <div className="flex flex-col gap-3">
-              <a href="tel:+33612345678" className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-secondary transition-colors">
-                <Phone className="w-4 h-4" /> 06 12 34 56 78
+              <a href="tel:+33698181428" className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-accent transition-colors">
+                <Phone className="w-4 h-4" /> 06 98 18 14 28
               </a>
-              <a href="mailto:contact@PHYSISCOACHING.fr" className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-secondary transition-colors">
-                <Mail className="w-4 h-4" /> contact@PHYSISCOACHING.fr
+              <a href="mailto:contact@physis-coaching.fr" className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-accent transition-colors">
+                <Mail className="w-4 h-4" /> contact@physis-coaching.fr
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-secondary transition-colors">
-                <Instagram className="w-4 h-4" /> @PHYSISCOACHING
+              <a href="https://instagram.com/physiscoachingcolmar" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-accent transition-colors">
+                <Instagram className="w-4 h-4" /> @physiscoachingcolmar
               </a>
             </div>
           </div>
         </div>
 
         <div className="mt-12 pt-8 border-t border-primary-foreground/10 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-primary-foreground/40">© {new Date().getFullYear()} PHYSIS COACHING. Tous droits réservés.</p>
-          <div className="flex gap-6">
-            <Link to="/" className="text-xs text-primary-foreground/40 hover:text-secondary transition-colors">Mentions légales</Link>
-            <Link to="/" className="text-xs text-primary-foreground/40 hover:text-secondary transition-colors">Confidentialité</Link>
+          <p className="text-xs text-primary-foreground/40 text-center sm:text-left">
+            © {new Date().getFullYear()} Physis Coaching. Auto-entrepreneur — TVA non applicable, art. 293B CGI. Tous droits réservés.
+          </p>
+          <div className="flex gap-6 shrink-0">
+            <Link to="/" className="text-xs text-primary-foreground/40 hover:text-accent transition-colors">Mentions légales</Link>
+            <Link to="/" className="text-xs text-primary-foreground/40 hover:text-accent transition-colors">Confidentialité</Link>
           </div>
         </div>
       </div>

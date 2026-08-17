@@ -5,24 +5,24 @@ const REPERES = ["Programmes", "Séances", "Réservations", "Suivi"];
 
 export default function AppExperience() {
   return (
-    <section id="application" className="py-24 lg:py-32 bg-primary overflow-hidden">
+    <section id="application" className="py-24 lg:py-32 bg-muted/40 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         <div className="max-w-xl">
-          <p className="text-xs font-semibold tracking-[0.25em] text-accent mb-4 uppercase">L'application</p>
-          <h2 className="text-4xl lg:text-5xl font-heading font-bold text-primary-foreground leading-tight uppercase">
+          <p className="text-sm md:text-base font-bold tracking-[0.2em] text-secondary mb-4 uppercase">L'application</p>
+          <h2 className="text-6xl lg:text-8xl font-heading font-bold text-primary leading-tight uppercase">
             Une application pensée pour votre progression.
           </h2>
-          <p className="text-primary-foreground/70 mt-6 leading-relaxed">
+          <p className="text-muted-foreground mt-6 leading-relaxed">
             L'application Physis permet de retrouver vos programmes, suivre vos séances, réserver vos rendez-vous et garder le lien avec votre coach.
           </p>
           <div className="flex flex-wrap gap-3 mt-8">
             {REPERES.map((r) => (
-              <span key={r} className="text-xs font-medium text-primary-foreground bg-primary-foreground/10 px-4 py-2 rounded-full">{r}</span>
+              <span key={r} className="text-xs font-medium text-primary bg-accent/15 px-4 py-2 rounded-full">{r}</span>
             ))}
           </div>
           <Link
             to="/register"
-            className="group inline-flex items-center gap-2 mt-10 px-8 py-4 bg-accent text-accent-foreground rounded-full text-sm font-semibold hover:scale-105 transition-all duration-300"
+            className="group inline-flex items-center gap-2 mt-10 px-8 py-4 bg-primary text-primary-foreground rounded-full text-sm font-semibold hover:scale-105 transition-all duration-300"
           >
             Découvrir l'application
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

@@ -19,8 +19,8 @@ export default function Clubs() {
       </div>
       <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
         <div className="max-w-2xl mb-16">
-          <p className="text-xs font-semibold tracking-[0.25em] text-accent mb-4 uppercase">Clubs & entreprises</p>
-          <h2 className="text-4xl lg:text-5xl font-heading font-bold leading-tight mb-6 uppercase">
+          <p className="text-sm md:text-base font-bold tracking-[0.2em] text-accent mb-4 uppercase">Clubs & entreprises</p>
+          <h2 className="text-6xl lg:text-8xl font-heading font-bold leading-tight mb-6 uppercase">
             Interventions pour clubs et entreprises.
           </h2>
           <p className="text-lg text-primary-foreground/70 leading-relaxed">

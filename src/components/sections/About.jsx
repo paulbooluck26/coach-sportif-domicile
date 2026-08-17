@@ -5,13 +5,13 @@ export default function About() {
         <div className="relative">
           <div className="aspect-[4/5] rounded-2xl overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&q=80"
+              src="/coach-paul.png"
               alt="Paul Booluck, coach PHYSIS COACHING"
               className="w-full h-full object-cover"
             />
           </div>
           <div className="absolute -bottom-6 -right-6 lg:-right-12 bg-background border border-accent/30 rounded-xl px-8 py-6 shadow-xl max-w-[200px]">
-            <p className="text-3xl font-heading font-bold text-primary">XX+</p>
+            <p className="text-3xl font-heading font-bold text-primary">200+</p>
             <p className="text-xs text-muted-foreground tracking-wide mt-1 uppercase">Clients accompagnés</p>
           </div>
         </div>
@@ -29,18 +29,14 @@ export default function About() {
               Mon parcours m'a amené à évoluer dans des environnements différents, en France comme à l'étranger, avec une même conviction : le bon entraînement n'est pas celui qui est le plus compliqué, mais celui qui est adapté à la personne et capable de la faire progresser. Rigueur, préparation et constance sont au cœur de mon approche du coaching.
             </p>
           </div>
-          <div className="mt-10 grid grid-cols-3 gap-4 pt-8 border-t border-accent/30">
+          <div className="mt-10 grid grid-cols-2 gap-6 pt-8 border-t border-accent/30 max-w-xs">
             <div>
-              <p className="text-2xl font-heading font-bold text-primary">XX+</p>
-              <p className="text-xs text-muted-foreground mt-1">Années d'expérience</p>
+              <p className="text-2xl font-heading font-bold text-primary">200+</p>
+              <p className="text-xs text-muted-foreground mt-1">Clients accompagnés</p>
             </div>
             <div>
-              <p className="text-2xl font-heading font-bold text-primary">XX%</p>
-              <p className="text-xs text-muted-foreground mt-1">À domicile</p>
-            </div>
-            <div>
-              <p className="text-2xl font-heading font-bold text-primary">24h</p>
-              <p className="text-xs text-muted-foreground mt-1">Annulation gratuite</p>
+              <p className="text-2xl font-heading font-bold text-primary">6</p>
+              <p className="text-xs text-muted-foreground mt-1">Ans d'expérience</p>
             </div>
           </div>
           <div className="mt-6 flex flex-wrap gap-3">

@@ -10,11 +10,15 @@ export default function About() {
               className="w-full h-full object-cover"
             />
           </div>
+          <div className="absolute -bottom-6 -right-6 lg:-right-12 bg-background border border-accent/30 rounded-xl px-8 py-6 shadow-xl max-w-[200px]">
+            <p className="text-3xl font-heading font-bold text-primary">XX+</p>
+            <p className="text-xs text-muted-foreground tracking-wide mt-1 uppercase">Clients accompagnés</p>
+          </div>
         </div>
 
         <div>
-          <p className="text-xs font-semibold tracking-[0.25em] text-secondary mb-4 uppercase">Le coach</p>
-          <h2 className="text-4xl lg:text-5xl font-heading font-bold text-primary leading-tight mb-8 uppercase">
+          <p className="text-sm md:text-base font-bold tracking-[0.2em] text-secondary mb-4 uppercase">Le coach</p>
+          <h2 className="text-6xl lg:text-8xl font-heading font-bold text-primary leading-tight mb-8 uppercase">
             Une expertise construite sur le terrain.
           </h2>
           <div className="space-y-6 text-base text-muted-foreground leading-relaxed">
@@ -22,15 +26,25 @@ export default function About() {
               Je suis Paul Booluck, coach sportif diplômé BPJEPS Activités de la Forme.
             </p>
             <p>
-              Mon parcours m'a amené à évoluer dans des environnements différents, en France comme à l'étranger, avec une même conviction : le bon entraînement n'est pas celui qui est le plus compliqué, mais celui qui est adapté à la personne et capable de la faire progresser.
-            </p>
-            <p>
-              Ancien membre du 3e RPIMa, j'ai également développé une culture de la rigueur, de la préparation et de la constance que j'intègre aujourd'hui dans mon approche du coaching.
+              Mon parcours m'a amené à évoluer dans des environnements différents, en France comme à l'étranger, avec une même conviction : le bon entraînement n'est pas celui qui est le plus compliqué, mais celui qui est adapté à la personne et capable de la faire progresser. Rigueur, préparation et constance sont au cœur de mon approche du coaching.
             </p>
           </div>
-          <div className="mt-10 flex flex-wrap gap-3 pt-8 border-t border-accent/30">
+          <div className="mt-10 grid grid-cols-3 gap-4 pt-8 border-t border-accent/30">
+            <div>
+              <p className="text-2xl font-heading font-bold text-primary">XX+</p>
+              <p className="text-xs text-muted-foreground mt-1">Années d'expérience</p>
+            </div>
+            <div>
+              <p className="text-2xl font-heading font-bold text-primary">XX%</p>
+              <p className="text-xs text-muted-foreground mt-1">À domicile</p>
+            </div>
+            <div>
+              <p className="text-2xl font-heading font-bold text-primary">24h</p>
+              <p className="text-xs text-muted-foreground mt-1">Annulation gratuite</p>
+            </div>
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3">
             <span className="text-xs font-medium text-primary bg-accent/15 px-4 py-2 rounded-full">BPJEPS Activités de la Forme</span>
-            <span className="text-xs font-medium text-primary bg-accent/15 px-4 py-2 rounded-full">3e RPIMa</span>
             <span className="text-xs font-medium text-primary bg-accent/15 px-4 py-2 rounded-full">Expérience France & international</span>
           </div>
         </div>

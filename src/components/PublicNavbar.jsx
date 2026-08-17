@@ -4,8 +4,8 @@ import { useAuth } from "@/lib/AuthContext";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
-  { label: "Le Coach", href: "/#about" },
-  { label: "Services", href: "/#services" },
+  { label: "Le Coach", href: "/#coach" },
+  { label: "Services", href: "/#accompagnements" },
   { label: "App Mobile", href: "/#application" },
   { label: "Témoignages", href: "/#testimonials" },
   { label: "Contact", href: "/#contact" },
@@ -55,8 +55,11 @@ export default function PublicNavbar() {
           ))}
         </div>
 
-        <div className="hidden lg:flex items-center gap-4">
-          <Link to={espaceLink} className={`text-sm font-medium transition-colors ${solid ? "text-primary/70 hover:text-secondary" : "text-primary-foreground/80 hover:text-primary-foreground"}`}>
+        <div className="hidden lg:flex items-center gap-3">
+          <Link
+            to={espaceLink}
+            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${solid ? "bg-primary text-primary-foreground hover:opacity-90" : "bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20"}`}
+          >
             Mon espace
           </Link>
           {isReserver ? (
@@ -69,7 +72,7 @@ export default function PublicNavbar() {
           ) : (
             <Link
               to="/offres"
-              className="px-6 py-2.5 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold hover:scale-105 hover:shadow-lg transition-all duration-300"
+              className="px-6 py-2.5 bg-accent text-accent-foreground rounded-full text-sm font-semibold uppercase tracking-wide hover:scale-105 hover:shadow-lg transition-all duration-300"
             >
               Réserver
             </Link>
@@ -90,14 +93,14 @@ export default function PublicNavbar() {
               </a>
             ))}
             <div className="h-px bg-accent/30" />
-            <Link to={espaceLink} className="text-sm font-medium text-primary/80">Mon espace</Link>
+            <Link to={espaceLink} className="px-6 py-3 bg-primary text-primary-foreground rounded-full text-sm font-semibold text-center">Mon espace</Link>
             {isReserver ? (
               <Link to="/" className="px-6 py-3 border border-primary/40 text-primary rounded-full text-sm font-semibold text-center">
                 Retour à l'accueil
               </Link>
             ) : (
-              <Link to="/offres" className="px-6 py-3 bg-secondary text-secondary-foreground rounded-full text-sm font-semibold text-center">
-                Réserver une séance
+              <Link to="/offres" className="px-6 py-3 bg-accent text-accent-foreground rounded-full text-sm font-semibold uppercase tracking-wide text-center">
+                Réserver
               </Link>
             )}
           </div>

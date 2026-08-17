@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@400;500;600;700;800;900&family=Public+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,65 +6,65 @@
 
 @layer base {
   :root {
-    --background: 60 14% 97.6%;
-    --foreground: 0 0% 10%;
-    --card: 60 14% 99%;
-    --card-foreground: 0 0% 10%;
-    --popover: 60 14% 99%;
-    --popover-foreground: 0 0% 10%;
-    --primary: 88 24% 17%;
-    --primary-foreground: 60 14% 97.6%;
-    --secondary: 76 18% 48%;
-    --secondary-foreground: 60 14% 97.6%;
-    --muted: 37 27% 93%;
-    --muted-foreground: 88 10% 35%;
-    --accent: 37 27% 68.6%;
-    --accent-foreground: 88 24% 17%;
-    --destructive: 0 72% 40%;
-    --destructive-foreground: 60 14% 97.6%;
-    --border: 37 20% 86%;
-    --input: 37 20% 86%;
-    --ring: 76 18% 48%;
-    --chart-1: 88 24% 17%;
-    --chart-2: 76 18% 48%;
-    --chart-3: 37 27% 68.6%;
-    --chart-4: 88 20% 35%;
-    --chart-5: 76 25% 60%;
+    --background: 37.5 30.8% 94.9%;
+    --foreground: 45 6.7% 11.8%;
+    --card: 37.5 30.8% 98%;
+    --card-foreground: 45 6.7% 11.8%;
+    --popover: 37.5 30.8% 98%;
+    --popover-foreground: 45 6.7% 11.8%;
+    --primary: 132 13.2% 14.9%;
+    --primary-foreground: 37.5 30.8% 94.9%;
+    --secondary: 132 12% 38%;
+    --secondary-foreground: 37.5 30.8% 94.9%;
+    --muted: 37.5 20% 91%;
+    --muted-foreground: 132 8% 32%;
+    --accent: 34.9 36.6% 60.4%;
+    --accent-foreground: 132 13.2% 14.9%;
+    --destructive: 0 60% 38%;
+    --destructive-foreground: 37.5 30.8% 94.9%;
+    --border: 37.5 18% 85%;
+    --input: 37.5 18% 85%;
+    --ring: 34.9 36.6% 60.4%;
+    --chart-1: 132 13.2% 14.9%;
+    --chart-2: 132 12% 38%;
+    --chart-3: 34.9 36.6% 60.4%;
+    --chart-4: 132 20% 28%;
+    --chart-5: 34.9 30% 50%;
     --radius: 0.75rem;
-    --font-heading: 'Outfit', ui-sans-serif, system-ui, sans-serif;
-    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --font-display: 'Outfit', ui-sans-serif, system-ui, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --sidebar-background: 88 24% 17%;
-    --sidebar-foreground: 60 14% 97.6%;
-    --sidebar-primary: 76 18% 48%;
-    --sidebar-primary-foreground: 60 14% 97.6%;
-    --sidebar-accent: 88 18% 25%;
-    --sidebar-accent-foreground: 60 14% 97.6%;
-    --sidebar-border: 88 18% 25%;
-    --sidebar-ring: 76 18% 48%;
+    --font-heading: 'Big Shoulders Display', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Public Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Big Shoulders Display', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --sidebar-background: 132 13.2% 14.9%;
+    --sidebar-foreground: 37.5 30.8% 94.9%;
+    --sidebar-primary: 34.9 36.6% 60.4%;
+    --sidebar-primary-foreground: 132 13.2% 14.9%;
+    --sidebar-accent: 132 12% 22%;
+    --sidebar-accent-foreground: 37.5 30.8% 94.9%;
+    --sidebar-border: 132 12% 22%;
+    --sidebar-ring: 34.9 36.6% 60.4%;
   }
 
   .dark {
-    --background: 88 24% 10%;
-    --foreground: 60 14% 97.6%;
-    --card: 88 24% 14%;
-    --card-foreground: 60 14% 97.6%;
-    --popover: 88 24% 14%;
-    --popover-foreground: 60 14% 97.6%;
-    --primary: 76 18% 48%;
-    --primary-foreground: 88 24% 10%;
-    --secondary: 88 18% 25%;
-    --secondary-foreground: 60 14% 97.6%;
-    --muted: 88 18% 20%;
-    --muted-foreground: 37 15% 60%;
-    --accent: 37 27% 68.6%;
-    --accent-foreground: 88 24% 10%;
-    --destructive: 0 62% 45%;
-    --destructive-foreground: 60 14% 97.6%;
-    --border: 88 18% 25%;
-    --input: 88 18% 25%;
-    --ring: 76 18% 48%;
+    --background: 132 13.2% 9%;
+    --foreground: 37.5 30.8% 94.9%;
+    --card: 132 13.2% 13%;
+    --card-foreground: 37.5 30.8% 94.9%;
+    --popover: 132 13.2% 13%;
+    --popover-foreground: 37.5 30.8% 94.9%;
+    --primary: 34.9 36.6% 60.4%;
+    --primary-foreground: 132 13.2% 9%;
+    --secondary: 132 12% 22%;
+    --secondary-foreground: 37.5 30.8% 94.9%;
+    --muted: 132 12% 18%;
+    --muted-foreground: 37.5 15% 65%;
+    --accent: 34.9 36.6% 60.4%;
+    --accent-foreground: 132 13.2% 9%;
+    --destructive: 0 55% 45%;
+    --destructive-foreground: 37.5 30.8% 94.9%;
+    --border: 132 12% 22%;
+    --input: 132 12% 22%;
+    --ring: 34.9 36.6% 60.4%;
   }
 }
 

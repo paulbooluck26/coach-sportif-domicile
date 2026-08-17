@@ -81,7 +81,7 @@ export default function AppelDecouverte() {
   return (
     <div className="min-h-screen pt-32 pb-20 px-6">
       <div className="max-w-3xl mx-auto">
-        <button onClick={() => navigate("/reserver")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-8">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-8">
           <ArrowLeft className="w-4 h-4" /> Retour
         </button>
 

@@ -30,7 +30,7 @@ export default function Contact() {
       <div className="grid lg:grid-cols-2 gap-16">
         <div>
           <p className="text-xs font-semibold tracking-label text-secondary mb-4">CONTACT</p>
-          <h2 className="text-4xl lg:text-5xl font-heading font-bold text-primary leading-tight mb-6">
+          <h2 className="text-6xl lg:text-8xl font-heading font-bold text-primary leading-tight mb-6">
             Une question ?<br />Parlons-en.
           </h2>
           <p className="text-muted-foreground leading-relaxed mb-8 max-w-md">

@@ -26,10 +26,10 @@ export default function Hero() {
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 animate-fade-up" style={{ animationDelay: "0.6s", opacity: 0 }}>
             <Link
-              to="/reserver"
+              to="/diagnostic"
               className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-accent text-accent-foreground rounded-full text-sm font-semibold hover:scale-105 hover:shadow-2xl transition-all duration-300"
             >
-              Réserver mon diagnostic
+              Trouver mon parcours
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <a
@@ -39,6 +39,9 @@ export default function Hero() {
               Découvrir les accompagnements
             </a>
           </div>
+          <p className="mt-4 text-xs text-primary-foreground/50 animate-fade-up" style={{ animationDelay: "0.7s", opacity: 0 }}>
+            3 minutes · Gratuit · Sans engagement
+          </p>
         </div>
       </div>
     </section>

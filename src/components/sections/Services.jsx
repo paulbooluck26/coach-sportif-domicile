@@ -38,6 +38,10 @@ export default function Services() {
             Un accompagnement adapté à votre objectif.
           </h2>
           <p className="text-muted-foreground mt-4">La même expertise, adaptée à votre situation.</p>
+          <Link to="/diagnostic" className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:gap-2.5 transition-all mt-3">
+            Pas encore sûr de ce qui vous correspond ? Faire le diagnostic
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
         <div className="flex lg:grid lg:grid-cols-3 gap-6 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 -mx-6 px-6 lg:mx-0 lg:px-0 snap-x snap-mandatory no-scrollbar">

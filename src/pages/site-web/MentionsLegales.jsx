@@ -9,7 +9,7 @@ export default function MentionsLegales() {
           <p>
             Physis Coaching — Paul Booluck<br />
             Auto-entrepreneur — TVA non applicable, art. 293B du CGI<br />
-            SIRET : [À COMPLÉTER]<br />
+            SIRET : 98524575200011<br />
             Adresse : Colmar, Haut-Rhin, France<br />
             Email : contact@physis-coaching.fr<br />
             Téléphone : 06 98 18 14 28

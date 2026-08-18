@@ -13,6 +13,7 @@ import ClientLayout from '@/components/ClientLayout';
 import CoachLayout from '@/components/CoachLayout';
 import Home from '@/pages/site-web/Home';
 import Login from '@/pages/site-web/Login';
+import Diagnostic from '@/pages/site-web/Diagnostic';
 import MentionsLegales from '@/pages/site-web/MentionsLegales';
 import Confidentialite from '@/pages/site-web/Confidentialite';
 import Register from '@/pages/site-web/Register';
@@ -76,6 +77,7 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/diagnostic" element={<Diagnostic />} />
       <Route path="/mentions-legales" element={<MentionsLegales />} />
       <Route path="/confidentialite" element={<Confidentialite />} />
       <Route path="/register" element={<Register />} />

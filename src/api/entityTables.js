@@ -24,5 +24,5 @@ export const KNOWN_ENTITIES = [
   'Notification', 'Paiement', 'PerformanceExercice',
   'Phase', 'Programme', 'ProgrammeAssignation', 'RecordPerso', 'Ressource',
   'RessourceCategorie', 'Seance', 'SeanceDeplacee', 'SeanceProgramme',
-  'Semaine', 'User', 'Produit', 'CodePromo', 'UtilisationCodePromo',
+  'Semaine', 'User', 'Produit', 'CodePromo', 'UtilisationCodePromo', 'DiagnosticPhysis',
 ];

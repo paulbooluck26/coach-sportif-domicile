@@ -34,7 +34,6 @@ import MesPerformances from '@/pages/espace-client/MesPerformances';
 import Seances from '@/pages/espace-client/Seances';
 import Bibliotheque from '@/pages/espace-client/Bibliotheque';
 import AchatProgramme from '@/pages/site-web/AchatProgramme';
-import PublicReserver from '@/pages/site-web/Reserver';
 import Offres from '@/pages/site-web/Offres';
 import CoachCommandes from '@/pages/admin/CoachCommandes';
 import CoachMessages from '@/pages/admin/CoachMessages';
@@ -46,6 +45,7 @@ import CoachProgrammes from '@/pages/admin/CoachProgrammes';
 import CoachPaiements from '@/pages/admin/CoachPaiements';
 import CoachCatalogue from '@/pages/admin/CoachCatalogue';
 import CoachPromotions from '@/pages/admin/CoachPromotions';
+import CoachDiagnostics from '@/pages/admin/CoachDiagnostics';
 import CoachDisponibilites from '@/pages/admin/CoachDisponibilites';
 import CoachEmails from '@/pages/admin/CoachEmails';
 import CoachBibliotheque from '@/pages/admin/CoachBibliotheque';
@@ -78,7 +78,6 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/diagnostic" element={<Diagnostic />} />
-      <Route path="/tarifs" element={<Tarifs />} />
       <Route path="/mentions-legales" element={<MentionsLegales />} />
       <Route path="/confidentialite" element={<Confidentialite />} />
       <Route path="/register" element={<Register />} />
@@ -88,7 +87,8 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Home />} />
         <Route path="/appel-decouverte" element={<AppelDecouverte />} />
         <Route path="/achat-programme" element={<AchatProgramme />} />
-        <Route path="/reserver" element={<PublicReserver />} />
+        <Route path="/reserver" element={<Tarifs />} />
+        <Route path="/tarifs" element={<Navigate to="/reserver" replace />} />
         <Route path="/offres" element={<Offres />} />
       </Route>
 
@@ -121,6 +121,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/paiements" element={<CoachPaiements />} />
           <Route path="/admin/catalogue" element={<CoachCatalogue />} />
           <Route path="/admin/promotions" element={<CoachPromotions />} />
+          <Route path="/admin/diagnostics" element={<CoachDiagnostics />} />
           <Route path="/admin/disponibilites" element={<CoachDisponibilites />} />
           <Route path="/admin/emails" element={<CoachEmails />} />
           <Route path="/admin/bibliotheque" element={<CoachBibliotheque />} />

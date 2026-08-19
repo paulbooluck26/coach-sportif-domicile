@@ -1,4 +1,5 @@
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/api/supabaseClient";
 import { envoyerEmail } from "@/lib/emailSender";
 import { parseDateLocal, typeLabelSeance as typeLabel } from "@/lib/creneaux";
 
@@ -10,10 +11,9 @@ import { parseDateLocal, typeLabelSeance as typeLabel } from "@/lib/creneaux";
  * - Report ≥ 24h avant : gratuit, nouveau créneau au choix.
  * - Report < 24h avant : impossible.
  *
- * ⚠️ Le remboursement Stripe réel n'est pas encore branché (paiement
- * simulé). En attendant, le paiement est marqué "refunded" directement.
- * Une fois Stripe connecté (phase 3), cette fonction devra appeler un vrai
- * remboursement via une Edge Function avant de mettre à jour ce statut.
+ * Le remboursement passe par l'Edge Function "refund-payment", qui
+ * déclenche un vrai remboursement Stripe (pas seulement un changement de
+ * statut en base).
  */
 
 function heuresAvantSeance(seance) {
@@ -44,8 +44,8 @@ export async function annulerSeance({ seance, user, motif }) {
     const paiements = await base44.entities.Paiement.filter({ seance_id: seance.id });
     const paiement = paiements.find((p) => p.status === "paid");
     if (paiement) {
-      await base44.entities.Paiement.update(paiement.id, { status: "refunded" });
-      remboursement = true;
+      const { error } = await supabase.functions.invoke("refund-payment", { body: { paiement_id: paiement.id } });
+      if (!error) remboursement = true;
     }
 
     // Séance réservée avec un crédit de carnet : on le recrédite.

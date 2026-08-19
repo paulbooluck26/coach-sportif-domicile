@@ -14,6 +14,7 @@ export default function SessionExecution() {
   const { seanceId } = useParams();
   const navigate = useNavigate();
   const plannedDate = new URLSearchParams(window.location.search).get("date");
+  const isPreview = new URLSearchParams(window.location.search).get("preview") === "1";
   const [sessionData, setSessionData] = useState(null);
   const [execState, setExecState] = useState({
     blocIndex: 0, round: 1, exerciseIndex: 0, phase: "loading",
@@ -234,6 +235,7 @@ export default function SessionExecution() {
 
   useEffect(() => {
     if (execState.phase !== "complete" || executionId || !user || !sessionData) return;
+    if (isPreview) { setExecutionId("preview"); return; }
     (async () => {
       try {
         const seance = sessionData.seance;
@@ -274,6 +276,7 @@ export default function SessionExecution() {
   useEffect(() => {
     if (execState.phase !== "complete" || !executionId || !sessionData || perfSavedRef.current) return;
     perfSavedRef.current = true;
+    if (isPreview) return;
     (async () => {
       try {
         const records = sessionData.blocs.flatMap(b => (b.exercices || []).map(ex => {
@@ -322,6 +325,7 @@ export default function SessionExecution() {
       onExit={() => navigate("/espace-client/programme")}
       perfData={perfData}
       onPerfChange={setPerf}
+      isPreview={isPreview}
     />
   );
 }

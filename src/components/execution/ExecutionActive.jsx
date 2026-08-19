@@ -4,7 +4,7 @@ import { Pause, Play, SkipForward, SkipBack, X, Clock } from "lucide-react";
 export default function ExecutionActive({
   execState, currentBloc, currentExercise, totalRounds, totalBlocs, totalExercises,
   restBetweenRoundsSecs, onNext, onPrev, onTogglePause, onExit,
-  perfData, onPerfChange, nextBloc
+  perfData, onPerfChange, nextBloc, isPreview
 }) {
   const { phase, round, exerciseIndex, restRemaining, exerciseTimeRemaining, isPaused } = execState;
   const blocTitle = currentBloc?.titre || `Bloc ${execState.blocIndex + 1}`;
@@ -17,6 +17,11 @@ export default function ExecutionActive({
 
   return (
     <div className="fixed inset-0 z-50 bg-primary text-primary-foreground flex flex-col overflow-hidden">
+      {isPreview && (
+        <div className="bg-accent text-accent-foreground text-center text-xs font-semibold py-1.5 tracking-wide uppercase">
+          Mode aperçu — rien n'est enregistré
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-primary-foreground/10">
         <div className="text-sm flex items-center gap-2 flex-wrap">

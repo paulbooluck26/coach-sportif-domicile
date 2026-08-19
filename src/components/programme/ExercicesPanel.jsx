@@ -15,14 +15,19 @@ export default function ExercicesPanel({ blocId }) {
   const load = async () => { setItems(await base44.entities.Exercice.filter({ bloc_id: blocId }, "ordre")); };
   useEffect(() => { load().catch(() => {}); }, [blocId]);
 
+  const [uploadError, setUploadError] = useState("");
+
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setUploading(true);
+    setUploadError("");
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setForm(f => ({ ...f, media_url: file_url }));
-    } catch (err) {}
+    } catch (err) {
+      setUploadError(err.message || "Échec de l'envoi. Réessayez.");
+    }
     setUploading(false);
   };
 
@@ -107,6 +112,7 @@ export default function ExercicesPanel({ blocId }) {
               <input type="file" accept="image/*,image/gif" onChange={handleFileUpload} disabled={uploading} className="text-sm" />
             )}
             {uploading && <p className="text-xs text-muted-foreground mt-1">Upload en cours...</p>}
+            {uploadError && <p className="text-xs text-destructive mt-1">{uploadError}</p>}
           </div>
           <div><label className="block text-xs font-medium text-muted-foreground mb-1">Instructions (optionnel)</label><textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className="w-full border border-border rounded-md px-3 py-2 text-sm resize-none" /></div>
           <div className="flex gap-2">

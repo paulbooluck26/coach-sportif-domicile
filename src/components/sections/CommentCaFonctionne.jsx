@@ -26,11 +26,12 @@ export default function CommentCaFonctionne() {
           ))}
         </div>
 
+        <p className="text-primary-foreground/60 text-sm mt-16 mb-3">Quel accompagnement vous correspond ?</p>
         <Link
-          to="/reserver"
-          className="group inline-flex items-center gap-2 mt-16 px-8 py-4 bg-accent text-accent-foreground rounded-full text-sm font-semibold hover:scale-105 transition-all duration-300"
+          to="/diagnostic"
+          className="group inline-flex items-center gap-2 px-8 py-4 bg-accent text-accent-foreground rounded-full text-sm font-semibold hover:scale-105 transition-all duration-300"
         >
-          Réserver un diagnostic
+          Faire le diagnostic
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>

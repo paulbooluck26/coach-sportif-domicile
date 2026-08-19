@@ -21,6 +21,35 @@ const SESSION_TYPE = {
   forge8: "seance_individuelle",
 };
 
+// Même correspondance que côté serveur (create-checkout-session) — permet
+// de retrouver la bonne ligne du catalogue admin pour chaque offre.
+const SKU_PAR_OFFRE = {
+  diagnostic: "coaching-diagnostic",
+  decouverte: "coaching-decouverte",
+  transformation: "coaching-transformation",
+  performance: "coaching-performance",
+  forge4: "coaching-forge4",
+  forge8: "coaching-forge8",
+};
+
+function produitVersOffre(id, p) {
+  return {
+    id,
+    titre: p.nom,
+    badge: p.metadata?.badge,
+    accroche: p.metadata?.accroche,
+    description: p.description,
+    duree: p.metadata?.duree,
+    prix: p.prix_promo ?? p.prix_ttc,
+    prixLabel: `${p.prix_promo ?? p.prix_ttc}€`,
+    prixUnite: p.metadata?.unite_prix,
+    sousTitre: p.metadata?.sousTitre,
+    inclus: p.metadata?.inclus,
+    cta: p.metadata?.cta,
+    dominant: p.metadata?.dominant,
+  };
+}
+
 export default function Domicile() {
   const { user } = useAuth();
   const { recurrentes, blocages, reservees, loading } = useCreneaux();
@@ -35,6 +64,25 @@ export default function Domicile() {
   const [done, setDone] = useState(null);
   const [searchParams] = useSearchParams();
   const stripeSessionId = searchParams.get("stripe_session_id");
+  // Démarre avec le contenu codé en dur (pas d'écran de chargement), puis
+  // se met à jour silencieusement avec le vrai catalogue admin dès qu'il
+  // arrive — si la requête échoue pour une raison ou une autre, on garde
+  // simplement l'affichage de secours.
+  const [catalogue, setCatalogue] = useState(FORGE_OFFRES);
+
+  useEffect(() => {
+    base44.entities.Produit.filter({ categorie: "coaching_domicile", actif: true })
+      .then((rows) => {
+        const parSku = {};
+        rows.forEach((p) => { parSku[p.sku] = p; });
+        const nouveauCatalogue = {};
+        Object.entries(SKU_PAR_OFFRE).forEach(([id, sku]) => {
+          if (parSku[sku]) nouveauCatalogue[id] = produitVersOffre(id, parSku[sku]);
+        });
+        setCatalogue((prev) => ({ ...prev, ...nouveauCatalogue }));
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -52,7 +100,7 @@ export default function Domicile() {
     })();
   }, [user]);
 
-  const offre = offreId ? FORGE_OFFRES[offreId] : null;
+  const offre = offreId ? catalogue[offreId] : null;
   const ponctuel = offreId ? estPonctuel(offreId) : false;
   const slots = date ? creneauxDisponibles(parseDateLocal(date), recurrentes, reservees) : [];
 
@@ -209,7 +257,7 @@ Paul BOOLUCK - PHYSIS COACHING`,
       {step === "catalogue" && (
         <div className="space-y-3">
           {CATALOGUE.map(id => {
-            const o = FORGE_OFFRES[id];
+            const o = catalogue[id];
             return (
               <button key={id} onClick={() => choisir(id)}
                 className="w-full text-left bg-card border rounded-2xl p-5 transition-all border-border hover:border-accent">

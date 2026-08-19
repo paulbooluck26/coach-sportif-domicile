@@ -1,52 +1,144 @@
-import { useState } from "react";
-import { ArrowLeft, ChevronRight, Eye } from "lucide-react";
-import PhasesPanel from "./PhasesPanel";
-import SemainesPanel from "./SemainesPanel";
-import SeancesPanel from "./SeancesPanel";
-import BlocsPanel from "./BlocsPanel";
-import ExercicesPanel from "./ExercicesPanel";
+import { parseTimeFromReps } from "@/lib/executionAudio";
+import { Pause, Play, SkipForward, SkipBack, X, Clock } from "lucide-react";
 
-export default function ProgrammeBuilder({ programme, onBack }) {
-  const [nav, setNav] = useState({ level: 0, phase: null, semaine: null, seance: null, bloc: null });
+export default function ExecutionActive({
+  execState, currentBloc, currentExercise, totalRounds, totalBlocs, totalExercises,
+  restBetweenRoundsSecs, onNext, onPrev, onTogglePause, onExit,
+  perfData, onPerfChange, nextBloc, isPreview
+}) {
+  const { phase, round, exerciseIndex, restRemaining, exerciseTimeRemaining, isPaused } = execState;
+  const blocTitle = currentBloc?.titre || `Bloc ${execState.blocIndex + 1}`;
 
-  const crumbs = [{ label: programme.name, go: () => setNav({ level: 0, phase: null, semaine: null, seance: null, bloc: null }) }];
-  if (nav.level >= 1 && nav.phase) crumbs.push({ label: nav.phase.nom, go: () => setNav(n => ({ ...n, level: 1, semaine: null, seance: null, bloc: null })) });
-  if (nav.level >= 2 && nav.semaine) crumbs.push({ label: `Semaine ${nav.semaine.numero}`, go: () => setNav(n => ({ ...n, level: 2, seance: null, bloc: null })) });
-  if (nav.level >= 3 && nav.seance) crumbs.push({ label: nav.seance.titre, go: () => setNav(n => ({ ...n, level: 3, bloc: null })) });
-  if (nav.level >= 4 && nav.bloc) crumbs.push({ label: nav.bloc.titre });
+  const restTotal = phase === "rest"
+    ? (currentExercise?.rest_seconds || currentBloc?.repos_entre_exercices || 60)
+    : restBetweenRoundsSecs;
+  const exerciseTotal = currentExercise ? parseTimeFromReps(currentExercise.reps) : 0;
+  const isRest = phase === "rest" || phase === "rest_between_rounds" || phase === "rest_between_blocs";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3 justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 hover:bg-muted rounded-md"><ArrowLeft className="w-5 h-5 text-foreground" /></button>
-          <div className="flex items-center gap-1.5 text-sm flex-wrap">
-            {crumbs.map((c, i) => (
-              <span key={i} className="flex items-center gap-1.5">
-                {i > 0 && <ChevronRight className="w-4 h-4 text-muted-foreground" />}
-                <button onClick={c.go} className={i === crumbs.length - 1 ? "font-semibold text-foreground" : "text-muted-foreground hover:text-foreground"}>{c.label}</button>
-              </span>
-            ))}
-          </div>
+    <div className="fixed inset-0 z-50 bg-primary text-primary-foreground flex flex-col overflow-hidden">
+      {isPreview && (
+        <div className="bg-accent text-accent-foreground text-center text-xs font-semibold py-1.5 tracking-wide uppercase">
+          Mode aperçu — rien n'est enregistré
         </div>
-        {nav.level >= 3 && nav.seance && (
-          <a
-            href={`/espace-client/seance/${nav.seance.id}?preview=1`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 border border-border text-foreground px-3 py-2 rounded-md text-sm font-medium hover:border-accent hover:text-accent transition-colors shrink-0"
-            title="Voir cette séance comme le client la verra, sans rien enregistrer"
-          >
-            <Eye className="w-4 h-4" /> Aperçu
-          </a>
+      )}
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-primary-foreground/10">
+        <div className="text-sm flex items-center gap-2 flex-wrap">
+          <span className="font-semibold text-secondary">{blocTitle}</span>
+          <span className="text-primary-foreground/30">·</span>
+          <span className="text-primary-foreground/60">Exercice {exerciseIndex + 1}/{totalExercises}</span>
+          {totalRounds > 1 && <>
+            <span className="text-primary-foreground/30">·</span>
+            <span className="text-secondary font-semibold">Tour {round}/{totalRounds}</span>
+          </>}
+        </div>
+        <button onClick={onExit} className="p-2 hover:bg-primary-foreground/10 rounded-md" title="Quitter"><X className="w-5 h-5" /></button>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col items-center justify-center px-6 py-6">
+        {phase === "exercise" && (
+          <div className="text-center max-w-lg">
+            {currentExercise?.media_url && <img src={currentExercise.media_url} alt={currentExercise?.name} className="w-full max-w-sm h-48 object-contain bg-primary-foreground/5 rounded-xl mb-6" />}
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-3">Exercice en cours</p>
+            <h1 className="font-heading text-4xl md:text-5xl font-bold mb-6">{currentExercise?.name}</h1>
+            <div className="mb-6">
+              <p className="text-xs text-primary-foreground/50 uppercase tracking-wider mb-1">Répétitions</p>
+              <p className="font-heading text-5xl font-bold">{currentExercise?.reps || "—"}</p>
+            </div>
+            {currentExercise?.intensity && (
+              <div className="inline-block bg-secondary/20 px-4 py-2 rounded-full mb-4">
+                <p className="text-sm font-semibold text-secondary">{currentExercise.intensity}</p>
+              </div>
+            )}
+            {currentExercise?.description && (
+              <p className="text-primary-foreground/60 mb-6">{currentExercise.description}</p>
+            )}
+            {exerciseTimeRemaining !== null && exerciseTimeRemaining > 0 && (
+              <CountdownRing remaining={exerciseTimeRemaining} total={exerciseTotal} label="Minuteur" />
+            )}
+          </div>
+        )}
+
+        {phase === "rest" && (
+          <div className="flex flex-col items-center w-full">
+            <CountdownRing remaining={restRemaining} total={restTotal} label="Repos" large />
+          </div>
+        )}
+
+        {(phase === "rest_between_rounds" || phase === "rest_between_blocs") && (
+          <div className="flex flex-col items-center text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-secondary mb-5">Récupération</p>
+            <h2 className="font-heading text-2xl md:text-4xl font-bold text-primary-foreground mb-10">Début du prochain {phase === "rest_between_blocs" ? "bloc" : "tour"} dans</h2>
+            <div className="relative w-64 h-64 md:w-72 md:h-72 mb-2">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="3" className="text-primary-foreground/10" />
+                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="4" className="text-secondary transition-all duration-1000 ease-linear" strokeDasharray={282.7} strokeDashoffset={282.7 * (1 - restRemaining / (restBetweenRoundsSecs || 1))} strokeLinecap="round" />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="font-heading text-8xl md:text-9xl font-bold leading-none">{restRemaining}</span>
+                <span className="text-xs uppercase tracking-[0.2em] text-primary-foreground/50 mt-3">secondes</span>
+              </div>
+            </div>
+            {phase === "rest_between_blocs" && nextBloc?.exercices?.length > 0 && (
+              <div className="mt-4 w-full max-w-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-3 text-center">À suivre — {nextBloc.titre || "prochain bloc"}</p>
+                <div className="space-y-1.5">
+                  {nextBloc.exercices.map((ex, i) => (
+                    <div key={ex.id || i} className="flex items-center gap-2 bg-primary-foreground/5 rounded-lg px-3 py-2">
+                      <span className="w-5 h-5 rounded bg-secondary/20 text-secondary flex items-center justify-center text-[10px] font-bold flex-shrink-0">{i + 1}</span>
+                      <p className="text-sm text-primary-foreground/80 truncate">{ex.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
-      {nav.level === 0 && <PhasesPanel programmeId={programme.id} onOpen={(p) => setNav({ level: 1, phase: p, semaine: null, seance: null, bloc: null })} />}
-      {nav.level === 1 && nav.phase && <SemainesPanel programmeId={programme.id} phase={nav.phase} onOpen={(s) => setNav({ level: 2, phase: nav.phase, semaine: s, seance: null, bloc: null })} />}
-      {nav.level === 2 && nav.semaine && <SeancesPanel semaineId={nav.semaine.id} onOpen={(s) => setNav({ level: 3, phase: nav.phase, semaine: nav.semaine, seance: s, bloc: null })} />}
-      {nav.level === 3 && nav.seance && <BlocsPanel seanceId={nav.seance.id} onOpen={(b) => setNav({ level: 4, phase: nav.phase, semaine: nav.semaine, seance: nav.seance, bloc: b })} />}
-      {nav.level === 4 && nav.bloc && <ExercicesPanel blocId={nav.bloc.id} />}
+      {/* Controls */}
+      <div className="px-6 py-6 border-t border-primary-foreground/10">
+        <div className="flex items-center justify-center gap-6 max-w-md mx-auto">
+          <button onClick={onPrev} className="p-3.5 hover:bg-primary-foreground/10 rounded-full transition-colors" title="Précédent">
+            <SkipBack className="w-6 h-6" />
+          </button>
+          <button onClick={onTogglePause} className="p-5 bg-primary-foreground text-primary rounded-full transition-colors hover:scale-105" title={isPaused ? "Reprendre" : "Pause"}>
+            {isPaused ? <Play className="w-7 h-7" /> : <Pause className="w-7 h-7" />}
+          </button>
+          <button onClick={onNext} className="p-3.5 bg-secondary text-secondary-foreground rounded-full transition-colors hover:scale-105" title="Suivant">
+            <SkipForward className="w-6 h-6" />
+          </button>
+        </div>
+        {isPaused && <p className="text-center text-sm text-primary-foreground/50 mt-3">En pause</p>}
+        {!isPaused && isRest && <p className="text-center text-sm text-primary-foreground/40 mt-3">Suivant pour passer le repos</p>}
+      </div>
+    </div>
+  );
+}
+
+function CountdownRing({ remaining, total, label, large }) {
+  const circumference = 282.7;
+  const offset = circumference * (1 - remaining / (total || 1));
+  const size = large ? "w-52 h-52" : "w-36 h-36";
+  const fontSize = large ? "text-7xl" : "text-4xl";
+
+  return (
+    <div className="flex flex-col items-center">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-5">{label}</p>
+      <div className={`relative ${size} mb-3`}>
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="3" className="text-primary-foreground/10" />
+          <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="3" className="text-secondary transition-all duration-1000 ease-linear" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className={`font-heading font-bold ${fontSize}`}>{remaining}</span>
+        </div>
+      </div>
+      <p className="text-sm text-primary-foreground/50 flex items-center gap-1.5">
+        <Clock className="w-3.5 h-3.5" /> secondes
+      </p>
     </div>
   );
 }

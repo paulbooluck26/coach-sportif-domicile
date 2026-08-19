@@ -1,48 +1,44 @@
-export default function About() {
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+
+const REPERES = ["Programmes", "Séances", "Réservations", "Suivi"];
+
+export default function AppExperience() {
   return (
-    <section id="coach" className="py-24 lg:py-32 max-w-7xl mx-auto px-6 lg:px-10">
-      <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-        <div className="relative">
-          <div className="aspect-[4/5] rounded-2xl overflow-hidden">
-            <img
-              src="/coach-paul.png"
-              alt="Paul Booluck, coach PHYSIS COACHING"
-              className="w-full h-full object-cover"
-            />
+    <section id="application" className="py-24 lg:py-32 bg-muted/40 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="max-w-xl">
+          <p className="text-sm md:text-base font-bold tracking-[0.2em] text-secondary mb-4 uppercase">L'application</p>
+          <h2 className="text-4xl lg:text-6xl font-heading font-bold text-primary leading-tight">
+            Une application pensée pour votre progression.
+          </h2>
+          <p className="text-muted-foreground mt-6 leading-relaxed">
+            L'application Physis permet de retrouver vos programmes, suivre vos séances, réserver vos rendez-vous et garder le lien avec votre coach.
+          </p>
+          <div className="flex flex-wrap gap-3 mt-8">
+            {REPERES.map((r) => (
+              <span key={r} className="text-xs font-medium text-primary bg-accent/15 px-4 py-2 rounded-full">{r}</span>
+            ))}
           </div>
-          <div className="absolute -bottom-6 -right-6 lg:-right-12 bg-background border border-accent/30 rounded-xl px-8 py-6 shadow-xl max-w-[200px]">
-            <p className="text-3xl font-heading font-bold text-primary">200+</p>
-            <p className="text-xs text-muted-foreground tracking-wide mt-1 uppercase">Clients accompagnés</p>
-          </div>
+          <Link
+            to="/register"
+            className="group inline-flex items-center gap-2 mt-10 px-8 py-4 bg-primary text-primary-foreground rounded-full text-sm font-semibold hover:scale-105 transition-all duration-300"
+          >
+            Découvrir l'application
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
 
-        <div>
-          <p className="text-sm md:text-base font-bold tracking-[0.2em] text-secondary mb-4 uppercase">Le coach</p>
-          <h2 className="text-4xl lg:text-6xl font-heading font-bold text-primary leading-tight mb-8">
-            Une expertise construite sur le terrain.
-          </h2>
-          <div className="space-y-6 text-base text-muted-foreground leading-relaxed">
-            <p>
-              Je suis Paul Booluck, coach sportif diplômé BPJEPS Activités de la Forme.
-            </p>
-            <p>
-              Mon parcours m'a amené à évoluer dans des environnements différents, en France comme à l'étranger, avec une même conviction : le bon entraînement n'est pas celui qui est le plus compliqué, mais celui qui est adapté à la personne et capable de la faire progresser. Rigueur, préparation et constance sont au cœur de mon approche du coaching.
-            </p>
+        <div className="relative flex justify-center lg:justify-end">
+          <div className="absolute inset-0 flex items-center justify-center lg:justify-end">
+            <div className="w-72 h-72 sm:w-80 sm:h-80 rounded-full bg-accent/20 blur-3xl" />
           </div>
-          <div className="mt-10 grid grid-cols-2 gap-6 pt-8 border-t border-accent/30 max-w-xs">
-            <div>
-              <p className="text-2xl font-heading font-bold text-primary">200+</p>
-              <p className="text-xs text-muted-foreground mt-1">Clients accompagnés</p>
-            </div>
-            <div>
-              <p className="text-2xl font-heading font-bold text-primary">6</p>
-              <p className="text-xs text-muted-foreground mt-1">Ans d'expérience</p>
-            </div>
-          </div>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <span className="text-xs font-medium text-primary bg-accent/15 px-4 py-2 rounded-full">BPJEPS Activités de la Forme</span>
-            <span className="text-xs font-medium text-primary bg-accent/15 px-4 py-2 rounded-full">Expérience France & international</span>
-          </div>
+          <img
+            src="https://media.base44.com/images/public/6a4fa54adc116f80e1bcc475/3a4202c58_Design_sans_titre__4_-removebg-preview.png"
+            alt="Application PHYSIS COACHING"
+            className="relative w-[240px] sm:w-[300px] lg:w-[360px] max-w-full h-auto object-contain drop-shadow-2xl"
+            loading="lazy"
+          />
         </div>
       </div>
     </section>

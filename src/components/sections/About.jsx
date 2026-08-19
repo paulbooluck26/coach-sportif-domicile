@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+
 export default function About() {
   return (
     <section id="coach" className="py-24 lg:py-32 max-w-7xl mx-auto px-6 lg:px-10">
@@ -18,7 +21,7 @@ export default function About() {
 
         <div>
           <p className="text-sm md:text-base font-bold tracking-[0.2em] text-secondary mb-4 uppercase">Le coach</p>
-          <h2 className="text-6xl lg:text-8xl font-heading font-bold text-primary leading-tight mb-8 uppercase">
+          <h2 className="text-4xl lg:text-6xl font-heading font-bold text-primary leading-tight mb-8">
             Une expertise construite sur le terrain.
           </h2>
           <div className="space-y-6 text-base text-muted-foreground leading-relaxed">
@@ -43,6 +46,14 @@ export default function About() {
             <span className="text-xs font-medium text-primary bg-accent/15 px-4 py-2 rounded-full">BPJEPS Activités de la Forme</span>
             <span className="text-xs font-medium text-primary bg-accent/15 px-4 py-2 rounded-full">Expérience France & international</span>
           </div>
+          <Link
+            to="/appel-decouverte"
+            className="group inline-flex items-center gap-2 mt-8 bg-primary text-primary-foreground px-7 py-3.5 rounded-full text-sm font-semibold hover:scale-105 transition-all duration-300"
+          >
+            Discuter avec moi
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <p className="text-xs text-muted-foreground mt-2.5">30 minutes · Gratuit · Sans engagement</p>
         </div>
       </div>
     </section>

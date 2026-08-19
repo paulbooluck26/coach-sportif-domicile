@@ -74,12 +74,12 @@ export default function PublicNavbar() {
               Retour à l'accueil
             </Link>
           ) : (
-            <Link
-              to="/tarifs"
+            <a
+              href="/#accompagnements"
               className="px-6 py-2.5 bg-accent text-accent-foreground rounded-full text-sm font-semibold uppercase tracking-wide hover:scale-105 hover:shadow-lg transition-all duration-300"
             >
               Réserver
-            </Link>
+            </a>
           )}
         </div>
 
@@ -103,9 +103,9 @@ export default function PublicNavbar() {
                 Retour à l'accueil
               </Link>
             ) : (
-              <Link to="/tarifs" className="px-6 py-3 bg-accent text-accent-foreground rounded-full text-sm font-semibold uppercase tracking-wide text-center">
+              <a href="/#accompagnements" className="px-6 py-3 bg-accent text-accent-foreground rounded-full text-sm font-semibold uppercase tracking-wide text-center">
                 Réserver
-              </Link>
+              </a>
             )}
           </div>
         </div>

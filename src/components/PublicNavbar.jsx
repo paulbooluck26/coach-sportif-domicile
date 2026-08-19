@@ -75,7 +75,7 @@ export default function PublicNavbar() {
             </Link>
           ) : (
             <Link
-              to="/offres"
+              to="/tarifs"
               className="px-6 py-2.5 bg-accent text-accent-foreground rounded-full text-sm font-semibold uppercase tracking-wide hover:scale-105 hover:shadow-lg transition-all duration-300"
             >
               Réserver
@@ -103,7 +103,7 @@ export default function PublicNavbar() {
                 Retour à l'accueil
               </Link>
             ) : (
-              <Link to="/offres" className="px-6 py-3 bg-accent text-accent-foreground rounded-full text-sm font-semibold uppercase tracking-wide text-center">
+              <Link to="/tarifs" className="px-6 py-3 bg-accent text-accent-foreground rounded-full text-sm font-semibold uppercase tracking-wide text-center">
                 Réserver
               </Link>
             )}

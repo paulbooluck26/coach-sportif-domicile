@@ -9,11 +9,27 @@ import { ChevronLeft, ChevronRight, CheckCircle2, Loader2, Sparkles, Check, Lock
 import { downloadICS } from "@/lib/calendarExport";
 import { envoyerEmail } from "@/lib/emailSender";
 
-const OFFRES = [
+const OFFRES_STATIQUES = [
   { id: "forge", nom: "FORGE", duree: 12, prix: 149, recommande: true, desc: "Le parcours idéal pour transformer votre physique et vos habitudes.", inclus: ["Programmation personnalisée", "Progression structurée", "Messagerie avec votre coach", "Appel de bilan"] },
   { id: "start", nom: "START", duree: 4, prix: 49, desc: "Construire de bonnes bases et reprendre une routine efficace.", inclus: ["Programme adapté à votre objectif", "Exercices expliqués en vidéo", "Appel de démarrage"] },
   { id: "legacy", nom: "LEGACY", duree: 24, prix: 299, desc: "Une transformation complète et durable avec un accompagnement longue durée.", inclus: ["Suivi renforcé", "Ajustements réguliers", "Analyse de progression"] },
 ];
+
+// Même correspondance que côté serveur (create-checkout-session).
+const SKU_PAR_OFFRE = { forge: "programme-forge", start: "programme-start", legacy: "programme-legacy" };
+
+function produitVersOffre(id, p, ordre) {
+  return {
+    id,
+    nom: p.nom,
+    duree: p.metadata?.duree_semaines,
+    prix: p.prix_promo ?? p.prix_ttc,
+    recommande: !!p.metadata?.recommande,
+    desc: p.description,
+    inclus: p.metadata?.inclus,
+    _ordre: ordre,
+  };
+}
 
 const OBJECTIFS = [
   { emoji: "🔥", titre: "Perte de poids", accroche: "Brûlez, tonifiez, transformez votre silhouette" },
@@ -32,6 +48,24 @@ export default function Programme() {
   const [step, setStep] = useState("catalogue"); // catalogue | detail | paiement | appel
   const [offreId, setOffreId] = useState(null);
   const [objectif, setObjectif] = useState("");
+  // Démarre avec le contenu codé en dur, mis à jour silencieusement dès
+  // que le vrai catalogue admin arrive — l'ordre FORGE en premier reste
+  // toujours respecté.
+  const [OFFRES, setOffres] = useState(OFFRES_STATIQUES);
+
+  useEffect(() => {
+    base44.entities.Produit.filter({ categorie: "programme_ligne", actif: true })
+      .then((rows) => {
+        const parSku = {};
+        rows.forEach((p) => { parSku[p.sku] = p; });
+        const nouvelles = OFFRES_STATIQUES.map((o) => {
+          const sku = SKU_PAR_OFFRE[o.id];
+          return parSku[sku] ? produitVersOffre(o.id, parSku[sku]) : o;
+        });
+        setOffres(nouvelles);
+      })
+      .catch(() => {});
+  }, []);
   const [card, setCard] = useState({ name: "", number: "", exp: "", cvc: "" });
   const [paying, setPaying] = useState(false);
 

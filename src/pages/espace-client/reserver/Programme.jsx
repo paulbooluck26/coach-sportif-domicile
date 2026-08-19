@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
 import { redirigerVersStripe } from "@/lib/stripeCheckout";
+import { supabase } from "@/api/supabaseClient";
 import { useCreneaux } from "@/hooks/useCreneaux";
 import { creneauxDisponibles, dateStr, parseDateLocal } from "@/lib/creneaux";
 import { Link, useSearchParams } from "react-router-dom";
@@ -120,6 +121,27 @@ export default function Programme() {
 
   const choisir = (id) => { setOffreId(id); setStep("detail"); };
 
+  const [codePromo, setCodePromo] = useState("");
+  const [promoAppliquee, setPromoAppliquee] = useState(null);
+  const [promoErreur, setPromoErreur] = useState("");
+  const [verifPromo, setVerifPromo] = useState(false);
+
+  const verifierPromo = async () => {
+    if (!codePromo.trim() || !offre) return;
+    setVerifPromo(true);
+    setPromoErreur("");
+    try {
+      const { data } = await supabase.functions.invoke("validate-promo-code", {
+        body: { code: codePromo, montant: offre.prix, client_id: user.id },
+      });
+      if (data?.valide) setPromoAppliquee(data);
+      else { setPromoAppliquee(null); setPromoErreur(data?.erreur || "Code invalide."); }
+    } catch {
+      setPromoErreur("Erreur de vérification. Réessayez.");
+    }
+    setVerifPromo(false);
+  };
+
   const acheter = async () => {
     setPaying(true);
     try {
@@ -140,6 +162,7 @@ export default function Programme() {
           objectif,
         },
         successPath: `/espace-client/reserver/programme?offre=${offre.id}`,
+        codePromo: promoAppliquee ? codePromo : undefined,
         cancelPath: "/espace-client/reserver/programme",
       });
     } catch (e) {
@@ -306,8 +329,33 @@ export default function Programme() {
 
         </div>
 
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Code promo (facultatif)</label>
+          {promoAppliquee ? (
+            <div className="flex items-center justify-between bg-secondary/10 border border-secondary rounded-xl px-4 py-3">
+              <p className="text-sm text-foreground">
+                <strong>{codePromo.toUpperCase()}</strong> appliqué — <span className="text-secondary font-semibold">-{promoAppliquee.reduction}€</span>
+              </p>
+              <button onClick={() => { setPromoAppliquee(null); setCodePromo(""); }} className="text-xs text-muted-foreground hover:text-destructive">Retirer</button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                value={codePromo}
+                onChange={(e) => setCodePromo(e.target.value)}
+                placeholder="Ex : BIENVENUE10"
+                className="flex-1 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent uppercase"
+              />
+              <button onClick={verifierPromo} disabled={!codePromo.trim() || verifPromo} className="border border-border text-foreground px-5 rounded-xl text-sm font-medium disabled:opacity-50">
+                {verifPromo ? "..." : "Appliquer"}
+              </button>
+            </div>
+          )}
+          {promoErreur && <p className="text-xs text-destructive mt-1.5">{promoErreur}</p>}
+        </div>
+
         <button onClick={acheter} disabled={paying || !objectif.trim()} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">
-          {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> Payer {offre.prix}€</>}
+          {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> Payer {promoAppliquee ? promoAppliquee.montantFinal : offre.prix}€</>}
         </button>
       </div>
     );

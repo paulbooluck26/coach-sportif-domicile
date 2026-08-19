@@ -129,6 +129,13 @@ export default function CoachClients() {
         </div>
       </div>
 
+      <p className="text-xs text-muted-foreground leading-relaxed">
+        <strong className="text-foreground">Actifs</strong> — séance à venir, programme en cours, ou carnet actif ·{" "}
+        <strong className="text-foreground">Anciens clients</strong> — ont déjà acheté, plus rien en cours ·{" "}
+        <strong className="text-foreground">Prospects</strong> — compte créé, jamais rien acheté ·{" "}
+        <strong className="text-foreground">Archivés</strong> — masqués manuellement par vous, sans supprimer le compte (réversible)
+      </p>
+
       {liste.length === 0 ? (
         <div className="bg-card border border-border rounded-lg p-12 text-center">
           <Users className="w-10 h-10 text-secondary mx-auto mb-4" />

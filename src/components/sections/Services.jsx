@@ -8,7 +8,7 @@ const accompagnements = [
     desc: "Séances individuelles chez vous ou en extérieur. Matériel fourni.",
     image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80",
     cta: "Voir les tarifs",
-    link: "/reserver",
+    link: "/tarifs",
   },
   {
     icon: Laptop,
@@ -34,7 +34,7 @@ export default function Services() {
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="max-w-2xl mb-16">
           <p className="text-sm md:text-base font-bold tracking-[0.2em] text-secondary mb-4 uppercase">Les accompagnements</p>
-          <h2 className="text-6xl lg:text-8xl font-heading font-bold text-primary leading-tight uppercase">
+          <h2 className="text-4xl lg:text-6xl font-heading font-bold text-primary leading-tight">
             Un accompagnement adapté à votre objectif.
           </h2>
           <p className="text-muted-foreground mt-4">La même expertise, adaptée à votre situation.</p>

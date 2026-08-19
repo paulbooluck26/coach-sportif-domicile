@@ -115,24 +115,28 @@ const QUESTIONS = [
 
 const PROFILS = {
   batisseur: {
-    nom: "Le Bâtisseur",
+    nom: "Structure",
     accroche: "Progression encadrée",
-    texte: "Vous avez envie de progresser, mais votre principal besoin est d'avoir une structure claire et un cadre qui vous permet de rester régulier.",
+    texte: "Vous avez envie de progresser, mais votre principal besoin est d'avoir un cadre clair qui vous permet de rester régulier.",
+    photo: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=900&q=80",
   },
   determine: {
-    nom: "Le Déterminé",
+    nom: "Détermination",
     accroche: "Accompagnement personnalisé",
     texte: "Vous savez ce que vous voulez. Votre priorité est d'être accompagné, corrigé et guidé pour progresser sans perdre de temps.",
+    photo: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=900&q=80",
   },
   autonome: {
-    nom: "L'Autonome",
+    nom: "Autonomie",
     accroche: "Progression indépendante",
     texte: "Vous savez vous entraîner seul et recherchez surtout une méthode claire, progressive et adaptée à votre objectif.",
+    photo: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=900&q=80",
   },
   performer: {
-    nom: "Le Performer",
+    nom: "Performance",
     accroche: "Optimisation",
     texte: "Vous avez déjà une pratique sportive et cherchez maintenant à structurer votre progression et mesurer vos performances.",
+    photo: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=900&q=80",
   },
 };
 
@@ -343,6 +347,9 @@ export default function Diagnostic() {
     return (
       <div className="min-h-screen bg-background px-6 py-20">
         <div className="max-w-xl mx-auto">
+          <div className="aspect-[16/9] rounded-2xl overflow-hidden mb-8">
+            <img src={profil.photo} alt={profil.nom} className="w-full h-full object-cover" />
+          </div>
           <p className="text-sm font-bold tracking-[0.2em] text-secondary uppercase text-center mb-3">Votre profil</p>
           <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary uppercase text-center leading-tight">
             {profil.nom}
@@ -367,7 +374,7 @@ export default function Diagnostic() {
               </>
             )}
             <Link
-              to={isDomicile ? "/reserver" : "/achat-programme"}
+              to={isDomicile ? "/tarifs" : "/achat-programme"}
               className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-3.5 rounded-full text-sm font-semibold hover:scale-105 transition-all duration-300"
             >
               {isDomicile ? "Découvrir le coaching à domicile" : "Découvrir les programmes"}

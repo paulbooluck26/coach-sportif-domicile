@@ -14,12 +14,12 @@ import CoachLayout from '@/components/CoachLayout';
 import Home from '@/pages/site-web/Home';
 import Login from '@/pages/site-web/Login';
 import Diagnostic from '@/pages/site-web/Diagnostic';
+import Tarifs from '@/pages/site-web/Tarifs';
 import MentionsLegales from '@/pages/site-web/MentionsLegales';
 import Confidentialite from '@/pages/site-web/Confidentialite';
 import Register from '@/pages/site-web/Register';
 import ForgotPassword from '@/pages/site-web/ForgotPassword';
 import ResetPassword from '@/pages/site-web/ResetPassword';
-import Reservation from '@/pages/espace-client/Reservation';
 import AppelDecouverte from '@/pages/site-web/AppelDecouverte';
 import ClientDashboard from '@/pages/espace-client/ClientDashboard';
 import ReserverDomicile from '@/pages/espace-client/reserver/Domicile';
@@ -78,6 +78,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/diagnostic" element={<Diagnostic />} />
+      <Route path="/tarifs" element={<Tarifs />} />
       <Route path="/mentions-legales" element={<MentionsLegales />} />
       <Route path="/confidentialite" element={<Confidentialite />} />
       <Route path="/register" element={<Register />} />
@@ -90,7 +91,6 @@ const AuthenticatedApp = () => {
         <Route path="/reserver" element={<PublicReserver />} />
         <Route path="/offres" element={<Offres />} />
       </Route>
-      <Route path="/reservation" element={<Reservation />} />
 
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<ClientLayout />}>

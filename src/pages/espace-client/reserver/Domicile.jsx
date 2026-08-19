@@ -5,6 +5,7 @@ import { useCreneaux } from "@/hooks/useCreneaux";
 import { creneauxDisponibles, parseDateLocal } from "@/lib/creneaux";
 import { estPonctuel, nbSeancesPourOffre } from "@/lib/carnetSeances";
 import { redirigerVersStripe } from "@/lib/stripeCheckout";
+import { supabase } from "@/api/supabaseClient";
 import CalendrierDispo from "@/components/CalendrierDispo";
 import { FORGE_OFFRES, prixDisplay } from "@/lib/forgeOffres";
 import { Link, useSearchParams } from "react-router-dom";
@@ -111,6 +112,27 @@ export default function Domicile() {
     setStep("detail");
   };
 
+  const [codePromo, setCodePromo] = useState("");
+  const [promoAppliquee, setPromoAppliquee] = useState(null); // { reduction, montantFinal }
+  const [promoErreur, setPromoErreur] = useState("");
+  const [verifPromo, setVerifPromo] = useState(false);
+
+  const verifierPromo = async () => {
+    if (!codePromo.trim() || !offre) return;
+    setVerifPromo(true);
+    setPromoErreur("");
+    try {
+      const { data } = await supabase.functions.invoke("validate-promo-code", {
+        body: { code: codePromo, montant: offre.prix, client_id: user.id },
+      });
+      if (data?.valide) setPromoAppliquee(data);
+      else { setPromoAppliquee(null); setPromoErreur(data?.erreur || "Code invalide."); }
+    } catch {
+      setPromoErreur("Erreur de vérification. Réessayez.");
+    }
+    setVerifPromo(false);
+  };
+
   const payer = async () => {
     setPaying(true);
     try {
@@ -138,6 +160,7 @@ export default function Domicile() {
             prestation_label: offre.titre,
           },
           successPath: "/espace-client/reserver/domicile",
+          codePromo: promoAppliquee ? codePromo : undefined,
         });
       } else {
         const total = nbSeancesPourOffre(offreId);
@@ -154,6 +177,7 @@ export default function Domicile() {
             nb_seances_total: String(total),
           },
           successPath: "/espace-client/reserver/domicile",
+          codePromo: promoAppliquee ? codePromo : undefined,
         });
       }
     } catch (e) {
@@ -367,8 +391,32 @@ Paul BOOLUCK - PHYSIS COACHING`,
 
             </div>
           </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Code promo (facultatif)</label>
+            {promoAppliquee ? (
+              <div className="flex items-center justify-between bg-secondary/10 border border-secondary rounded-xl px-4 py-3">
+                <p className="text-sm text-foreground">
+                  <strong>{codePromo.toUpperCase()}</strong> appliqué — <span className="text-secondary font-semibold">-{promoAppliquee.reduction}€</span>
+                </p>
+                <button onClick={() => { setPromoAppliquee(null); setCodePromo(""); }} className="text-xs text-muted-foreground hover:text-destructive">Retirer</button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  value={codePromo}
+                  onChange={(e) => setCodePromo(e.target.value)}
+                  placeholder="Ex : BIENVENUE10"
+                  className="flex-1 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent uppercase"
+                />
+                <button onClick={verifierPromo} disabled={!codePromo.trim() || verifPromo} className="border border-border text-foreground px-5 rounded-xl text-sm font-medium disabled:opacity-50">
+                  {verifPromo ? "..." : "Appliquer"}
+                </button>
+              </div>
+            )}
+            {promoErreur && <p className="text-xs text-destructive mt-1.5">{promoErreur}</p>}
+          </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lock className="w-3.5 h-3.5" /> Paiement sécurisé via Stripe · Annulation gratuite jusqu'à 24h avant</div>
-          <button onClick={payer} disabled={paying || !adresse.trim()} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> Payer {offre.prix}€</>}</button>
+          <button onClick={payer} disabled={paying || !adresse.trim()} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> Payer {promoAppliquee ? promoAppliquee.montantFinal : offre.prix}€</>}</button>
         </div>
       )}
     </div>

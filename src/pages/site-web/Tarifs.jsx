@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Check, ArrowRight, Flame, Crown, CalendarClock, Dumbbell, Sparkles, Loader2 } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const ICONES = {
   "coaching-diagnostic": Flame,
@@ -28,6 +29,11 @@ export default function Tarifs() {
 
   return (
     <div className="pt-32 pb-24">
+      <Seo
+        title="Tarifs Coaching à Domicile"
+        description="Découvrez nos tarifs de coaching sportif à domicile à Colmar : diagnostic, packs de séances, abonnements FORGE. Paiement sécurisé, annulation gratuite."
+        path="/reserver"
+      />
       <section id="pricing" className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <p className="text-sm md:text-base font-bold tracking-[0.2em] text-secondary mb-4 uppercase">Coaching à domicile</p>

@@ -12,6 +12,7 @@ const EVENEMENTS = [
   { value: "achat_programme", label: "Achat programme" },
   { value: "appel_decouverte", label: "Confirmation appel découverte" },
   { value: "rappel_appel_decouverte", label: "Rappel appel découverte 24h avant" },
+  { value: "lien_visio_appel", label: "Lien Google Meet pour un appel" },
   { value: "appel_demarrage", label: "Confirmation appel de démarrage" },
   { value: "programme_disponible", label: "Programme disponible" },
   { value: "rdv_modifie", label: "Séance déplacée" },

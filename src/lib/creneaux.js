@@ -42,7 +42,14 @@ export async function fetchDisponibilites() {
  */
 export async function fetchSeancesReservees() {
   try {
-    return await base44.entities.Seance.filter({ status: "booked" });
+    // "booked" ET "rescheduled" occupent réellement un créneau — un
+    // rendez-vous déplacé depuis l'admin reste bien réservé, juste à une
+    // nouvelle date/heure.
+    const [booked, rescheduled] = await Promise.all([
+      base44.entities.Seance.filter({ status: "booked" }),
+      base44.entities.Seance.filter({ status: "rescheduled" }),
+    ]);
+    return [...booked, ...rescheduled];
   } catch {
     return [];
   }

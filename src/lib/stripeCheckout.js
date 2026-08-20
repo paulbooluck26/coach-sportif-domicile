@@ -6,7 +6,7 @@ import { supabase } from "@/api/supabaseClient";
  * La réservation/le carnet/la commande ne sera créé QU'UNE FOIS le
  * paiement confirmé (via le webhook Stripe, côté serveur) — jamais avant.
  */
-export async function redirigerVersStripe({ nom, montant, metadata, successPath, cancelPath }) {
+export async function redirigerVersStripe({ nom, montant, metadata, successPath, cancelPath, codePromo }) {
   const { data, error } = await supabase.functions.invoke("create-checkout-session", {
     body: {
       nom,
@@ -15,10 +15,11 @@ export async function redirigerVersStripe({ nom, montant, metadata, successPath,
       success_path: successPath,
       cancel_path: cancelPath || successPath,
       origin: window.location.origin,
+      code_promo: codePromo || undefined,
     },
   });
   if (error || !data?.url) {
-    throw new Error(error?.message || "Impossible de créer la session de paiement.");
+    throw new Error(data?.error || error?.message || "Impossible de créer la session de paiement.");
   }
   window.location.href = data.url;
 }

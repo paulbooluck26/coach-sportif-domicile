@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { ArrowLeft, ArrowRight, Sparkles, Home as HomeIcon, Laptop, Loader2, CheckCircle2 } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const QUESTIONS = [
   {
@@ -241,6 +242,11 @@ export default function Diagnostic() {
   if (etape === "intro") {
     return (
       <div className="min-h-screen flex items-center justify-center px-6 py-20 bg-gradient-to-b from-primary to-primary/90">
+        <Seo
+          title="Diagnostic Physis Gratuit"
+          description="Répondez à quelques questions et découvrez en 3 minutes l'accompagnement PHYSIS COACHING le plus adapté à votre profil : coaching à domicile ou programme en ligne."
+          path="/diagnostic"
+        />
         <div className="max-w-lg text-center">
           <Sparkles className="w-9 h-9 text-accent mx-auto mb-6" />
           <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary-foreground uppercase leading-tight">

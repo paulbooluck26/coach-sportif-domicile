@@ -45,7 +45,7 @@ const OBJECTIFS = [
 
 export default function Programme() {
   const { user } = useAuth();
-  const { recurrentes, reservees } = useCreneaux();
+  const { recurrentes, reservees, reload: reloadCreneaux } = useCreneaux();
   const [step, setStep] = useState("catalogue"); // catalogue | detail | paiement | appel
   const [offreId, setOffreId] = useState(null);
   const [objectif, setObjectif] = useState("");
@@ -105,6 +105,14 @@ export default function Programme() {
   };
 
   const offre = OFFRES.find((o) => o.id === offreId);
+
+  // Recharge les créneaux déjà pris juste avant d'afficher le calendrier
+  // de l'appel — la liste chargée à l'ouverture de la page peut être
+  // périmée si quelqu'un a réservé entre-temps (risque de double
+  // réservation sinon, séance à domicile ou appel confondus).
+  useEffect(() => {
+    if (step === "appel") reloadCreneaux();
+  }, [step]);
 
   useEffect(() => {
     if (!user) return;

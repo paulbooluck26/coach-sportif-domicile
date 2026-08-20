@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { ArrowRight, Sparkles, Check, Loader2 } from "lucide-react";
+import Seo from "@/components/Seo";
 
 export default function AchatProgramme() {
   const [produits, setProduits] = useState(null);
@@ -16,6 +17,11 @@ export default function AchatProgramme() {
 
   return (
     <div className="pt-32 pb-24">
+      <Seo
+        title="Programmes en Ligne"
+        description="Programmes d'entraînement structurés à suivre en autonomie, avec un suivi personnalisé de votre coach via l'application PHYSIS COACHING."
+        path="/achat-programme"
+      />
       <section className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <p className="text-sm md:text-base font-bold tracking-[0.2em] text-secondary mb-4 uppercase">Programmes en ligne</p>

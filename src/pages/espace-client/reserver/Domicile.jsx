@@ -53,7 +53,7 @@ function produitVersOffre(id, p) {
 
 export default function Domicile() {
   const { user } = useAuth();
-  const { recurrentes, blocages, reservees, loading } = useCreneaux();
+  const { recurrentes, blocages, reservees, loading, reload: reloadCreneaux } = useCreneaux();
   const [diagDone, setDiagDone] = useState(null);
   const [adresse, setAdresse] = useState("");
   const [step, setStep] = useState("catalogue");
@@ -84,6 +84,13 @@ export default function Domicile() {
       })
       .catch(() => {});
   }, []);
+
+  // Recharge les créneaux déjà pris juste avant d'afficher le calendrier
+  // — la liste chargée à l'ouverture de la page peut être périmée si
+  // quelqu'un a réservé entre-temps (risque de double réservation sinon).
+  useEffect(() => {
+    if (step === "detail") reloadCreneaux();
+  }, [step]);
 
   useEffect(() => {
     if (!user) return;

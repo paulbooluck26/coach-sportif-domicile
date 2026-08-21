@@ -17,14 +17,17 @@ export default function ReservationCredit({ carnets, adresse, onClose, onReserve
 
   const slots = date ? creneauxDisponibles(parseDateLocal(date), recurrentes, reservees) : [];
 
+  const [erreur, setErreur] = useState("");
+
   const confirmer = async () => {
     if (!carnetId || !date || !heure) return;
     setSubmitting(true);
+    setErreur("");
     try {
       const { seance } = await reserverSeanceAvecCredit({ user, carnetId, date, heure, location: adresse || "Domicile" });
       setConfirmed({ seance, date, heure });
-    } catch {
-      alert("Erreur lors de la réservation. Vérifiez votre crédit.");
+    } catch (e) {
+      setErreur(e.message || "Erreur inconnue");
     } finally {
       setSubmitting(false);
     }
@@ -84,6 +87,7 @@ export default function ReservationCredit({ carnets, adresse, onClose, onReserve
                 )}
               </div>
             )}
+            {erreur && <p className="text-sm text-destructive bg-destructive/5 rounded-lg px-3 py-2">{erreur}</p>}
             <button onClick={confirmer} disabled={!carnetId || !date || !heure || submitting} className="w-full bg-primary text-primary-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-40">
               {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Réservation...</> : <>Confirmer le créneau <ChevronRight className="w-4 h-4" /></>}
             </button>

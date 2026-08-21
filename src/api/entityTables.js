@@ -25,4 +25,5 @@ export const KNOWN_ENTITIES = [
   'Phase', 'Programme', 'ProgrammeAssignation', 'RecordPerso', 'Ressource',
   'RessourceCategorie', 'Seance', 'SeanceDeplacee', 'SeanceProgramme',
   'Semaine', 'User', 'Produit', 'CodePromo', 'UtilisationCodePromo', 'DiagnosticPhysis',
+  'Badge', 'BadgeClient', 'ObjectifClient',
 ];

@@ -13,19 +13,35 @@ export default function ClientDashboard() {
   const [executions, setExecutions] = useState(null);
   const [projections, setProjections] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [badgeCount, setBadgeCount] = useState(0);
+  const [nouveauBadge, setNouveauBadge] = useState(null);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
       try {
-        const [allSeances, execs, profiles] = await Promise.all([
+        const [allSeances, execs, profiles, mesBadges] = await Promise.all([
           base44.entities.Seance.filter({ client_id: user.id }, "date"),
           base44.entities.ExecutionSeance.filter({ client_id: user.id }, "-date_execution", 100),
           base44.entities.ClientProfile.filter({ user_id: user.id }),
+          base44.entities.BadgeClient.filter({ client_id: user.id }),
         ]);
         setSeances(allSeances);
         setExecutions(execs);
         setProfile(profiles[0] || null);
+        setBadgeCount(mesBadges.length);
+
+        // Un badge tout juste obtenu et jamais montré ? Petite notification
+        // discrète, puis on le marque comme vu pour ne pas la remontrer.
+        const nonVu = mesBadges.find((b) => !b.vu);
+        if (nonVu) {
+          try {
+            const badgeDef = await base44.entities.Badge.get(nonVu.badge_id);
+            setNouveauBadge(badgeDef);
+          } catch (_) {}
+          base44.entities.BadgeClient.update(nonVu.id, { vu: true }).catch(() => {});
+        }
+
         const projs = await loadClientProjection(user.id);
         setProjections(projs);
       } catch {
@@ -56,7 +72,6 @@ export default function ClientDashboard() {
   const completedCount = executions.filter(e => e.statut === "termine").length;
   const completedDates = executions.filter(e => e.statut === "termine").map(e => e.date_execution);
   const streak = computeStreak(completedDates);
-  const badges = Math.floor(completedCount / 5);
 
   return (
     <div className="space-y-6">
@@ -66,6 +81,21 @@ export default function ClientDashboard() {
           <h1 className="font-heading text-3xl font-bold text-foreground">{getGreeting()} {prenom} 👋</h1>
         </div>
       </div>
+
+      {nouveauBadge && (
+        <Link
+          to="/espace-client/badges"
+          onClick={() => setNouveauBadge(null)}
+          className="flex items-center gap-3 bg-accent/10 border border-accent/30 rounded-2xl px-4 py-3 hover:bg-accent/15 transition-colors"
+        >
+          <span className="text-2xl">{nouveauBadge.icone}</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">Nouveau badge débloqué</p>
+            <p className="text-xs text-muted-foreground truncate">{nouveauBadge.nom}</p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+        </Link>
+      )}
 
       {hasTodaySession ? (
         <div className="bg-primary text-primary-foreground rounded-2xl p-6">
@@ -116,11 +146,11 @@ export default function ClientDashboard() {
             <p className="font-heading text-2xl font-bold text-foreground">{completedCount}</p>
             <p className="text-xs text-muted-foreground">séances faites</p>
           </div>
-          <div className="bg-card border border-border rounded-2xl p-4 text-center">
+          <Link to="/espace-client/badges" className="bg-card border border-border rounded-2xl p-4 text-center hover:border-accent/50 transition-colors">
             <TrendingUp className="w-6 h-6 text-secondary mx-auto mb-2" />
-            <p className="font-heading text-2xl font-bold text-foreground">{badges}</p>
+            <p className="font-heading text-2xl font-bold text-foreground">{badgeCount}</p>
             <p className="text-xs text-muted-foreground">badges</p>
-          </div>
+          </Link>
         </div>
       </div>
 

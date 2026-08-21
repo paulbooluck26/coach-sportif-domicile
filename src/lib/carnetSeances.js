@@ -64,29 +64,51 @@ export async function acheterCarnet({ user, offreId }) {
 
 // Réserve une séance en consommant un crédit d'un carnet actif (sans paiement).
 export async function reserverSeanceAvecCredit({ user, carnetId, date, heure, location }) {
-  const carnet = await base44.entities.CarnetSeances.get(carnetId);
+  let carnet;
+  try {
+    carnet = await base44.entities.CarnetSeances.get(carnetId);
+  } catch (e) {
+    throw new Error("[étape: lecture carnet] " + e.message);
+  }
   if (!carnet) throw new Error("Carnet introuvable (id: " + carnetId + ")");
   if (carnet.nb_seances_restantes <= 0) throw new Error("Aucun crédit disponible sur ce carnet");
-  const seance = await base44.entities.Seance.create({
-    client_id: user.id,
-    client_name: user.full_name || user.email,
-    session_type: "seance_individuelle",
-    date,
-    time: heure,
-    duration_minutes: 60,
-    price: 0,
-    status: "booked",
-    location: location || "Domicile",
-    carnet_id: carnet.id,
-  });
+
+  let seance;
+  try {
+    seance = await base44.entities.Seance.create({
+      client_id: user.id,
+      client_name: user.full_name || user.email,
+      session_type: "seance_individuelle",
+      date,
+      time: heure,
+      duration_minutes: 60,
+      price: 0,
+      status: "booked",
+      location: location || "Domicile",
+      carnet_id: carnet.id,
+    });
+  } catch (e) {
+    throw new Error("[étape: création séance] " + e.message);
+  }
+
   const consommees = (carnet.nb_seances_consommees || 0) + 1;
   const restantes = Math.max(0, carnet.nb_seances_restantes - 1);
-  await base44.entities.CarnetSeances.update(carnet.id, {
-    nb_seances_consommees: consommees,
-    nb_seances_restantes: restantes,
-    statut: restantes === 0 ? "epuise" : carnet.statut,
-  });
-  await upsertClientProfile(user, location ? { adresse: location } : {});
+  try {
+    await base44.entities.CarnetSeances.update(carnet.id, {
+      nb_seances_consommees: consommees,
+      nb_seances_restantes: restantes,
+      statut: restantes === 0 ? "epuise" : carnet.statut,
+    });
+  } catch (e) {
+    throw new Error("[étape: mise à jour crédit] " + e.message);
+  }
+
+  try {
+    await upsertClientProfile(user, location ? { adresse: location } : {});
+  } catch (e) {
+    throw new Error("[étape: profil client] " + e.message);
+  }
+
   return { seance, carnet };
 }
 

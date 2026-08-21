@@ -65,7 +65,8 @@ export async function acheterCarnet({ user, offreId }) {
 // Réserve une séance en consommant un crédit d'un carnet actif (sans paiement).
 export async function reserverSeanceAvecCredit({ user, carnetId, date, heure, location }) {
   const carnet = await base44.entities.CarnetSeances.get(carnetId);
-  if (!carnet || carnet.nb_seances_restantes <= 0) throw new Error("Aucun crédit disponible");
+  if (!carnet) throw new Error("Carnet introuvable (id: " + carnetId + ")");
+  if (carnet.nb_seances_restantes <= 0) throw new Error("Aucun crédit disponible sur ce carnet");
   const seance = await base44.entities.Seance.create({
     client_id: user.id,
     client_name: user.full_name || user.email,

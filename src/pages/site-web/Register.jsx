@@ -10,6 +10,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
+import { envoyerEmail } from "@/lib/emailSender";
 
 export default function Register() {
   const [searchParams] = useSearchParams();
@@ -49,6 +50,14 @@ export default function Register() {
       const result = await base44.auth.verifyOtp({ email, otpCode });
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
+      }
+      try {
+        await envoyerEmail("bienvenue", email, {
+          client_prenom: prenom,
+          lien_espace: "https://physis-coaching.fr/espace-client/programme",
+        });
+      } catch (_) {
+        // Un mail de bienvenue raté ne doit jamais bloquer la création du compte.
       }
       window.location.href = searchParams.get("redirect") || "/";
     } catch (err) {

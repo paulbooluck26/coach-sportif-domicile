@@ -20,19 +20,31 @@ export default function ClientDashboard() {
     if (!user) return;
     (async () => {
       try {
-        const [allSeances, execs, profiles, mesBadges] = await Promise.all([
+        const [allSeances, execs, profiles] = await Promise.all([
           base44.entities.Seance.filter({ client_id: user.id }, "date"),
           base44.entities.ExecutionSeance.filter({ client_id: user.id }, "-date_execution", 100),
           base44.entities.ClientProfile.filter({ user_id: user.id }),
-          base44.entities.BadgeClient.filter({ client_id: user.id }),
         ]);
         setSeances(allSeances);
         setExecutions(execs);
         setProfile(profiles[0] || null);
+        const projs = await loadClientProjection(user.id);
+        setProjections(projs);
+      } catch {
+        setSeances([]); setExecutions([]); setProjections([]); setProfile(null);
+      }
+    })();
+  }, [user]);
+
+  // Séparé exprès : une panne sur les séances/programme ne doit jamais
+  // pouvoir masquer silencieusement le chargement des badges.
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      try {
+        const mesBadges = await base44.entities.BadgeClient.filter({ client_id: user.id });
         setBadgeCount(mesBadges.length);
 
-        // Un badge tout juste obtenu et jamais montré ? Petite notification
-        // discrète, puis on le marque comme vu pour ne pas la remontrer.
         const nonVu = mesBadges.find((b) => !b.vu);
         if (nonVu) {
           try {
@@ -41,11 +53,8 @@ export default function ClientDashboard() {
           } catch (_) {}
           base44.entities.BadgeClient.update(nonVu.id, { vu: true }).catch(() => {});
         }
-
-        const projs = await loadClientProjection(user.id);
-        setProjections(projs);
-      } catch {
-        setSeances([]); setExecutions([]); setProjections([]); setProfile(null);
+      } catch (e) {
+        console.error("Erreur chargement badges:", e.message);
       }
     })();
   }, [user]);

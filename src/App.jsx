@@ -27,6 +27,8 @@ import ReserverProgramme from '@/pages/espace-client/reserver/Programme';
 import ReserverAppel from '@/pages/espace-client/reserver/Appel';
 import Messages from '@/pages/espace-client/Messages';
 import Profil from '@/pages/espace-client/Profil';
+import MesBadges from '@/pages/espace-client/MesBadges';
+import CoachBadges from '@/pages/admin/CoachBadges';
 import MonProgramme from '@/pages/espace-client/MonProgramme';
 import BilanInitial from '@/pages/espace-client/BilanInitial';
 import SessionExecution from '@/pages/espace-client/SessionExecution';
@@ -102,6 +104,7 @@ const AuthenticatedApp = () => {
           <Route path="/espace-client/reserver/appel" element={<ReserverAppel />} />
           <Route path="/espace-client/messages" element={<Messages />} />
           <Route path="/espace-client/profil" element={<Profil />} />
+          <Route path="/espace-client/badges" element={<MesBadges />} />
           <Route path="/espace-client/performances" element={<MesPerformances />} />
           <Route path="/espace-client/seances" element={<Seances />} />
           <Route path="/espace-client/bibliotheque" element={<Bibliotheque />} />
@@ -122,6 +125,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/catalogue" element={<CoachCatalogue />} />
           <Route path="/admin/promotions" element={<CoachPromotions />} />
           <Route path="/admin/diagnostics" element={<CoachDiagnostics />} />
+          <Route path="/admin/badges" element={<CoachBadges />} />
           <Route path="/admin/disponibilites" element={<CoachDisponibilites />} />
           <Route path="/admin/emails" element={<CoachEmails />} />
           <Route path="/admin/bibliotheque" element={<CoachBibliotheque />} />

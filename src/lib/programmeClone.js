@@ -17,7 +17,7 @@ export async function cloneExercice(exercice, blocId) {
 export async function cloneBloc(bloc, seanceId) {
   const newBloc = await base44.entities.Bloc.create({
     seance_programme_id: seanceId,
-    titre: bloc.titre ? `${bloc.titre} (copie)` : "",
+    titre: bloc.titre ? bloc.titre : "",
     ordre: bloc.ordre,
     repos_entre_exercices: bloc.repos_entre_exercices,
     rounds: bloc.rounds,
@@ -34,7 +34,7 @@ export async function cloneBloc(bloc, seanceId) {
 export async function cloneSeance(seance, semaineId) {
   const newSe = await base44.entities.SeanceProgramme.create({
     semaine_id: semaineId,
-    titre: seance.titre ? `${seance.titre} (copie)` : "",
+    titre: seance.titre ? seance.titre : "",
     jours_semaine: seance.jours_semaine,
     type_seance: seance.type_seance,
     description: seance.description,
@@ -51,7 +51,7 @@ export async function cloneSemaine(semaine, programmeId, newNumero, phaseId) {
     programme_id: programmeId,
     phase_id: phaseId || semaine.phase_id,
     numero: newNumero,
-    titre: semaine.titre ? `${semaine.titre} (copie)` : "",
+    titre: semaine.titre ? semaine.titre : "",
     objectif: semaine.objectif,
   });
   const seances = await base44.entities.SeanceProgramme.filter({ semaine_id: semaine.id });

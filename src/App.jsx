@@ -29,6 +29,7 @@ import Messages from '@/pages/espace-client/Messages';
 import Profil from '@/pages/espace-client/Profil';
 import MesBadges from '@/pages/espace-client/MesBadges';
 import CoachBadges from '@/pages/admin/CoachBadges';
+import CoachFraisDeplacement from '@/pages/admin/CoachFraisDeplacement';
 import MonProgramme from '@/pages/espace-client/MonProgramme';
 import BilanInitial from '@/pages/espace-client/BilanInitial';
 import SessionExecution from '@/pages/espace-client/SessionExecution';
@@ -126,6 +127,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/promotions" element={<CoachPromotions />} />
           <Route path="/admin/diagnostics" element={<CoachDiagnostics />} />
           <Route path="/admin/badges" element={<CoachBadges />} />
+          <Route path="/admin/frais-deplacement" element={<CoachFraisDeplacement />} />
           <Route path="/admin/disponibilites" element={<CoachDisponibilites />} />
           <Route path="/admin/emails" element={<CoachEmails />} />
           <Route path="/admin/bibliotheque" element={<CoachBibliotheque />} />

@@ -21,6 +21,7 @@ export default function CoachClients() {
   const [detailClient, setDetailClient] = useState(null);
   const [form, setForm] = useState({});
   const [onglet, setOnglet] = useState("actifs");
+  const [recherche, setRecherche] = useState("");
   const [vue, setVue] = useState("cartes"); // cartes | tableau
 
   const load = async () => {
@@ -104,7 +105,9 @@ export default function CoachClients() {
     acc[o.key] = enrichis.filter((c) => c._categorie === o.key);
     return acc;
   }, {});
-  const liste = parOnglet[onglet] || [];
+  const liste = (parOnglet[onglet] || []).filter((c) =>
+    !recherche || (c.nom || c.email || "").toLowerCase().includes(recherche.toLowerCase())
+  );
 
   const exporterExcel = () => {
     const rows = liste.map((c) => ({
@@ -138,6 +141,13 @@ export default function CoachClients() {
         </div>
         <button onClick={() => { setEditing({ new: true }); setForm({ nom: "", email: "", telephone: "", adresse: "", objectif: "", notes: "" }); }} className="bg-primary text-primary-foreground px-5 py-2.5 rounded-md font-semibold text-sm">+ Ajouter un client</button>
       </div>
+
+      <input
+        value={recherche}
+        onChange={(e) => setRecherche(e.target.value)}
+        placeholder="Rechercher un client par nom..."
+        className="w-full max-w-sm border border-border rounded-md px-3 py-2 text-sm bg-card focus:outline-none focus:border-accent"
+      />
 
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex gap-1 border-b border-border">

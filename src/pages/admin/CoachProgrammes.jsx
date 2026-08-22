@@ -29,6 +29,7 @@ export default function CoachProgrammes() {
   const [onglet, setOnglet] = useState("actifs");
   const [deploying, setDeploying] = useState(null);
   const [deployClientId, setDeployClientId] = useState("");
+  const [rechercheClient, setRechercheClient] = useState("");
   const [deployLoading, setDeployLoading] = useState(false);
 
   const load = async () => {
@@ -103,7 +104,7 @@ export default function CoachProgrammes() {
     load();
   };
 
-  const ouvrirDeploiement = (p) => { setDeploying(p); setDeployClientId(""); };
+  const ouvrirDeploiement = (p) => { setDeploying(p); setDeployClientId(""); setRechercheClient(""); };
   const confirmerDeploiement = async () => {
     if (!deploying || !deployClientId) return;
     setDeployLoading(true);
@@ -266,10 +267,28 @@ export default function CoachProgrammes() {
             </div>
             <p className="text-sm text-muted-foreground mb-4">Une copie complète de ce modèle (semaines, séances, exercices) sera créée pour le client choisi.</p>
             <label className="block text-sm font-medium text-foreground mb-1.5">Client</label>
-            <select value={deployClientId} onChange={e => setDeployClientId(e.target.value)} className="w-full border border-border rounded-md px-3 py-2 bg-background focus:outline-none focus:border-accent mb-6">
-              <option value="">Choisir un client...</option>
-              {clients.map(c => <option key={c.id} value={c.user_id}>{c.nom || c.email}</option>)}
-            </select>
+            <input
+              value={rechercheClient}
+              onChange={(e) => { setRechercheClient(e.target.value); setDeployClientId(""); }}
+              placeholder="Rechercher un client..."
+              className="w-full border border-border rounded-md px-3 py-2 bg-background focus:outline-none focus:border-accent mb-2"
+            />
+            <div className="max-h-48 overflow-y-auto border border-border rounded-md mb-6">
+              {clients
+                .filter((c) => !rechercheClient || (c.nom || c.email || "").toLowerCase().includes(rechercheClient.toLowerCase()))
+                .map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => { setDeployClientId(c.user_id); setRechercheClient(c.nom || c.email); }}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-secondary/20 ${deployClientId === c.user_id ? "bg-accent/15 font-medium text-foreground" : "text-foreground"}`}
+                  >
+                    {c.nom || c.email}
+                  </button>
+                ))}
+              {clients.filter((c) => !rechercheClient || (c.nom || c.email || "").toLowerCase().includes(rechercheClient.toLowerCase())).length === 0 && (
+                <p className="px-3 py-2 text-sm text-muted-foreground">Aucun client trouvé.</p>
+              )}
+            </div>
             <div className="flex gap-3">
               <button onClick={() => setDeploying(null)} className="flex-1 border border-border py-3 rounded-md text-sm font-medium text-foreground">Annuler</button>
               <button onClick={confirmerDeploiement} disabled={!deployClientId || deployLoading} className="flex-1 bg-primary text-primary-foreground py-3 rounded-md text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2">

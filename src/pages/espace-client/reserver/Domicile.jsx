@@ -56,6 +56,23 @@ export default function Domicile() {
   const { recurrentes, blocages, reservees, loading, reload: reloadCreneaux } = useCreneaux();
   const [diagDone, setDiagDone] = useState(null);
   const [adresse, setAdresse] = useState("");
+  const [deplacement, setDeplacement] = useState(null);
+  const [deplacementErreur, setDeplacementErreur] = useState("");
+  const [verifDeplacement, setVerifDeplacement] = useState(false);
+
+  const verifierDeplacement = async () => {
+    if (!adresse.trim()) return;
+    setVerifDeplacement(true);
+    setDeplacementErreur("");
+    try {
+      const { data } = await supabase.functions.invoke("calculer-frais-deplacement", { body: { adresse } });
+      if (data?.error) setDeplacementErreur(data.error);
+      else setDeplacement(data);
+    } catch {
+      setDeplacementErreur("Impossible de calculer les frais de déplacement pour le moment.");
+    }
+    setVerifDeplacement(false);
+  };
   const [step, setStep] = useState("catalogue");
   const [offreId, setOffreId] = useState(null);
   const [date, setDate] = useState(null);
@@ -389,11 +406,31 @@ Paul BOOLUCK - PHYSIS COACHING`,
                   <input
                     required
                     value={adresse}
-                    onChange={(e) => setAdresse(e.target.value)}
+                    onChange={(e) => { setAdresse(e.target.value); setDeplacement(null); setDeplacementErreur(""); }}
                     placeholder="12 rue Exemple, 68000 Colmar"
                     className="w-full border border-border rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-accent"
                   />
                 </div>
+                <button
+                  onClick={verifierDeplacement}
+                  disabled={!adresse.trim() || verifDeplacement}
+                  className="mt-2 text-xs font-medium text-secondary hover:underline disabled:opacity-50 disabled:no-underline"
+                >
+                  {verifDeplacement ? "Calcul en cours..." : "Vérifier les frais de déplacement"}
+                </button>
+                {deplacement && !deplacement.horsZone && (
+                  <div className="mt-2 bg-secondary/10 border border-secondary/30 rounded-xl px-4 py-3 text-sm">
+                    <p className="text-foreground">Distance : <strong>{deplacement.distanceKm} km</strong></p>
+                    <p className="text-foreground">
+                      Frais de déplacement : <strong>{deplacement.frais > 0 ? `+${deplacement.frais}€` : "Gratuit"}</strong>
+                    </p>
+                  </div>
+                )}
+                {deplacement?.horsZone && (
+                  <p className="mt-2 text-xs text-destructive">Cette adresse est en dehors de notre zone d'intervention (au-delà de {deplacement.distanceMax} km).</p>
+                )}
+                {deplacementErreur && <p className="mt-2 text-xs text-destructive">{deplacementErreur}</p>}
+                <p className="text-xs text-muted-foreground mt-2">Les séances à domicile sont disponibles dans un rayon défini autour de Colmar. Les frais de déplacement sont calculés automatiquement selon la distance réelle jusqu'à votre adresse.</p>
               </div>
 
             </div>
@@ -423,7 +460,7 @@ Paul BOOLUCK - PHYSIS COACHING`,
             {promoErreur && <p className="text-xs text-destructive mt-1.5">{promoErreur}</p>}
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lock className="w-3.5 h-3.5" /> Paiement sécurisé via Stripe · Annulation gratuite jusqu'à 24h avant</div>
-          <button onClick={payer} disabled={paying || !adresse.trim()} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> Payer {promoAppliquee ? promoAppliquee.montantFinal : offre.prix}€</>}</button>
+          <button onClick={payer} disabled={paying || !adresse.trim() || deplacement?.horsZone} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> Payer {(promoAppliquee ? promoAppliquee.montantFinal : offre.prix) + (deplacement && !deplacement.horsZone ? deplacement.frais : 0)}€</>}</button>
         </div>
       )}
     </div>

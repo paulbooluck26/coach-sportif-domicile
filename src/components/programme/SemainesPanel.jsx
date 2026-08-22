@@ -26,8 +26,21 @@ export default function SemainesPanel({ programmeId, phase, onOpen }) {
   const submit = async () => {
     if (editId) { await base44.entities.Semaine.update(editId, form); setEditId(null); }
     else {
-      const numero = all.length ? Math.max(...all.map(s => s.numero || 0)) + 1 : 1;
-      await base44.entities.Semaine.create({ ...form, numero, programme_id: programmeId, phase_id: phase.id });
+      // Trouve où cette semaine doit vraiment s'insérer dans la
+      // numérotation continue du programme (pas juste "après la
+      // dernière semaine créée", qui casse l'ordre entre phases).
+      let insertAt;
+      if (items.length > 0) {
+        insertAt = Math.max(...items.map(s => s.numero || 0)) + 1;
+      } else {
+        const phasesAvant = phases.filter(p => p.ordre < phase.ordre).map(p => p.id);
+        const semainesAvant = all.filter(s => phasesAvant.includes(s.phase_id));
+        insertAt = semainesAvant.length ? Math.max(...semainesAvant.map(s => s.numero || 0)) + 1 : 1;
+      }
+      // Décale toutes les semaines suivantes d'un cran pour laisser la place.
+      const aDecaler = all.filter(s => (s.numero || 0) >= insertAt);
+      await Promise.all(aDecaler.map(s => base44.entities.Semaine.update(s.id, { numero: (s.numero || 0) + 1 })));
+      await base44.entities.Semaine.create({ ...form, numero: insertAt, programme_id: programmeId, phase_id: phase.id });
     }
     setAdding(false); setForm({ titre: "", objectif: "" }); load();
   };

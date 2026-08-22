@@ -16,7 +16,7 @@ export default function PublicNavbar() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
-  const espaceLink = user ? "/espace-client" : "/login";
+  const espaceLink = user ? "/espace-client" : "/login?redirect=/espace-client";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);

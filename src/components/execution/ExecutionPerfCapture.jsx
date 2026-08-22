@@ -53,6 +53,8 @@ export default function ExecutionPerfCapture({ bloc, exercices, perfData, onPerf
                     <label className="block text-[10px] uppercase tracking-wider text-primary-foreground/40 mb-1">Répétitions réalisées</label>
                     <input
                       type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={v.reps ?? ""}
                       onChange={(e) => onPerfChange(ex.id, "reps", e.target.value)}
                       placeholder="—"

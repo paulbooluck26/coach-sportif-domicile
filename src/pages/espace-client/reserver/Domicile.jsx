@@ -414,8 +414,9 @@ Paul BOOLUCK - PHYSIS COACHING`,
                 <button
                   onClick={verifierDeplacement}
                   disabled={!adresse.trim() || verifDeplacement}
-                  className="mt-2 text-xs font-medium text-secondary hover:underline disabled:opacity-50 disabled:no-underline"
+                  className="mt-2 inline-flex items-center gap-1.5 border border-secondary text-secondary px-4 py-2 rounded-full text-xs font-semibold hover:bg-secondary hover:text-secondary-foreground transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-secondary"
                 >
+                  <MapPin className="w-3.5 h-3.5" />
                   {verifDeplacement ? "Calcul en cours..." : "Vérifier les frais de déplacement"}
                 </button>
                 {deplacement && !deplacement.horsZone && (

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { LayoutDashboard, Users, CalendarDays, Dumbbell, Inbox, CreditCard, LogOut, Home, Clock, ShoppingBag, MessageCircle, Mail, Library, Package, Tag, ClipboardList, Award } from "lucide-react";
+import { LayoutDashboard, Users, CalendarDays, Dumbbell, Inbox, CreditCard, LogOut, Home, Clock, ShoppingBag, MessageCircle, Mail, Library, Package, Tag, ClipboardList, Award, Navigation } from "lucide-react";
 
 const nav = [
   { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
@@ -18,6 +18,7 @@ const nav = [
   { to: "/admin/promotions", label: "Promotions", icon: Tag },
   { to: "/admin/diagnostics", label: "Diagnostics", icon: ClipboardList },
   { to: "/admin/badges", label: "Badges", icon: Award },
+  { to: "/admin/frais-deplacement", label: "Déplacement", icon: Navigation },
   { to: "/admin/emails", label: "Emails", icon: Mail },
   { to: "/admin/bibliotheque", label: "Bibliothèque", icon: Library },
 ];

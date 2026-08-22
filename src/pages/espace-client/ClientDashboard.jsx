@@ -42,7 +42,7 @@ export default function ClientDashboard() {
     if (!user) return;
     (async () => {
       try {
-        const mesBadges = await base44.entities.BadgeClient.filter({ client_id: user.id });
+        const mesBadges = await base44.entities.BadgeClient.filter({ client_id: user.id }, "-date_obtention");
         setBadgeCount(mesBadges.length);
 
         const nonVu = mesBadges.find((b) => !b.vu);

@@ -60,13 +60,13 @@ export default function MesBadges() {
         const [badgeList, badgeClientList, profiles, bilans, seances, executions, records, messages, objectifs] = await Promise.all([
           base44.entities.Badge.filter({ actif: true }, "ordre_affichage"),
           base44.entities.BadgeClient.filter({ client_id: user.id }, "-date_obtention"),
-          base44.entities.ClientProfile.filter({ user_id: user.id }),
-          base44.entities.BilanInitial.filter({ client_id: user.id }),
-          base44.entities.Seance.filter({ client_id: user.id }),
-          base44.entities.ExecutionSeance.filter({ client_id: user.id }),
-          base44.entities.RecordPerso.filter({ client_id: user.id }),
-          base44.entities.Message.filter({ client_id: user.id, sender: "client" }),
-          base44.entities.ObjectifClient.filter({ client_id: user.id }),
+          base44.entities.ClientProfile.filter({ user_id: user.id }, "-created_date"),
+          base44.entities.BilanInitial.filter({ client_id: user.id }, "-created_date"),
+          base44.entities.Seance.filter({ client_id: user.id }, "-date"),
+          base44.entities.ExecutionSeance.filter({ client_id: user.id }, "-date_execution"),
+          base44.entities.RecordPerso.filter({ client_id: user.id }, "-date_record"),
+          base44.entities.Message.filter({ client_id: user.id, sender: "client" }, "-created_date"),
+          base44.entities.ObjectifClient.filter({ client_id: user.id }, "-date_creation"),
         ]);
 
         const profile = profiles[0];
@@ -105,6 +105,7 @@ export default function MesBadges() {
         setBadges(badgeList);
         setObtenus(badgeClientList);
       } catch (e) {
+        console.error("Erreur chargement Mes badges:", e.message);
         setBadges([]);
         setObtenus([]);
       }

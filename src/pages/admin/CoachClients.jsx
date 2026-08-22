@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Users, Mail, Phone, MapPin, Target, Edit, X, Save, TrendingUp, List, Table2, Download, Archive, RotateCcw } from "lucide-react";
+import { Users, Mail, Phone, MapPin, Target, Edit, X, Save, TrendingUp, List, Table2, Download, Archive, RotateCcw, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { supabase } from "@/api/supabaseClient";
 import ClientDetail from "@/components/coach/ClientDetail";
 import ClientAvatar from "@/components/ClientAvatar";
 
@@ -47,6 +48,26 @@ export default function CoachClients() {
   const toggleArchive = async (c) => {
     await base44.entities.ClientProfile.update(c.id, { archive: !c.archive });
     load();
+  };
+
+  const [deleting, setDeleting] = useState(null);
+  const [confirmDelText, setConfirmDelText] = useState("");
+  const [deletingLoading, setDeletingLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  const supprimerClient = async () => {
+    setDeletingLoading(true);
+    setDeleteError("");
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account", { body: { target_client_id: deleting.user_id } });
+      if (error || data?.error) throw new Error(data?.error || error?.message || "Échec de la suppression");
+      setDeleting(null);
+      setConfirmDelText("");
+      load();
+    } catch (e) {
+      setDeleteError(e.message);
+    }
+    setDeletingLoading(false);
   };
 
   if (!clients || !seances || !paiements) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
@@ -168,6 +189,9 @@ export default function CoachClients() {
                     <button onClick={() => toggleArchive(c)} className="text-muted-foreground hover:text-accent p-1" title={c.archive ? "Restaurer" : "Archiver"}>
                       {c.archive ? <RotateCcw className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
                     </button>
+                    <button onClick={() => setDeleting(c)} className="text-muted-foreground hover:text-destructive p-1" title="Supprimer définitivement">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -190,6 +214,7 @@ export default function CoachClients() {
                   <button onClick={() => toggleArchive(c)} className="text-muted-foreground hover:text-accent p-1" title={c.archive ? "Restaurer" : "Archiver"}>
                     {c.archive ? <RotateCcw className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
                   </button>
+                  <button onClick={() => setDeleting(c)} className="text-muted-foreground hover:text-destructive p-1" title="Supprimer définitivement"><Trash2 className="w-4 h-4" /></button>
                   <button onClick={() => { setEditing(c); setForm({ nom: c.nom, email: c.email, telephone: c.telephone, adresse: c.adresse, objectif: c.objectif, notes: c.notes }); }} className="text-muted-foreground hover:text-accent p-1"><Edit className="w-4 h-4" /></button>
                 </div>
               </div>
@@ -233,6 +258,29 @@ export default function CoachClients() {
         </div>
       )}
       {detailClient && <ClientDetail client={detailClient} onClose={() => setDetailClient(null)} />}
+
+      {deleting && (
+        <div className="fixed inset-0 z-50 bg-primary/40 flex items-center justify-center p-6" onClick={() => !deletingLoading && setDeleting(null)}>
+          <div className="bg-card rounded-2xl p-8 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+              <AlertTriangle className="w-6 h-6 text-destructive" />
+            </div>
+            <h3 className="font-heading font-bold text-xl text-foreground mb-2">Supprimer {deleting.nom || "ce client"}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+              Cette action est <strong>définitive</strong>. Le compte de connexion sera supprimé et les informations personnelles anonymisées. Les paiements passés sont conservés pour vos obligations comptables légales.
+            </p>
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">Tapez <strong>SUPPRIMER</strong> pour confirmer</label>
+            <input value={confirmDelText} onChange={(e) => setConfirmDelText(e.target.value)} className="w-full border border-border rounded-lg px-3 py-2.5 text-sm mb-2 bg-background focus:outline-none focus:border-destructive" />
+            {deleteError && <p className="text-xs text-destructive mb-2">{deleteError}</p>}
+            <div className="flex gap-3 mt-4">
+              <button onClick={() => { setDeleting(null); setConfirmDelText(""); }} disabled={deletingLoading} className="flex-1 border border-border py-3 rounded-lg text-sm font-medium text-foreground disabled:opacity-50">Annuler</button>
+              <button onClick={supprimerClient} disabled={confirmDelText !== "SUPPRIMER" || deletingLoading} className="flex-1 bg-destructive text-destructive-foreground py-3 rounded-lg text-sm font-semibold disabled:opacity-40 flex items-center justify-center gap-2">
+                {deletingLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Supprimer définitivement"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

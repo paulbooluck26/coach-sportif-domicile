@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import { User, Mail, Phone, MapPin, CreditCard, LogOut, Edit, Save, X, Target, Dumbbell, ClipboardList, CheckCircle2, TrendingUp, AlertTriangle, Loader2 } from "lucide-react";
+import { User, Mail, Phone, MapPin, CreditCard, LogOut, Edit, Save, X, Target, Dumbbell, ClipboardList, CheckCircle2, TrendingUp, AlertTriangle, Loader2, ChevronDown } from "lucide-react";
 import ProfilePhotoUpload from "@/components/ProfilePhotoUpload";
 
 export default function Profil() {
@@ -13,6 +13,7 @@ export default function Profil() {
   const [paiements, setPaiements] = useState([]);
   const [programmes, setProgrammes] = useState([]);
   const [editing, setEditing] = useState(false);
+  const [paiementsOuvert, setPaiementsOuvert] = useState(false);
   const [form, setForm] = useState({});
   const [bilan, setBilan] = useState(null);
   const [showDelete, setShowDelete] = useState(false);
@@ -166,24 +167,29 @@ export default function Profil() {
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-5">
-        <h2 className="font-heading font-semibold text-foreground mb-3 flex items-center gap-2"><CreditCard className="w-4 h-4 text-secondary" /> Paiements</h2>
-        {paiements.length > 0 ? (
-          <div className="space-y-2">
-            {paiements.map(p => (
-              <div key={p.id} className="flex items-center justify-between border border-border rounded-lg p-3">
-                <div className="flex items-center gap-3">
-                  <CreditCard className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{p.montant || p.amount || 0}€</p>
-                    <p className="text-xs text-muted-foreground">{new Date(p.created_date).toLocaleDateString("fr-FR")}</p>
+        <button onClick={() => setPaiementsOuvert((o) => !o)} className="w-full flex items-center justify-between">
+          <h2 className="font-heading font-semibold text-foreground flex items-center gap-2"><CreditCard className="w-4 h-4 text-secondary" /> Paiements {paiements.length > 0 && <span className="text-xs text-muted-foreground font-normal">({paiements.length})</span>}</h2>
+          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${paiementsOuvert ? "rotate-180" : ""}`} />
+        </button>
+        {paiementsOuvert && (
+          paiements.length > 0 ? (
+            <div className="space-y-2 mt-3">
+              {paiements.map(p => (
+                <div key={p.id} className="flex items-center justify-between border border-border rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{p.montant || p.amount || 0}€</p>
+                      <p className="text-xs text-muted-foreground">{new Date(p.created_date).toLocaleDateString("fr-FR")}</p>
+                    </div>
                   </div>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-secondary/15 text-secondary capitalize">{p.statut || p.status || ""}</span>
                 </div>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-secondary/15 text-secondary capitalize">{p.statut || p.status || ""}</span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">Aucun paiement enregistré.</p>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground mt-3">Aucun paiement enregistré.</p>
+          )
         )}
       </div>
 

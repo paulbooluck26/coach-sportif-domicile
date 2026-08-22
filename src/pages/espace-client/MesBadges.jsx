@@ -59,7 +59,7 @@ export default function MesBadges() {
       try {
         const [badgeList, badgeClientList, profiles, bilans, seances, executions, records, messages, objectifs] = await Promise.all([
           base44.entities.Badge.filter({ actif: true }, "ordre_affichage"),
-          base44.entities.BadgeClient.filter({ client_id: user.id }),
+          base44.entities.BadgeClient.filter({ client_id: user.id }, "-date_obtention"),
           base44.entities.ClientProfile.filter({ user_id: user.id }),
           base44.entities.BilanInitial.filter({ client_id: user.id }),
           base44.entities.Seance.filter({ client_id: user.id }),

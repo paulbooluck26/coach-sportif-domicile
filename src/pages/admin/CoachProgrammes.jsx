@@ -30,6 +30,8 @@ export default function CoachProgrammes() {
   const [deploying, setDeploying] = useState(null);
   const [deployClientId, setDeployClientId] = useState("");
   const [rechercheClient, setRechercheClient] = useState("");
+  const [assignationsProgramme, setAssignationsProgramme] = useState(null);
+  const [dateModifiee, setDateModifiee] = useState({});
   const [deployLoading, setDeployLoading] = useState(false);
 
   const load = async () => {
@@ -52,7 +54,24 @@ export default function CoachProgrammes() {
   }, []);
 
   const startNew = () => { setEditing({ new: true }); setForm(emptyForm); };
-  const startEdit = (p) => { setEditing(p); setForm({ name: p.name || "", description: p.description || "", duration_weeks: p.duration_weeks || 4, objective: p.objective || "", client_ids: p.client_ids || [], statut: p.statut || "brouillon", est_modele: !!p.est_modele, date_debut: new Date().toISOString().split("T")[0] }); };
+  const startEdit = (p) => {
+    setEditing(p);
+    setForm({ name: p.name || "", description: p.description || "", duration_weeks: p.duration_weeks || 4, objective: p.objective || "", client_ids: p.client_ids || [], statut: p.statut || "brouillon", est_modele: !!p.est_modele, date_debut: new Date().toISOString().split("T")[0] });
+    setAssignationsProgramme(null);
+    setDateModifiee({});
+    if (!p.est_modele) {
+      base44.entities.ProgrammeAssignation.filter({ programme_id: p.id }).then(setAssignationsProgramme).catch(() => setAssignationsProgramme([]));
+    }
+  };
+
+  const enregistrerDateAssignation = async (assignationId) => {
+    const nouvelleDate = dateModifiee[assignationId];
+    if (!nouvelleDate) return;
+    await base44.entities.ProgrammeAssignation.update(assignationId, { date_debut: nouvelleDate });
+    const fresh = await base44.entities.ProgrammeAssignation.filter({ programme_id: editing.id });
+    setAssignationsProgramme(fresh);
+    setDateModifiee((d) => { const copy = { ...d }; delete copy[assignationId]; return copy; });
+  };
 
   const toggleClient = (userId) => {
     setForm(f => ({ ...f, client_ids: f.client_ids.includes(userId) ? f.client_ids.filter(id => id !== userId) : [...f.client_ids, userId] }));
@@ -247,6 +266,35 @@ export default function CoachProgrammes() {
               )}
               {!form.est_modele && (
                 <div><label className="block text-sm font-medium text-foreground mb-1.5">Date de début (nouveaux clients)</label><input type="date" value={form.date_debut || ""} onChange={e => setForm({ ...form, date_debut: e.target.value })} className="w-full border border-border rounded-md px-3 py-2 focus:outline-none focus:border-accent" /><p className="text-xs text-muted-foreground mt-1">Date à laquelle le programme commence pour les clients nouvellement assignés.</p></div>
+              )}
+              {!form.est_modele && assignationsProgramme && assignationsProgramme.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Corriger la date de début d'un client déjà assigné</label>
+                  <div className="border border-border rounded-md p-3 space-y-2">
+                    {assignationsProgramme.map((a) => {
+                      const client = clients.find((c) => c.user_id === a.client_id);
+                      return (
+                        <div key={a.id} className="flex items-center gap-2">
+                          <span className="text-sm text-foreground flex-1 truncate">{client?.nom || client?.email || "Client inconnu"}</span>
+                          <input
+                            type="date"
+                            value={dateModifiee[a.id] ?? a.date_debut ?? ""}
+                            onChange={(e) => setDateModifiee((d) => ({ ...d, [a.id]: e.target.value }))}
+                            className="border border-border rounded-md px-2 py-1.5 text-sm focus:outline-none focus:border-accent"
+                          />
+                          <button
+                            onClick={() => enregistrerDateAssignation(a.id)}
+                            disabled={!dateModifiee[a.id] || dateModifiee[a.id] === a.date_debut}
+                            className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-md font-medium disabled:opacity-40 shrink-0"
+                          >
+                            Corriger
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Pensez à choisir un lundi pour que la numérotation des semaines reste cohérente.</p>
+                </div>
               )}
               <div><label className="block text-sm font-medium text-foreground mb-1.5">Description</label><textarea value={form.description || ""} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} className="w-full border border-border rounded-md px-3 py-2 resize-none focus:outline-none focus:border-accent" /></div>
             </div>

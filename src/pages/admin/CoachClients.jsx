@@ -16,6 +16,7 @@ export default function CoachClients() {
   const [clients, setClients] = useState(null);
   const [seances, setSeances] = useState(null);
   const [paiements, setPaiements] = useState(null);
+  const [assignations, setAssignations] = useState(null);
   const [editing, setEditing] = useState(null);
   const [detailClient, setDetailClient] = useState(null);
   const [form, setForm] = useState({});
@@ -23,14 +24,16 @@ export default function CoachClients() {
   const [vue, setVue] = useState("cartes"); // cartes | tableau
 
   const load = async () => {
-    const [c, s, p] = await Promise.all([
+    const [c, s, p, a] = await Promise.all([
       base44.entities.ClientProfile.list("-created_date", 300),
       base44.entities.Seance.list("-date"),
       base44.entities.Paiement.list("-date_paiement", 500),
+      base44.entities.ProgrammeAssignation.list("-created_date", 300),
     ]);
     setClients(c);
     setSeances(s);
     setPaiements(p);
+    setAssignations(a);
   };
   useEffect(() => { load().catch(() => {}); }, []);
 
@@ -77,18 +80,20 @@ export default function CoachClients() {
     setDeletingLoading(false);
   };
 
-  if (!clients || !seances || !paiements) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
+  if (!clients || !seances || !paiements || !assignations) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div>;
 
   const today = new Date().toISOString().split("T")[0];
 
   const enrichis = clients.map((c) => {
     const clientSeances = seances.filter((s) => s.client_id === c.user_id);
     const clientPaiements = paiements.filter((p) => p.client_id === c.user_id && p.status === "paid");
+    const clientAssignations = assignations.filter((a) => a.client_id === c.user_id);
     const aVenir = clientSeances.some((s) => s.date >= today && s.status !== "cancelled");
-    const dejaEuActivite = clientSeances.length > 0 || clientPaiements.length > 0;
+    const programmeEnCours = clientAssignations.length > 0;
+    const dejaEuActivite = clientSeances.length > 0 || clientPaiements.length > 0 || programmeEnCours;
     let categorie;
     if (c.archive) categorie = "archives";
-    else if (aVenir) categorie = "actifs";
+    else if (aVenir || programmeEnCours) categorie = "actifs";
     else if (dejaEuActivite) categorie = "anciens";
     else categorie = "prospects";
     const totalDepense = clientPaiements.reduce((sum, p) => sum + (p.amount || 0), 0);

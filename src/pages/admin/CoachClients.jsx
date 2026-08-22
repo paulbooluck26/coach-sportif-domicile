@@ -59,8 +59,15 @@ export default function CoachClients() {
     setDeletingLoading(true);
     setDeleteError("");
     try {
-      const { data, error } = await supabase.functions.invoke("delete-account", { body: { target_client_id: deleting.user_id } });
-      if (error || data?.error) throw new Error(data?.error || error?.message || "Échec de la suppression");
+      if (!deleting.user_id) {
+        // Fiche ajoutée manuellement depuis l'admin — aucun compte de
+        // connexion derrière, rien à faire côté serveur, on supprime
+        // simplement la fiche elle-même.
+        await base44.entities.ClientProfile.delete(deleting.id);
+      } else {
+        const { data, error } = await supabase.functions.invoke("delete-account", { body: { target_client_id: deleting.user_id } });
+        if (error || data?.error) throw new Error(data?.error || error?.message || "Échec de la suppression");
+      }
       setDeleting(null);
       setConfirmDelText("");
       load();
@@ -267,7 +274,7 @@ export default function CoachClients() {
             </div>
             <h3 className="font-heading font-bold text-xl text-foreground mb-2">Supprimer {deleting.nom || "ce client"}</h3>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-              Cette action est <strong>définitive</strong>. Le compte de connexion sera supprimé et les informations personnelles anonymisées. Les paiements passés sont conservés pour vos obligations comptables légales.
+              Cette action est <strong>définitive</strong>. {deleting.user_id ? "Le compte de connexion sera supprimé et les informations personnelles anonymisées." : "Cette fiche sera entièrement supprimée."} Les paiements passés éventuels sont conservés pour vos obligations comptables légales.
             </p>
             <label className="block text-xs font-medium text-muted-foreground mb-1.5">Tapez <strong>SUPPRIMER</strong> pour confirmer</label>
             <input value={confirmDelText} onChange={(e) => setConfirmDelText(e.target.value)} className="w-full border border-border rounded-lg px-3 py-2.5 text-sm mb-2 bg-background focus:outline-none focus:border-destructive" />

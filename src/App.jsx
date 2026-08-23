@@ -95,7 +95,7 @@ const AuthenticatedApp = () => {
         <Route path="/offres" element={<Offres />} />
       </Route>
 
-      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+      <Route element={<ProtectedRoute />}>
         <Route element={<ClientLayout />}>
           <Route path="/espace-client" element={<ClientDashboard />} />
           <Route path="/espace-client/programme" element={<MonProgramme />} />

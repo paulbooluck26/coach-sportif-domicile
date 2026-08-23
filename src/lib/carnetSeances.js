@@ -6,7 +6,7 @@ const todayStr = () => new Date().toISOString().split("T")[0];
 
 export const OFFRES_PONCTUELLES = ["bilan"];
 export const OFFRES_PACK = ["pack_intensif"];
-export const OFFRES_ABONNEMENT = []; // gérés via les vrais abonnements Stripe, pas encore construits
+export const OFFRES_ABONNEMENT = ["essentiel", "performance", "hybrid", "signature"];
 
 export const estPonctuel = (id) => OFFRES_PONCTUELLES.includes(id);
 export const estPack = (id) => OFFRES_PACK.includes(id);

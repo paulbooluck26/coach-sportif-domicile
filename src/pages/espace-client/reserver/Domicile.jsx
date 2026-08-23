@@ -7,30 +7,31 @@ import { estPonctuel, nbSeancesPourOffre } from "@/lib/carnetSeances";
 import { redirigerVersStripe } from "@/lib/stripeCheckout";
 import { supabase } from "@/api/supabaseClient";
 import CalendrierDispo from "@/components/CalendrierDispo";
-import { FORGE_OFFRES, prixDisplay } from "@/lib/forgeOffres";
 import { Link, useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Clock, MapPin, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, CalendarPlus, Flame } from "lucide-react";
 import { downloadICS } from "@/lib/calendarExport";
 
-const CATALOGUE = ["diagnostic", "transformation", "performance", "forge4", "forge8", "decouverte"];
+const CATALOGUE = ["bilan", "pack_intensif"];
 const SESSION_TYPE = {
-  diagnostic: "evaluation",
-  decouverte: "seance_individuelle",
-  transformation: "seance_individuelle",
-  performance: "seance_individuelle",
-  forge4: "seance_individuelle",
-  forge8: "seance_individuelle",
+  bilan: "evaluation",
+  pack_intensif: "seance_individuelle",
 };
 
 // Même correspondance que côté serveur (create-checkout-session) — permet
 // de retrouver la bonne ligne du catalogue admin pour chaque offre.
+// Seules les offres à paiement unique vivent ici — les abonnements
+// (Essentiel, Performance, Hybrid, Signature) passent par les vrais
+// abonnements Stripe, pas encore construits.
 const SKU_PAR_OFFRE = {
-  diagnostic: "coaching-diagnostic",
-  decouverte: "coaching-decouverte",
-  transformation: "coaching-transformation",
-  performance: "coaching-performance",
-  forge4: "coaching-forge4",
-  forge8: "coaching-forge8",
+  bilan: "coaching-bilan",
+  pack_intensif: "coaching-pack-intensif",
+};
+
+// Contenu de secours minimal — juste le temps que le vrai catalogue
+// admin arrive, pour ne jamais planter ni montrer une ancienne offre.
+const CATALOGUE_SECOURS = {
+  bilan: { id: "bilan", titre: "Bilan Physis", prix: 80, prixLabel: "80€", duree: "60 min" },
+  pack_intensif: { id: "pack_intensif", titre: "Pack Intensif", prix: 790, prixLabel: "790€", duree: "10 séances" },
 };
 
 function produitVersOffre(id, p) {
@@ -40,7 +41,7 @@ function produitVersOffre(id, p) {
     badge: p.metadata?.badge,
     accroche: p.metadata?.accroche,
     description: p.description,
-    duree: p.metadata?.duree,
+    duree: p.metadata?.duree || (p.metadata?.nb_seances ? `${p.metadata.nb_seances} séances` : ""),
     prix: p.prix_promo ?? p.prix_ttc,
     prixLabel: `${p.prix_promo ?? p.prix_ttc}€`,
     prixUnite: p.metadata?.unite_prix,
@@ -86,7 +87,7 @@ export default function Domicile() {
   // se met à jour silencieusement avec le vrai catalogue admin dès qu'il
   // arrive — si la requête échoue pour une raison ou une autre, on garde
   // simplement l'affichage de secours.
-  const [catalogue, setCatalogue] = useState(FORGE_OFFRES);
+  const [catalogue, setCatalogue] = useState(CATALOGUE_SECOURS);
 
   useEffect(() => {
     base44.entities.Produit.filter({ categorie: "coaching_domicile", actif: true })
@@ -235,7 +236,7 @@ export default function Domicile() {
             <h2 className="font-heading text-2xl font-bold text-foreground mb-2">Crédit de séances activé</h2>
             <p className="text-foreground/60 mb-6">Paiement de <strong className="text-foreground">{offre.prix}€</strong> validé. <strong className="text-foreground">{carnet.nb_seances_total} séances</strong> sont désormais disponibles dans votre espace.</p>
             <div className="bg-secondary/10 rounded-xl p-5 text-left space-y-2 mb-6">
-              <p className="flex items-center gap-2 text-sm text-foreground/80"><Flame className="w-4 h-4 text-accent" /> {offre.titre} — {prixDisplay(offre)}</p>
+              <p className="flex items-center gap-2 text-sm text-foreground/80"><Flame className="w-4 h-4 text-accent" /> {offre.titre} — {offre.prixLabel}</p>
               <p className="flex items-center gap-2 text-sm text-foreground/80"><CalendarDays className="w-4 h-4 text-accent" /> {carnet.nb_seances_total} séances à réserver à votre rythme</p>
               {adresse && <p className="flex items-center gap-2 text-sm text-foreground/80"><MapPin className="w-4 h-4 text-accent" /> {adresse}</p>}
             </div>
@@ -254,7 +255,7 @@ export default function Domicile() {
           <div className="bg-secondary/10 rounded-xl p-5 text-left space-y-2 mb-6">
             <p className="flex items-center gap-2 text-sm text-foreground/80"><CalendarDays className="w-4 h-4 text-accent" /> {parseDateLocal(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</p>
             <p className="flex items-center gap-2 text-sm text-foreground/80"><Clock className="w-4 h-4 text-accent" /> {heure} · 60 min</p>
-            <p className="flex items-center gap-2 text-sm text-foreground/80"><Flame className="w-4 h-4 text-accent" /> {offre.titre} — {prixDisplay(offre)}</p>
+            <p className="flex items-center gap-2 text-sm text-foreground/80"><Flame className="w-4 h-4 text-accent" /> {offre.titre} — {offre.prixLabel}</p>
             {adresse && <p className="flex items-center gap-2 text-sm text-foreground/80"><MapPin className="w-4 h-4 text-accent" /> {adresse}</p>}
           </div>
           <button
@@ -317,7 +318,7 @@ Paul BOOLUCK - PHYSIS COACHING`,
                     {(o.sousTitre || o.duree) && <p className="text-xs text-muted-foreground mt-0.5">{o.sousTitre || o.duree}</p>}
                     {o.inclus && <p className="text-xs text-muted-foreground mt-1 truncate">{o.inclus.join(" · ")}</p>}
                   </div>
-                  <p className="font-heading text-lg font-bold text-foreground whitespace-nowrap">{prixDisplay(o)}</p>
+                  <p className="font-heading text-lg font-bold text-foreground whitespace-nowrap">{o.prixLabel}</p>
                 </div>
               </button>
             );
@@ -335,7 +336,7 @@ Paul BOOLUCK - PHYSIS COACHING`,
                 <h2 className="font-heading text-2xl font-bold text-foreground">{offre.titre}</h2>
                 <p className="text-sm text-muted-foreground mt-1">{offre.sousTitre || offre.duree || "60 min"}</p>
               </div>
-              <p className="font-heading text-2xl font-bold text-foreground whitespace-nowrap">{prixDisplay(offre)}</p>
+              <p className="font-heading text-2xl font-bold text-foreground whitespace-nowrap">{offre.prixLabel}</p>
             </div>
             {(offre.accroche || offre.description) && (
               <p className="text-sm text-foreground/80 leading-relaxed">{offre.accroche || offre.description}</p>
@@ -364,7 +365,7 @@ Paul BOOLUCK - PHYSIS COACHING`,
           <button onClick={() => setStep("catalogue")} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="w-4 h-4" /> Autres offres</button>
           <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between">
             <div><p className="font-heading font-semibold text-foreground">{offre.titre}</p><p className="text-xs text-muted-foreground">{offre.sousTitre || offre.duree || "60 min"}</p></div>
-            <p className="font-heading text-xl font-bold text-foreground">{prixDisplay(offre)}</p>
+            <p className="font-heading text-xl font-bold text-foreground">{offre.prixLabel}</p>
           </div>
           {loading ? <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-secondary border-t-primary rounded-full animate-spin" /></div> : (
             <CalendrierDispo recurrentes={recurrentes} blocages={blocages} reservees={reservees} value={date} onChange={setDate} />

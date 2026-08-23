@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
@@ -11,6 +11,7 @@ const DefaultFallback = () => (
 
 export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthenticatedElement }) {
   const { isAuthenticated, isLoadingAuth, authChecked, authError, checkUserAuth } = useAuth();
+  const location = useLocation();
 
   useEffect(() => {
     if (!authChecked && !isLoadingAuth) {
@@ -22,15 +23,20 @@ export default function ProtectedRoute({ fallback = <DefaultFallback />, unauthe
     return fallback;
   }
 
+  // Retient toujours où l'utilisateur essayait d'aller — pour qu'il y
+  // atterrisse une fois connecté, plutôt que sur l'accueil par défaut.
+  const destinationApresConnexion = location.pathname + location.search;
+  const redirectionParDefaut = <Navigate to={`/login?redirect=${encodeURIComponent(destinationApresConnexion)}`} replace />;
+
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     }
-    return unauthenticatedElement;
+    return unauthenticatedElement || redirectionParDefaut;
   }
 
   if (!isAuthenticated) {
-    return unauthenticatedElement;
+    return unauthenticatedElement || redirectionParDefaut;
   }
 
   return <Outlet />;

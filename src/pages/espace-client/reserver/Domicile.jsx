@@ -315,25 +315,47 @@ Paul BOOLUCK - PHYSIS COACHING`,
       </div>
 
       {step === "catalogue" && (
-        <div className="space-y-3">
-          {CATALOGUE.map(id => {
-            const o = catalogue[id];
-            return (
-              <button key={id} onClick={() => choisir(id)}
-                className="w-full text-left bg-card border rounded-2xl p-5 transition-all border-border hover:border-accent">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-heading font-semibold text-foreground">{o.titre}</p>
-                    </div>
-                    {(o.sousTitre || o.duree) && <p className="text-xs text-muted-foreground mt-0.5">{o.sousTitre || o.duree}</p>}
-                    {o.inclus && <p className="text-xs text-muted-foreground mt-1 truncate">{o.inclus.join(" · ")}</p>}
-                  </div>
-                  <p className="font-heading text-lg font-bold text-foreground whitespace-nowrap">{o.prixLabel}</p>
-                </div>
-              </button>
-            );
-          })}
+        <div className="space-y-8">
+          {[
+            { titre: "Coaching à domicile", sousTitre: "Votre coach est présent à chaque entraînement.", ids: ["essentiel", "performance"] },
+            { titre: "Coaching hybride", sousTitre: "Votre coach vous accompagne, même lorsque vous vous entraînez seul.", ids: ["hybrid", "signature"] },
+            { titre: "Autres formules", sousTitre: "Sans abonnement.", ids: ["bilan", "pack_intensif"] },
+          ].map((groupe) => (
+            <div key={groupe.titre}>
+              <h2 className="font-heading font-bold text-lg text-primary">{groupe.titre}</h2>
+              <p className="text-xs text-muted-foreground mb-3">{groupe.sousTitre}</p>
+              <div className="space-y-3">
+                {groupe.ids.map((id) => {
+                  const o = catalogue[id];
+                  if (!o) return null;
+                  const dominant = !!o.dominant;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => choisir(id)}
+                      className={`relative w-full text-left rounded-2xl p-5 transition-all border ${
+                        dominant ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-accent"
+                      }`}
+                    >
+                      {o.badge && (
+                        <span className="absolute -top-2.5 left-5 px-2.5 py-0.5 bg-secondary text-secondary-foreground text-[10px] font-semibold rounded-full tracking-wide whitespace-nowrap">
+                          {o.badge}
+                        </span>
+                      )}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className={`font-heading font-semibold ${dominant ? "text-primary-foreground" : "text-foreground"}`}>{o.titre}</p>
+                          {(o.sousTitre || o.duree) && <p className={`text-xs mt-0.5 ${dominant ? "text-primary-foreground/60" : "text-muted-foreground"}`}>{o.sousTitre || o.duree}</p>}
+                          {o.inclus && <p className={`text-xs mt-1 truncate ${dominant ? "text-primary-foreground/60" : "text-muted-foreground"}`}>{o.inclus.join(" · ")}</p>}
+                        </div>
+                        <p className={`font-heading text-lg font-bold whitespace-nowrap ${dominant ? "text-secondary" : "text-foreground"}`}>{o.prixLabel}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

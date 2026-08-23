@@ -104,7 +104,7 @@ export default function MonProgramme() {
           </div>
         ) : (
           <div className="grid lg:grid-cols-2 gap-6">
-            <ProgrammeCalendar projections={projections} onDayClick={(date, dayProjs) => setSelectedDay({ date, projections: dayProjs })} />
+            <ProgrammeCalendar projections={projections} onDayClick={(date, dayProjs) => setSelectedDay({ date, projections: dayProjs })} selectedDate={selectedDay?.date} />
             <div>
               {selectedDay ? (
                 <div className="bg-card border border-border rounded-lg p-6">

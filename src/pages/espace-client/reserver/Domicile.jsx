@@ -179,6 +179,7 @@ export default function Domicile() {
       if (estAbonnement(offreId)) {
         await redirigerVersAbonnementStripe({
           offreId,
+          adresse,
           successPath: "/espace-client/reserver/domicile",
         });
       } else if (ponctuel) {
@@ -432,7 +433,7 @@ Paul BOOLUCK - PHYSIS COACHING`,
               </div>
               <p className="font-heading text-2xl font-bold text-foreground">{offre.prix}€{estAbonnement(offreId) ? "/mois" : ""}</p>
             </div>
-            {!estAbonnement(offreId) && (
+            {(
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Adresse de la séance</label>
@@ -497,7 +498,7 @@ Paul BOOLUCK - PHYSIS COACHING`,
             {promoErreur && <p className="text-xs text-destructive mt-1.5">{promoErreur}</p>}
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lock className="w-3.5 h-3.5" /> Paiement sécurisé via Stripe · Annulation gratuite jusqu'à 24h avant</div>
-          <button onClick={payer} disabled={paying || (!estAbonnement(offreId) && (!adresse.trim() || deplacement?.horsZone))} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> {estAbonnement(offreId) ? `S'abonner ${offre.prix}€/mois` : `Payer ${(promoAppliquee ? promoAppliquee.montantFinal : offre.prix) + (deplacement && !deplacement.horsZone ? deplacement.frais : 0)}€`}</>}</button>
+          <button onClick={payer} disabled={paying || !adresse.trim() || deplacement?.horsZone} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> {estAbonnement(offreId) ? `S'abonner ${offre.prix}€/mois` : `Payer ${(promoAppliquee ? promoAppliquee.montantFinal : offre.prix) + (deplacement && !deplacement.horsZone ? deplacement.frais : 0)}€`}</>}</button>
         </div>
       )}
     </div>

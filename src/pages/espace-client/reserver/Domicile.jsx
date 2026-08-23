@@ -3,28 +3,31 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useCreneaux } from "@/hooks/useCreneaux";
 import { creneauxDisponibles, parseDateLocal } from "@/lib/creneaux";
-import { estPonctuel, nbSeancesPourOffre } from "@/lib/carnetSeances";
+import { estPonctuel, estAbonnement, nbSeancesPourOffre } from "@/lib/carnetSeances";
 import { redirigerVersStripe } from "@/lib/stripeCheckout";
+import { redirigerVersAbonnementStripe } from "@/lib/abonnementCheckout";
 import { supabase } from "@/api/supabaseClient";
 import CalendrierDispo from "@/components/CalendrierDispo";
 import { Link, useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Clock, MapPin, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, CalendarPlus, Flame } from "lucide-react";
 import { downloadICS } from "@/lib/calendarExport";
 
-const CATALOGUE = ["bilan", "pack_intensif"];
+const CATALOGUE = ["essentiel", "hybrid", "performance", "signature", "bilan", "pack_intensif"];
 const SESSION_TYPE = {
   bilan: "evaluation",
   pack_intensif: "seance_individuelle",
 };
 
-// Même correspondance que côté serveur (create-checkout-session) — permet
-// de retrouver la bonne ligne du catalogue admin pour chaque offre.
-// Seules les offres à paiement unique vivent ici — les abonnements
-// (Essentiel, Performance, Hybrid, Signature) passent par les vrais
-// abonnements Stripe, pas encore construits.
+// Même correspondance que côté serveur (create-checkout-session /
+// create-subscription-checkout) — permet de retrouver la bonne ligne du
+// catalogue admin pour chaque offre.
 const SKU_PAR_OFFRE = {
   bilan: "coaching-bilan",
   pack_intensif: "coaching-pack-intensif",
+  essentiel: "coaching-essentiel",
+  performance: "coaching-performance-abo",
+  hybrid: "coaching-hybrid",
+  signature: "coaching-signature",
 };
 
 // Contenu de secours minimal — juste le temps que le vrai catalogue
@@ -32,6 +35,10 @@ const SKU_PAR_OFFRE = {
 const CATALOGUE_SECOURS = {
   bilan: { id: "bilan", titre: "Bilan Physis", prix: 80, prixLabel: "80€", duree: "60 min" },
   pack_intensif: { id: "pack_intensif", titre: "Pack Intensif", prix: 790, prixLabel: "790€", duree: "10 séances" },
+  essentiel: { id: "essentiel", titre: "PHYSIS Essentiel", prix: 300, prixLabel: "300€/mois", duree: "4 séances/mois" },
+  performance: { id: "performance", titre: "PHYSIS Performance", prix: 550, prixLabel: "550€/mois", duree: "8 séances/mois" },
+  hybrid: { id: "hybrid", titre: "PHYSIS Hybrid", prix: 430, prixLabel: "430€/mois", duree: "Engagement 3 mois" },
+  signature: { id: "signature", titre: "PHYSIS Signature", prix: 650, prixLabel: "650€/mois", duree: "Engagement 3 mois" },
 };
 
 function produitVersOffre(id, p) {
@@ -169,7 +176,12 @@ export default function Domicile() {
         }
       } catch (_) {}
 
-      if (ponctuel) {
+      if (estAbonnement(offreId)) {
+        await redirigerVersAbonnementStripe({
+          offreId,
+          successPath: "/espace-client/reserver/domicile",
+        });
+      } else if (ponctuel) {
         await redirigerVersStripe({
           nom: offre.titre,
           montant: offre.prix,
@@ -189,7 +201,6 @@ export default function Domicile() {
         });
       } else {
         const total = nbSeancesPourOffre(offreId);
-        const abonnement = offreId === "forge4" || offreId === "forge8";
         await redirigerVersStripe({
           nom: offre.titre,
           montant: offre.prix,
@@ -198,7 +209,7 @@ export default function Domicile() {
             client_id: user.id,
             offre_id: offreId,
             offre_titre: offre.titre,
-            type_carnet: abonnement ? "abonnement" : "pack",
+            type_carnet: "pack",
             nb_seances_total: String(total),
           },
           successPath: "/espace-client/reserver/domicile",
@@ -397,8 +408,9 @@ Paul BOOLUCK - PHYSIS COACHING`,
                   ? <p className="text-xs text-muted-foreground">{parseDateLocal(date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })} · {heure}</p>
                   : <p className="text-xs text-muted-foreground">{nbSeancesPourOffre(offreId)} séances · à réserver dans votre espace</p>}
               </div>
-              <p className="font-heading text-2xl font-bold text-foreground">{offre.prix}€</p>
+              <p className="font-heading text-2xl font-bold text-foreground">{offre.prix}€{estAbonnement(offreId) ? "/mois" : ""}</p>
             </div>
+            {!estAbonnement(offreId) && (
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Adresse de la séance</label>
@@ -436,6 +448,7 @@ Paul BOOLUCK - PHYSIS COACHING`,
               </div>
 
             </div>
+            )}
           </div>
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Code promo (facultatif)</label>
@@ -462,7 +475,7 @@ Paul BOOLUCK - PHYSIS COACHING`,
             {promoErreur && <p className="text-xs text-destructive mt-1.5">{promoErreur}</p>}
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lock className="w-3.5 h-3.5" /> Paiement sécurisé via Stripe · Annulation gratuite jusqu'à 24h avant</div>
-          <button onClick={payer} disabled={paying || !adresse.trim() || deplacement?.horsZone} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> Payer {(promoAppliquee ? promoAppliquee.montantFinal : offre.prix) + (deplacement && !deplacement.horsZone ? deplacement.frais : 0)}€</>}</button>
+          <button onClick={payer} disabled={paying || (!estAbonnement(offreId) && (!adresse.trim() || deplacement?.horsZone))} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> {estAbonnement(offreId) ? `S'abonner ${offre.prix}€/mois` : `Payer ${(promoAppliquee ? promoAppliquee.montantFinal : offre.prix) + (deplacement && !deplacement.horsZone ? deplacement.frais : 0)}€`}</>}</button>
         </div>
       )}
     </div>

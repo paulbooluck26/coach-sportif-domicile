@@ -6,6 +6,7 @@ import { loadClientProjection } from "@/lib/projection";
 import { parseDateLocal, typeLabelSeance as typeLabel } from "@/lib/creneaux";
 import { Play, CalendarDays, Clock, MapPin, Flame, Trophy, TrendingUp, ChevronRight, Dumbbell, CalendarPlus, BookOpen } from "lucide-react";
 import ClientAvatar from "@/components/ClientAvatar";
+import BienvenueEspaceClient from "@/components/BienvenueEspaceClient";
 
 export default function ClientDashboard() {
   const { user } = useAuth();
@@ -15,6 +16,7 @@ export default function ClientDashboard() {
   const [profile, setProfile] = useState(null);
   const [badgeCount, setBadgeCount] = useState(0);
   const [nouveauBadge, setNouveauBadge] = useState(null);
+  const [showBienvenue, setShowBienvenue] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -28,6 +30,7 @@ export default function ClientDashboard() {
         setSeances(allSeances);
         setExecutions(execs);
         setProfile(profiles[0] || null);
+        if (profiles[0] && !profiles[0].tuto_vu) setShowBienvenue(true);
         const projs = await loadClientProjection(user.id);
         setProjections(projs);
       } catch {
@@ -212,6 +215,16 @@ export default function ClientDashboard() {
           <p className="text-sm font-semibold text-foreground">Mes programmes</p>
         </Link>
       </div>
+
+      {showBienvenue && (
+        <BienvenueEspaceClient
+          prenom={prenom}
+          onClose={() => {
+            setShowBienvenue(false);
+            if (profile?.id) base44.entities.ClientProfile.update(profile.id, { tuto_vu: true }).catch(() => {});
+          }}
+        />
+      )}
     </div>
   );
 }

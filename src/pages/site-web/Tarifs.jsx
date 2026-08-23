@@ -75,7 +75,7 @@ export default function Tarifs() {
       <section className="max-w-3xl mx-auto px-6 lg:px-10 text-center mb-16">
         <p className="text-sm md:text-base font-bold tracking-[0.2em] text-secondary mb-4 uppercase">Coaching à domicile</p>
         <h1 className="text-4xl lg:text-6xl font-heading font-bold text-primary leading-tight mb-6">
-          Votre progression. Un accompagnement qui s'adapte à vous.
+          Un accompagnement qui s'adapte à vous
         </h1>
         <p className="text-muted-foreground leading-relaxed">
           Colmar et alentours. Paiement sécurisé en ligne. Annulation gratuite jusqu'à 24h avant la séance.
@@ -89,7 +89,7 @@ export default function Tarifs() {
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-full bg-secondary/15 flex items-center justify-center shrink-0"><Home className="w-5 h-5 text-secondary" /></div>
             <div>
-              <h2 className="text-xl font-heading font-bold text-primary uppercase">Coaching à domicile</h2>
+              <h2 className="text-2xl font-heading font-bold text-primary">Coaching à domicile</h2>
               <p className="text-sm text-muted-foreground">Votre coach est présent à chaque entraînement.</p>
             </div>
           </div>
@@ -104,7 +104,7 @@ export default function Tarifs() {
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-full bg-secondary/15 flex items-center justify-center shrink-0"><Layers className="w-5 h-5 text-secondary" /></div>
             <div>
-              <h2 className="text-xl font-heading font-bold text-primary uppercase">Coaching hybride</h2>
+              <h2 className="text-2xl font-heading font-bold text-primary">Coaching hybride</h2>
               <p className="text-sm text-muted-foreground">Votre coach vous accompagne, même lorsque vous vous entraînez seul.</p>
             </div>
           </div>
@@ -148,11 +148,11 @@ export default function Tarifs() {
                   {comparatif.map((p) => <td key={p.id} className="text-center py-3 px-3 text-foreground">{p.engagement_mois ? `${p.engagement_mois} mois` : "—"}</td>)}
                 </tr>
                 <tr>
-                  <td className="py-3 pr-4 text-muted-foreground align-top">Idéal si...</td>
+                  <td className="py-3 pr-4 text-muted-foreground align-top">Idéal pour...</td>
                   {comparatif.map((p) => <td key={p.id} className="text-center py-3 px-3 text-foreground text-xs leading-snug">{p.ideal_si}</td>)}
                 </tr>
                 <tr>
-                  <td className="py-3 pr-4 text-muted-foreground font-medium">Prix</td>
+                  <td className="py-3 pr-4 text-muted-foreground font-medium">Prix mensuel</td>
                   {comparatif.map((p) => <td key={p.id} className="text-center py-3 px-3 font-heading font-bold text-primary">{p.prix_ttc}€</td>)}
                 </tr>
               </tbody>

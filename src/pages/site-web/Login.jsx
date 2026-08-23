@@ -22,10 +22,7 @@ export default function Login() {
     setLoading(true);
     try {
       await base44.auth.loginViaEmailPassword(email, password);
-      const dest = searchParams.get("redirect") || "/";
-      console.log("[diagnostic connexion] URL complète :", window.location.href);
-      console.log("[diagnostic connexion] destination lue :", dest);
-      window.location.href = dest;
+      window.location.href = searchParams.get("redirect") || "/";
     } catch (err) {
       setError(translateAuthError(err.message));
     } finally {

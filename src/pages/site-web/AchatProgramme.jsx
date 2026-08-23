@@ -66,7 +66,7 @@ export default function AchatProgramme() {
                   </span>
                 )}
                 <h3 className={`text-xl font-heading font-bold ${highlight ? "text-primary-foreground" : "text-primary"}`}>{p.nom}</h3>
-                <p className={`text-xs mt-1 ${highlight ? "text-primary-foreground/60" : "text-muted-foreground"}`}>{p.metadata?.duree_semaines} semaines</p>
+                <p className={`text-xs mt-1 ${highlight ? "text-primary-foreground/60" : "text-muted-foreground"}`}>{p.metadata?.duree_semaines} semaines{p.metadata?.prix_semaine ? ` · ${p.metadata.prix_semaine}/semaine` : ""}</p>
                 <div className="flex items-baseline gap-1 my-3">
                   <span className={`text-3xl font-heading font-bold ${highlight ? "text-secondary" : "text-primary"}`}>{prix}€</span>
                 </div>

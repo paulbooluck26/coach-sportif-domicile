@@ -4,16 +4,16 @@ import { upsertClientProfile, envoyerRecuPaiement } from "@/lib/reservationFlow"
 
 const todayStr = () => new Date().toISOString().split("T")[0];
 
-export const OFFRES_PONCTUELLES = ["diagnostic", "decouverte"];
-export const OFFRES_PACK = ["transformation", "performance"];
-export const OFFRES_ABONNEMENT = ["forge4", "forge8"];
+export const OFFRES_PONCTUELLES = ["bilan"];
+export const OFFRES_PACK = ["pack_intensif"];
+export const OFFRES_ABONNEMENT = []; // gérés via les vrais abonnements Stripe, pas encore construits
 
 export const estPonctuel = (id) => OFFRES_PONCTUELLES.includes(id);
 export const estPack = (id) => OFFRES_PACK.includes(id);
 export const estAbonnement = (id) => OFFRES_ABONNEMENT.includes(id);
 
 export function nbSeancesPourOffre(offreId) {
-  return { transformation: 10, performance: 20, forge4: 4, forge8: 8 }[offreId] || 1;
+  return { pack_intensif: 10 }[offreId] || 1;
 }
 
 function periodeCourante() {

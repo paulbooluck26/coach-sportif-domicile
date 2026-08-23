@@ -70,9 +70,9 @@ export default function AchatProgramme() {
                 <div className="flex items-baseline gap-1 my-3">
                   <span className={`text-3xl font-heading font-bold ${highlight ? "text-secondary" : "text-primary"}`}>{prix}€</span>
                 </div>
-                <p className={`text-sm mb-4 ${highlight ? "text-primary-foreground/80" : "text-foreground/80"}`}>{p.description}</p>
+                <p className={`text-sm italic mb-4 ${highlight ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{p.ideal_si}</p>
                 <ul className="space-y-2 mb-6 flex-1">
-                  {(p.metadata?.inclus || []).map((f, j) => (
+                  {(p.metadata?.inclus || []).slice(0, 4).map((f, j) => (
                     <li key={j} className={`flex items-start gap-2 text-sm ${highlight ? "text-primary-foreground/80" : "text-foreground/80"}`}>
                       <Check className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
                       {f}

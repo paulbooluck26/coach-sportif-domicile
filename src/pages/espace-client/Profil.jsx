@@ -18,6 +18,10 @@ export default function Profil() {
   const [showBienvenue, setShowBienvenue] = useState(false);
   const [form, setForm] = useState({});
   const [bilan, setBilan] = useState(null);
+  const [abonnement, setAbonnement] = useState(null);
+  const [confirmNonRenouveler, setConfirmNonRenouveler] = useState(false);
+  const [nonRenouvelerLoading, setNonRenouvelerLoading] = useState(false);
+  const [nonRenouvelerErreur, setNonRenouvelerErreur] = useState("");
   const [showDelete, setShowDelete] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -41,6 +45,13 @@ export default function Profil() {
       setProgrammes(allProgs.filter(p => p.client_ids?.includes(user.id)));
       const bilans = await base44.entities.BilanInitial.filter({ client_id: user.id }).catch(() => []);
       setBilan(bilans[0] || null);
+      const abos = await base44.entities.AbonnementClient.filter({ client_id: user.id, statut: "actif" }, "-created_date").catch(() => []);
+      if (abos[0]) {
+        const prod = await base44.entities.Produit.get(abos[0].produit_id).catch(() => null);
+        setAbonnement({ ...abos[0], produit: prod });
+      } else {
+        setAbonnement(null);
+      }
     } catch {}
   };
 
@@ -167,6 +178,68 @@ export default function Profil() {
         <p className="text-sm text-muted-foreground mb-4">Consultez l'évolution de vos performances et vos records personnels au fil des séances.</p>
         <Link to="/espace-client/performances" className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2.5 rounded-lg text-sm font-semibold">Voir mes performances</Link>
       </div>
+
+      {abonnement && (
+        <div className="bg-card border border-accent/30 rounded-2xl p-5">
+          <h2 className="font-heading font-semibold text-foreground mb-3">Mon abonnement</h2>
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div>
+              <p className="text-sm font-semibold text-foreground">{abonnement.produit?.nom}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{abonnement.produit?.prix_ttc}€/mois</p>
+            </div>
+            <span className={`text-xs px-2.5 py-1 rounded-full whitespace-nowrap ${abonnement.statut === "actif" ? "bg-secondary/15 text-secondary" : "bg-muted text-muted-foreground"}`}>
+              {abonnement.statut === "actif" ? "Actif" : "Ne se renouvellera pas"}
+            </span>
+          </div>
+          {abonnement.date_fin_engagement && new Date(abonnement.date_fin_engagement) > new Date() && (
+            <p className="text-xs text-muted-foreground mb-3">Engagement jusqu'au {new Date(abonnement.date_fin_engagement).toLocaleDateString("fr-FR")}.</p>
+          )}
+
+          {abonnement.renouvellement_actif ? (
+            <button onClick={() => setConfirmNonRenouveler(true)} className="text-xs text-muted-foreground hover:text-destructive underline">
+              Ne pas renouveler mon abonnement
+            </button>
+          ) : (
+            <p className="text-xs text-muted-foreground">Le renouvellement automatique est déjà arrêté.</p>
+          )}
+        </div>
+      )}
+
+      {confirmNonRenouveler && (
+        <div className="fixed inset-0 z-50 bg-primary/40 flex items-center justify-center p-6" onClick={() => !nonRenouvelerLoading && setConfirmNonRenouveler(false)}>
+          <div className="bg-card rounded-2xl p-8 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-heading font-bold text-xl text-foreground mb-3">Ne pas renouveler mon abonnement</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+              {abonnement?.date_fin_engagement && new Date(abonnement.date_fin_engagement) > new Date()
+                ? `Votre engagement initial court jusqu'au ${new Date(abonnement.date_fin_engagement).toLocaleDateString("fr-FR")} — les mensualités restantes de cet engagement restent dues. Votre abonnement s'arrêtera automatiquement à cette date, sans reconduction.`
+                : "Votre abonnement s'arrêtera à la fin du mois déjà réglé, sans reconduction."}
+            </p>
+            {nonRenouvelerErreur && <p className="text-xs text-destructive mb-3">{nonRenouvelerErreur}</p>}
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmNonRenouveler(false)} disabled={nonRenouvelerLoading} className="flex-1 border border-border py-3 rounded-lg text-sm font-medium text-foreground disabled:opacity-50">Annuler</button>
+              <button
+                onClick={async () => {
+                  setNonRenouvelerLoading(true);
+                  setNonRenouvelerErreur("");
+                  try {
+                    const { data, error } = await supabase.functions.invoke("ne-pas-renouveler-abonnement");
+                    if (error || data?.error) throw new Error(data?.error || error?.message);
+                    setConfirmNonRenouveler(false);
+                    load();
+                  } catch (e) {
+                    setNonRenouvelerErreur(e.message);
+                  }
+                  setNonRenouvelerLoading(false);
+                }}
+                disabled={nonRenouvelerLoading}
+                className="flex-1 bg-destructive text-destructive-foreground py-3 rounded-lg text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {nonRenouvelerLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirmer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="bg-card border border-border rounded-2xl p-5">
         <button onClick={() => setPaiementsOuvert((o) => !o)} className="w-full flex items-center justify-between">

@@ -124,7 +124,7 @@ export default function AchatProgramme() {
                   { label: "Suivi hebdomadaire", render: (p) => p.metadata?.duree_semaines >= 12 ? "✓" : "—" },
                   { label: "Messagerie coach", render: (p) => p.metadata?.duree_semaines >= 12 ? "✓" : "—" },
                   { label: "Visio mensuelle", render: (p) => p.metadata?.duree_semaines >= 24 ? "✓" : "—" },
-                  { label: "Idéal pour...", render: (p) => p.ideal_si, small: true },
+                  { label: "Idéal si...", render: (p) => p.ideal_si, small: true },
                 ].flatMap((row, ri) => [
                   <div key={`label-${ri}`} className="py-5 px-6 border-b border-accent/20 text-sm font-semibold text-primary">{row.label}</div>,
                   ...produits.map((p) => {

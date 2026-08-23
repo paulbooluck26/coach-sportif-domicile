@@ -118,7 +118,7 @@ export default function Seances() {
 
       <div>
         <h2 className="font-heading text-lg font-semibold text-foreground mb-3">Calendrier des séances</h2>
-        <ProgrammeCalendar projections={projections} onDayClick={(d) => setSelectedDay(d)} />
+        <ProgrammeCalendar projections={projections} onDayClick={(d) => setSelectedDay(d)} selectedDate={selectedDay} />
       </div>
 
       {selectedDay && (

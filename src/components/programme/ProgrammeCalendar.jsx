@@ -17,7 +17,14 @@ function dayStatus(projs) {
   return null;
 }
 
-export default function ProgrammeCalendar({ projections, onDayClick }) {
+function memeJour(a, b) {
+  if (!a || !b) return false;
+  const da = new Date(a);
+  const db = new Date(b);
+  return da.getFullYear() === db.getFullYear() && da.getMonth() === db.getMonth() && da.getDate() === db.getDate();
+}
+
+export default function ProgrammeCalendar({ projections, onDayClick, selectedDate }) {
   const [calMonth, setCalMonth] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -72,7 +79,7 @@ export default function ProgrammeCalendar({ projections, onDayClick }) {
               onClick={() => hasSessions && onDayClick(cell.date, cell.projections)}
               className={`aspect-square rounded-md text-sm font-medium transition-all relative ${
                 cell.isToday ? "ring-2 ring-primary" : ""
-              } ${hasSessions ? "hover:scale-105 cursor-pointer" : "cursor-default"} ${
+              } ${memeJour(cell.date, selectedDate) ? "ring-2 ring-offset-2 ring-blue-500" : ""} ${hasSessions ? "hover:scale-105 cursor-pointer" : "cursor-default"} ${
                 cfg ? `${cfg.bg} ${cfg.text}` : "text-foreground hover:bg-muted"
               }`}
             >

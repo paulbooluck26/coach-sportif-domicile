@@ -1,11 +1,45 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
+import { redirigerVersAbonnementStripe } from "@/lib/abonnementCheckout";
 import { Check, ArrowRight, Home, Layers, Sparkles, Loader2 } from "lucide-react";
 import Seo from "@/components/Seo";
 
+// Même correspondance que côté serveur.
+const OFFRE_ID_PAR_SKU = {
+  "coaching-essentiel": "essentiel",
+  "coaching-performance-abo": "performance",
+  "coaching-hybrid": "hybrid",
+  "coaching-signature": "signature",
+};
+
 function OffreCard({ p, highlight }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [erreur, setErreur] = useState("");
   const abonnement = p.type_facturation === "abonnement";
+
+  const sabonner = async () => {
+    if (!user) {
+      navigate("/login?redirect=/reserver");
+      return;
+    }
+    setLoading(true);
+    setErreur("");
+    try {
+      await redirigerVersAbonnementStripe({
+        offreId: OFFRE_ID_PAR_SKU[p.sku],
+        successPath: "/espace-client/profil?abonnement=confirme",
+        cancelPath: "/reserver",
+      });
+    } catch (e) {
+      setErreur(e.message);
+      setLoading(false);
+    }
+  };
+
   return (
     <div
       className={`relative rounded-2xl p-6 border transition-all duration-300 hover:scale-[1.02] flex flex-col ${
@@ -31,17 +65,18 @@ function OffreCard({ p, highlight }) {
         ))}
       </ul>
       {p.engagement_mois && (
-        <p className={`text-xs mb-4 ${highlight ? "text-primary-foreground/50" : "text-muted-foreground"}`}>Engagement {p.engagement_mois} mois</p>
+        <p className={`text-xs mb-2 ${highlight ? "text-primary-foreground/50" : "text-muted-foreground"}`}>Engagement {p.engagement_mois} mois</p>
       )}
-      <Link
-        to="/appel-decouverte"
-        className={`flex items-center justify-center gap-2 w-full py-3 rounded-full text-sm font-semibold transition-all duration-300 ${
+      {erreur && <p className="text-xs text-destructive mb-3">{erreur}</p>}
+      <button
+        onClick={sabonner}
+        disabled={loading}
+        className={`flex items-center justify-center gap-2 w-full py-3 rounded-full text-sm font-semibold transition-all duration-300 disabled:opacity-60 ${
           highlight ? "bg-secondary text-secondary-foreground hover:scale-105" : "border border-primary text-primary hover:bg-primary hover:text-primary-foreground"
         }`}
       >
-        S'abonner
-        <ArrowRight className="w-4 h-4" />
-      </Link>
+        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>S'abonner <ArrowRight className="w-4 h-4" /></>}
+      </button>
     </div>
   );
 }

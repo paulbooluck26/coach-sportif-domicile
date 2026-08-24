@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Dumbbell, Trash2, Edit, X, Save, Hammer, RotateCcw, Library, Rocket, Loader2 } from "lucide-react";
 import ProgrammeBuilder from "@/components/programme/ProgrammeBuilder";
@@ -33,6 +34,14 @@ export default function CoachProgrammes() {
   const [assignationsProgramme, setAssignationsProgramme] = useState(null);
   const [dateModifiee, setDateModifiee] = useState({});
   const [deployLoading, setDeployLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const openId = searchParams.get("open");
+    if (openId) {
+      base44.entities.Programme.get(openId).then(setBuilder).catch(() => {});
+    }
+  }, [searchParams]);
 
   const load = async () => {
     const [p, c] = await Promise.all([

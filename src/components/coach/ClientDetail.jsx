@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Star, Flame, Award, Activity, X, Calendar, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Star, Flame, Award, Activity, X, Calendar, CheckCircle2, XCircle, Clock, CreditCard, MapPin } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { loadClientProjection } from "@/lib/projection";
 import ProgrammeCalendar from "@/components/programme/ProgrammeCalendar";
@@ -19,6 +19,8 @@ export default function ClientDetail({ client, onClose }) {
   const [credits, setCredits] = useState(undefined);
   const [projections, setProjections] = useState(undefined);
   const [selectedDay, setSelectedDay] = useState(null);
+  const [abonnement, setAbonnement] = useState(undefined);
+  const [programmesAssignes, setProgrammesAssignes] = useState(undefined);
 
   useEffect(() => {
     if (!client?.user_id) return;
@@ -36,9 +38,24 @@ export default function ClientDetail({ client, onClose }) {
         setRecords(recs);
         const cars = await base44.entities.CarnetSeances.filter({ client_id: client.user_id }, "-date_achat");
         setCredits(cars);
+
+        const abos = await base44.entities.AbonnementClient.filter({ client_id: client.user_id, statut: "actif" }, "-created_date").catch(() => []);
+        if (abos[0]) {
+          const prod = await base44.entities.Produit.get(abos[0].produit_id).catch(() => null);
+          setAbonnement({ ...abos[0], produit: prod });
+        } else {
+          setAbonnement(null);
+        }
+
+        const assignations = await base44.entities.ProgrammeAssignation.filter({ client_id: client.user_id }, "-created_date").catch(() => []);
+        const progs = await Promise.all(
+          assignations.map(async (a) => ({ ...a, programme: await base44.entities.Programme.get(a.programme_id).catch(() => null) }))
+        );
+        setProgrammesAssignes(progs);
+
         const projs = await loadClientProjection(client.user_id);
         setProjections(projs);
-      } catch (e) { setFeedbacks([]); setPerfByExercise({}); setRecords([]); setCredits([]); setProjections([]); }
+      } catch (e) { setFeedbacks([]); setPerfByExercise({}); setRecords([]); setCredits([]); setProjections([]); setAbonnement(null); setProgrammesAssignes([]); }
     })();
   }, [client]);
 
@@ -60,6 +77,29 @@ export default function ClientDetail({ client, onClose }) {
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
         </div>
         <div className="px-6 pt-4">
+          {(abonnement || (programmesAssignes && programmesAssignes.length > 0)) && (
+            <div className="grid sm:grid-cols-2 gap-3 mb-2">
+              {abonnement && (
+                <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-3">
+                  <p className="text-xs font-semibold text-secondary uppercase tracking-wide flex items-center gap-1.5 mb-1"><CreditCard className="w-3.5 h-3.5" /> Abonnement actif</p>
+                  <p className="text-sm font-semibold text-foreground">{abonnement.produit?.nom} — {abonnement.produit?.prix_ttc}€/mois</p>
+                  {abonnement.adresse && <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" /> {abonnement.adresse}</p>}
+                  {abonnement.date_fin_engagement && new Date(abonnement.date_fin_engagement) > new Date() && (
+                    <p className="text-xs text-muted-foreground mt-0.5">Engagement jusqu'au {new Date(abonnement.date_fin_engagement).toLocaleDateString("fr-FR")}</p>
+                  )}
+                  {!abonnement.renouvellement_actif && <p className="text-xs text-destructive mt-0.5">Ne se renouvellera pas</p>}
+                </div>
+              )}
+              {programmesAssignes && programmesAssignes.length > 0 && (
+                <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+                  <p className="text-xs font-semibold text-accent uppercase tracking-wide mb-1">Programme(s) assigné(s)</p>
+                  {programmesAssignes.map((a) => (
+                    <p key={a.id} className="text-sm text-foreground">{a.programme?.name || "Programme"} <span className="text-xs text-muted-foreground">— depuis le {new Date(a.date_debut).toLocaleDateString("fr-FR")}</span></p>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <div className="flex gap-2 border-b border-border overflow-x-auto no-scrollbar">
             <button onClick={() => setTab("feedback")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "feedback" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Feedbacks</button>
             <button onClick={() => setTab("perf")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "perf" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Performances</button>

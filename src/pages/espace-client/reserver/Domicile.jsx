@@ -177,10 +177,11 @@ export default function Domicile() {
       } catch (_) {}
 
       if (estAbonnement(offreId)) {
+        const estHybride = offreId === "hybrid" || offreId === "signature";
         await redirigerVersAbonnementStripe({
           offreId,
           adresse,
-          successPath: "/espace-client/reserver/domicile",
+          successPath: estHybride ? "/espace-client/reserver/programme?appel_hybride=1" : "/espace-client/reserver/domicile",
         });
       } else if (ponctuel) {
         await redirigerVersStripe({

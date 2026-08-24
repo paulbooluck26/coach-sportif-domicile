@@ -78,7 +78,7 @@ export default function ClientDetail({ client, onClose }) {
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
         </div>
         <div className="px-6 pt-4">
-          <div className="flex gap-2 border-b border-border overflow-x-auto no-scrollbar">
+          <div className="flex gap-2 border-b border-border overflow-x-auto pb-0.5" style={{ scrollbarWidth: "thin", WebkitOverflowScrolling: "touch" }} onWheel={(e) => { if (e.deltaY !== 0) { e.currentTarget.scrollLeft += e.deltaY; } }}>
             <button onClick={() => setTab("feedback")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "feedback" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Feedbacks</button>
             <button onClick={() => setTab("perf")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "perf" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Performances</button>
             <button onClick={() => setTab("rm")} className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap ${tab === "rm" ? "border-accent text-foreground" : "border-transparent text-muted-foreground"}`}>Records (RM)</button>

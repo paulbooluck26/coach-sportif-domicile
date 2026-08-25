@@ -88,7 +88,7 @@ export default function Programme() {
       setOffreId(offreParam);
       setStep("confirmation");
     }
-    if (searchParams.get("appel_hybride") === "1") {
+    if (searchParams.get("appel_abonnement") === "1") {
       setStep("appel");
     }
   }, []);

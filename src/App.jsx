@@ -27,6 +27,7 @@ import ReserverProgramme from '@/pages/espace-client/reserver/Programme';
 import ReserverAppel from '@/pages/espace-client/reserver/Appel';
 import Messages from '@/pages/espace-client/Messages';
 import Profil from '@/pages/espace-client/Profil';
+import InstallerApp from '@/pages/espace-client/InstallerApp';
 import MesBadges from '@/pages/espace-client/MesBadges';
 import CoachBadges from '@/pages/admin/CoachBadges';
 import CoachFraisDeplacement from '@/pages/admin/CoachFraisDeplacement';
@@ -105,6 +106,7 @@ const AuthenticatedApp = () => {
           <Route path="/espace-client/reserver/appel" element={<ReserverAppel />} />
           <Route path="/espace-client/messages" element={<Messages />} />
           <Route path="/espace-client/profil" element={<Profil />} />
+          <Route path="/espace-client/installer-app" element={<InstallerApp />} />
           <Route path="/espace-client/badges" element={<MesBadges />} />
           <Route path="/espace-client/performances" element={<MesPerformances />} />
           <Route path="/espace-client/seances" element={<Seances />} />

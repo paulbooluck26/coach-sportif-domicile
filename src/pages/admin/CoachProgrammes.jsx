@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Dumbbell, Trash2, Edit, X, Save, Hammer, RotateCcw, Library, Rocket, Loader2 } from "lucide-react";
+import { Dumbbell, Trash2, Edit, X, Save, Hammer, RotateCcw, Library, Rocket, Loader2, ListChecks } from "lucide-react";
+import ProgrammeSuivi from "@/components/programme/ProgrammeSuivi";
 import ProgrammeBuilder from "@/components/programme/ProgrammeBuilder";
 import { cloneProgramme } from "@/lib/programmeClone";
 
@@ -27,6 +28,7 @@ export default function CoachProgrammes() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [builder, setBuilder] = useState(null);
+  const [suiviProgramme, setSuiviProgramme] = useState(null);
   const [onglet, setOnglet] = useState("actifs");
   const [deploying, setDeploying] = useState(null);
   const [deployClientId, setDeployClientId] = useState("");
@@ -222,6 +224,9 @@ export default function CoachProgrammes() {
                         <button onClick={() => ouvrirDeploiement(p)} className="flex items-center gap-1.5 bg-secondary text-secondary-foreground px-4 py-2 rounded-md text-sm font-semibold"><Rocket className="w-4 h-4" /> Déployer</button>
                       )}
                       <button onClick={() => startEdit(p)} className="p-2 text-muted-foreground hover:text-accent border border-border rounded-md"><Edit className="w-4 h-4" /></button>
+                      {!p.est_modele && p.client_ids?.length > 0 && (
+                        <button onClick={() => setSuiviProgramme(p)} className="flex items-center gap-1.5 border border-border text-foreground px-3 py-2 rounded-md text-sm font-medium hover:border-accent hover:text-accent"><ListChecks className="w-4 h-4" /> Suivi</button>
+                      )}
                       <button onClick={() => supprimer(p)} className="p-2 text-muted-foreground hover:text-destructive border border-border rounded-md"><Trash2 className="w-4 h-4" /></button>
                     </>
                   )}
@@ -354,6 +359,14 @@ export default function CoachProgrammes() {
             </div>
           </div>
         </div>
+      )}
+
+      {suiviProgramme && (
+        <ProgrammeSuivi
+          programme={suiviProgramme}
+          clientNom={suiviProgramme.client_names || "Client"}
+          onClose={() => setSuiviProgramme(null)}
+        />
       )}
     </div>
   );

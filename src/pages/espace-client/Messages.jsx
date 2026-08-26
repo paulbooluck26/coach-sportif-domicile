@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Send, Image as ImageIcon, Smile, Loader2 } from "lucide-react";
+import { Send, Image as ImageIcon, Smile, Loader2, Trash2 } from "lucide-react";
 
 const EMOJIS = ["😀","😂","😍","👍","🙏","💪","🔥","🎉","👏","😅","😢","😮","❤️","✅","👌","🙌","😴","🤔","💯","👀","🥵","🏋️","🤝","😉"];
 
@@ -13,6 +13,7 @@ export default function Messages() {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showEmojis, setShowEmojis] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   const bottomRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -23,6 +24,18 @@ export default function Messages() {
       setMessages(data);
     } catch {}
     setLoading(false);
+  };
+
+  const supprimerMessage = async (id) => {
+    if (!confirm("Supprimer ce message ?")) return;
+    setDeletingId(id);
+    try {
+      await base44.entities.Message.delete(id);
+      setMessages((m) => m.filter((msg) => msg.id !== id));
+    } catch {
+      alert("Impossible de supprimer ce message.");
+    }
+    setDeletingId(null);
   };
 
   useEffect(() => {
@@ -91,7 +104,17 @@ export default function Messages() {
           </div>
         ) : (
           messages.map(m => (
-            <div key={m.id} className={`flex ${m.sender === "client" ? "justify-end" : "justify-start"}`}>
+            <div key={m.id} className={`flex items-end gap-1.5 ${m.sender === "client" ? "justify-end" : "justify-start"}`}>
+              {m.sender === "client" && (
+                <button
+                  onClick={() => supprimerMessage(m.id)}
+                  disabled={deletingId === m.id}
+                  className="p-1 text-muted-foreground/50 hover:text-destructive shrink-0 disabled:opacity-40"
+                  title="Supprimer ce message"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
               <div className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-sm ${m.sender === "client" ? "bg-primary text-primary-foreground rounded-br-md" : "bg-secondary/15 text-foreground rounded-bl-md"}`}>
                 {m.image_url && (
                   <img src={m.image_url} alt="" className="rounded-xl max-w-full max-h-64 object-contain mb-1.5" />

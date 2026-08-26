@@ -7,7 +7,7 @@ import ReservationCredit from "@/components/seances/ReservationCredit";
 import SeanceManageModal from "@/components/seances/SeanceManageModal";
 import { parseDateLocal, typeLabelSeance as typeLabel } from "@/lib/creneaux";
 import { Link } from "react-router-dom";
-import { CalendarDays, Clock, MapPin, CheckCircle2, CalendarPlus, ShoppingBag, X, Flame } from "lucide-react";
+import { CalendarDays, Clock, MapPin, CheckCircle2, CalendarPlus, ShoppingBag, X, Flame, Info } from "lucide-react";
 
 const STATUT_BADGE = {
   booked: { label: "Confirmée", cls: "bg-accent/15 text-accent" },
@@ -23,6 +23,7 @@ export default function Seances() {
   const [profile, setProfile] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [showResa, setShowResa] = useState(false);
+  const [showInfoCredits, setShowInfoCredits] = useState(false);
   const [seanceGeree, setSeanceGeree] = useState(null);
 
   const load = async () => {
@@ -83,7 +84,10 @@ export default function Seances() {
       </div>
 
       <div>
-        <h2 className="font-heading text-lg font-semibold text-foreground mb-3">Mes crédits</h2>
+        <button onClick={() => setShowInfoCredits(true)} className="flex items-center gap-1.5 mb-3">
+          <h2 className="font-heading text-lg font-semibold text-foreground">Mes crédits</h2>
+          <Info className="w-4 h-4 text-muted-foreground" />
+        </button>
         {carnets.length === 0 ? (
           <div className="bg-secondary/10 border border-secondary/30 rounded-2xl p-5 text-center">
             <p className="font-medium text-foreground mb-1">Aucun crédit de séances</p>
@@ -170,6 +174,28 @@ export default function Seances() {
           onClose={() => setSeanceGeree(null)}
           onUpdated={load}
         />
+      )}
+
+      {showInfoCredits && (
+        <div className="fixed inset-0 z-50 bg-primary/40 flex items-center justify-center p-6" onClick={() => setShowInfoCredits(false)}>
+          <div className="bg-card rounded-2xl p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-heading font-bold text-lg text-foreground">Comment fonctionnent mes crédits ?</h3>
+              <button onClick={() => setShowInfoCredits(false)} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="space-y-4 text-sm text-foreground/80 leading-relaxed">
+              <div>
+                <p className="font-semibold text-foreground mb-1">Abonnement mensuel</p>
+                <p>Votre crédit de séances se renouvelle automatiquement chaque mois, à la date de votre premier paiement. Les séances non utilisées ne se reportent pas sur le mois suivant.</p>
+              </div>
+              <div>
+                <p className="font-semibold text-foreground mb-1">Pack de séances</p>
+                <p>Vos séances restent disponibles jusqu'à épuisement, sans limite de durée — aucun renouvellement automatique.</p>
+              </div>
+              <p className="text-xs text-muted-foreground pt-1">Une question sur votre crédit actuel ? Écrivez-moi directement depuis Messages.</p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

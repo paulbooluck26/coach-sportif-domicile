@@ -364,7 +364,6 @@ export default function CoachProgrammes() {
       {suiviProgramme && (
         <ProgrammeSuivi
           programme={suiviProgramme}
-          clientNom={suiviProgramme.client_names || "Client"}
           onClose={() => setSuiviProgramme(null)}
         />
       )}

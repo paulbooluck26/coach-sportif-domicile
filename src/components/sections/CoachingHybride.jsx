@@ -15,7 +15,7 @@ export default function CoachingHybride() {
   if (!produits || produits.length === 0) return null;
 
   return (
-    <section className="py-24 bg-background">
+    <section className="pt-8 pb-24 bg-background">
       <div className="max-w-4xl mx-auto px-6 lg:px-10">
         <div className="text-center mb-12">
           <p className="text-sm font-bold tracking-[0.2em] text-secondary uppercase mb-4">Coaching hybride</p>

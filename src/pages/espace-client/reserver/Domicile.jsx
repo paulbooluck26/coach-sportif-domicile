@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useCreneaux } from "@/hooks/useCreneaux";
@@ -57,6 +57,69 @@ function produitVersOffre(id, p) {
     cta: p.metadata?.cta,
     dominant: p.metadata?.dominant,
   };
+}
+
+function GroupeCarrousel({ titre, sousTitre, ids, catalogue, onChoisir }) {
+  const scrollRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const offres = ids.map((id) => catalogue[id]).filter(Boolean);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el || !el.children[0]) return;
+    const cardWidth = el.children[0].offsetWidth + 16;
+    const index = Math.round(el.scrollLeft / cardWidth);
+    setActiveIndex(Math.max(0, Math.min(index, offres.length - 1)));
+  };
+  const scrollToOffer = (i) => {
+    const el = scrollRef.current;
+    if (!el || !el.children[i]) return;
+    el.scrollTo({ left: el.children[i].offsetLeft - el.offsetLeft, behavior: "smooth" });
+  };
+
+  if (offres.length === 0) return null;
+
+  return (
+    <div>
+      <h2 className="font-heading text-lg font-semibold text-foreground mb-0.5">{titre}</h2>
+      <p className="text-xs text-muted-foreground mb-3">{sousTitre}</p>
+      <div ref={scrollRef} onScroll={handleScroll} className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory no-scrollbar">
+        {offres.map((o) => {
+          const dominant = !!o.dominant;
+          return (
+            <button
+              key={o.id}
+              onClick={() => onChoisir(o.id)}
+              className={`snap-center shrink-0 w-[82%] sm:w-[320px] text-left rounded-2xl p-5 transition-all ${
+                dominant ? "bg-primary text-primary-foreground border-2 border-secondary" : "bg-card border border-border hover:border-accent"
+              }`}
+            >
+              {o.badge && (
+                <span className="inline-flex items-center gap-1 bg-secondary text-secondary-foreground text-xs font-semibold px-2.5 py-0.5 rounded-full mb-3">
+                  {o.badge}
+                </span>
+              )}
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className={`font-heading text-xl font-bold ${dominant ? "text-primary-foreground" : "text-foreground"}`}>{o.titre}</h3>
+                  {(o.sousTitre || o.duree) && <p className={`text-xs mt-0.5 ${dominant ? "text-primary-foreground/60" : "text-muted-foreground"}`}>{o.sousTitre || o.duree}</p>}
+                </div>
+                <p className={`font-heading text-2xl font-bold whitespace-nowrap ${dominant ? "text-secondary" : "text-foreground"}`}>{o.prixLabel}</p>
+              </div>
+              {o.description && <p className={`text-sm leading-relaxed mt-3 ${dominant ? "text-primary-foreground/70" : "text-foreground/70"}`}>{o.description}</p>}
+            </button>
+          );
+        })}
+      </div>
+      {offres.length > 1 && (
+        <div className="flex items-center justify-center gap-1.5 mt-3">
+          {offres.map((o, i) => (
+            <button key={o.id} onClick={() => scrollToOffer(i)} aria-label={`Voir ${o.titre}`} className={`h-1.5 rounded-full transition-all ${i === activeIndex ? "w-5 bg-accent" : "w-1.5 bg-border"}`} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function Domicile() {
@@ -313,50 +376,32 @@ Paul BOOLUCK - PHYSIS COACHING`,
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-1">Coaching à domicile</p>
         <h1 className="font-heading text-3xl font-bold text-foreground">Réserver une séance</h1>
+        <p className="text-sm text-muted-foreground mt-2">Votre coach se déplace chez vous, à Colmar et alentours. Choisissez la formule qui correspond à votre rythme.</p>
       </div>
 
       {step === "catalogue" && (
         <div className="space-y-8">
-          {[
-            { titre: "Coaching à domicile", sousTitre: "Votre coach est présent à chaque entraînement.", ids: ["essentiel", "performance"] },
-            { titre: "Coaching hybride", sousTitre: "Votre coach vous accompagne, même lorsque vous vous entraînez seul.", ids: ["hybrid", "signature"] },
-            { titre: "Autres formules", sousTitre: "Sans abonnement.", ids: ["bilan", "pack_intensif"] },
-          ].map((groupe) => (
-            <div key={groupe.titre}>
-              <h2 className="font-heading font-bold text-lg text-primary">{groupe.titre}</h2>
-              <p className="text-xs text-muted-foreground mb-3">{groupe.sousTitre}</p>
-              <div className="space-y-3">
-                {groupe.ids.map((id) => {
-                  const o = catalogue[id];
-                  if (!o) return null;
-                  const dominant = !!o.dominant;
-                  return (
-                    <button
-                      key={id}
-                      onClick={() => choisir(id)}
-                      className={`relative w-full text-left rounded-2xl p-5 transition-all border ${
-                        dominant ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:border-accent"
-                      }`}
-                    >
-                      {o.badge && (
-                        <span className="absolute -top-2.5 left-5 px-2.5 py-0.5 bg-secondary text-secondary-foreground text-[10px] font-semibold rounded-full tracking-wide whitespace-nowrap">
-                          {o.badge}
-                        </span>
-                      )}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p className={`font-heading font-semibold ${dominant ? "text-primary-foreground" : "text-foreground"}`}>{o.titre}</p>
-                          {(o.sousTitre || o.duree) && <p className={`text-xs mt-0.5 ${dominant ? "text-primary-foreground/60" : "text-muted-foreground"}`}>{o.sousTitre || o.duree}</p>}
-                          {o.inclus && <p className={`text-xs mt-1 truncate ${dominant ? "text-primary-foreground/60" : "text-muted-foreground"}`}>{o.inclus.join(" · ")}</p>}
-                        </div>
-                        <p className={`font-heading text-lg font-bold whitespace-nowrap ${dominant ? "text-secondary" : "text-foreground"}`}>{o.prixLabel}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+          <GroupeCarrousel
+            titre="Coaching à domicile"
+            sousTitre="Votre coach est présent à chaque entraînement."
+            ids={["essentiel", "performance"]}
+            catalogue={catalogue}
+            onChoisir={choisir}
+          />
+          <GroupeCarrousel
+            titre="Coaching hybride"
+            sousTitre="Votre coach vous accompagne, même lorsque vous vous entraînez seul."
+            ids={["hybrid", "signature"]}
+            catalogue={catalogue}
+            onChoisir={choisir}
+          />
+          <GroupeCarrousel
+            titre="Autres formules"
+            sousTitre="Sans abonnement."
+            ids={["bilan", "pack_intensif"]}
+            catalogue={catalogue}
+            onChoisir={choisir}
+          />
         </div>
       )}
 

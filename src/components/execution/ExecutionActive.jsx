@@ -14,6 +14,7 @@ export default function ExecutionActive({
     : restBetweenRoundsSecs;
   const exerciseTotal = currentExercise ? parseTimeFromReps(currentExercise.reps) : 0;
   const isRest = phase === "rest" || phase === "rest_between_rounds" || phase === "rest_between_blocs";
+  const prochainExercice = phase === "rest" ? currentBloc?.exercices?.[exerciseIndex + 1] : null;
 
   return (
     <div className="fixed inset-0 z-50 bg-primary text-primary-foreground flex flex-col overflow-hidden">
@@ -64,6 +65,15 @@ export default function ExecutionActive({
         {phase === "rest" && (
           <div className="flex flex-col items-center w-full">
             <CountdownRing remaining={restRemaining} total={restTotal} label="Repos" large />
+            {prochainExercice && (
+              <div className="text-center mt-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary mb-2">Ensuite</p>
+                {prochainExercice.media_url && (
+                  <img src={prochainExercice.media_url} alt={prochainExercice.name} className="w-32 h-32 object-contain bg-primary-foreground/5 rounded-xl mb-2 mx-auto" />
+                )}
+                <p className="font-heading text-lg font-bold">{prochainExercice.name}</p>
+              </div>
+            )}
           </div>
         )}
 

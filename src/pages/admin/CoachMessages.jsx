@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/api/supabaseClient";
 import { Send, Search, ArrowLeft, MessageCircle, Plus, X, Image as ImageIcon, Smile, Loader2 } from "lucide-react";
 import ClientAvatar from "@/components/ClientAvatar";
 
@@ -111,6 +112,7 @@ export default function CoachMessages() {
       setInput("");
       setShowEmojis(false);
       load();
+      supabase.functions.invoke("notifier-nouveau-message", { body: { client_id: selectedClient } }).catch(() => {});
     } catch {}
     setSending(false);
   };
@@ -130,6 +132,7 @@ export default function CoachMessages() {
         lu: false,
       });
       load();
+      supabase.functions.invoke("notifier-nouveau-message", { body: { client_id: selectedClient } }).catch(() => {});
     } catch {
       alert("Erreur lors de l'envoi de l'image. Vérifiez qu'elle fait moins de 5 Mo (JPEG, PNG ou WEBP).");
     }

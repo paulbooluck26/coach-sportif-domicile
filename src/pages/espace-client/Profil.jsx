@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { supabase } from "@/api/supabaseClient";
 import { useAuth } from "@/lib/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import { User, Mail, Phone, MapPin, CreditCard, LogOut, Edit, Save, X, Target, Dumbbell, ClipboardList, CheckCircle2, TrendingUp, AlertTriangle, Loader2, ChevronDown, Compass } from "lucide-react";
+import { User, Mail, Phone, MapPin, CreditCard, LogOut, Edit, Save, X, Target, Dumbbell, ClipboardList, CheckCircle2, TrendingUp, AlertTriangle, Loader2, ChevronDown, Compass, Smartphone } from "lucide-react";
 import BienvenueEspaceClient from "@/components/BienvenueEspaceClient";
 import ProfilePhotoUpload from "@/components/ProfilePhotoUpload";
 
@@ -271,6 +271,10 @@ export default function Profil() {
       <button onClick={() => setShowBienvenue(true)} className="w-full flex items-center justify-center gap-2 border border-border rounded-xl py-3 text-sm font-medium text-foreground hover:bg-secondary/10 transition-colors">
         <Compass className="w-4 h-4" /> Revoir la présentation de l'espace
       </button>
+
+      <Link to="/espace-client/installer-app" className="w-full flex items-center justify-center gap-2 border border-border rounded-xl py-3 text-sm font-medium text-foreground hover:bg-secondary/10 transition-colors">
+        <Smartphone className="w-4 h-4" /> Installer l'application sur mon téléphone
+      </Link>
 
       <button onClick={() => { logout(); navigate("/"); }} className="w-full flex items-center justify-center gap-2 border border-border rounded-xl py-3 text-sm font-medium text-destructive hover:bg-destructive/5 transition-colors">
         <LogOut className="w-4 h-4" /> Déconnexion

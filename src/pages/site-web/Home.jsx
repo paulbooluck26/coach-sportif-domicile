@@ -1,6 +1,7 @@
 import Hero from "@/components/sections/Hero";
 import ApprocheSimple from "@/components/sections/ApprocheSimple";
 import Services from "@/components/sections/Services";
+import CoachingHybride from "@/components/sections/CoachingHybride";
 import About from "@/components/sections/About";
 import CommentCaFonctionne from "@/components/sections/CommentCaFonctionne";
 import AppExperience from "@/components/sections/AppExperience";
@@ -43,6 +44,7 @@ export default function Home() {
       <Hero />
       <ApprocheSimple />
       <Services />
+      <CoachingHybride />
       <About />
       <CommentCaFonctionne />
       <AppExperience />

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, ChevronRight, Eye } from "lucide-react";
+import { ArrowLeft, ChevronRight, Eye, FileDown, Loader2 } from "lucide-react";
+import { supabase } from "@/api/supabaseClient";
 import PhasesPanel from "./PhasesPanel";
 import SemainesPanel from "./SemainesPanel";
 import SeancesPanel from "./SeancesPanel";
@@ -8,6 +9,37 @@ import ExercicesPanel from "./ExercicesPanel";
 
 export default function ProgrammeBuilder({ programme, onBack }) {
   const [nav, setNav] = useState({ level: 0, phase: null, semaine: null, seance: null, bloc: null });
+  const [exportLoading, setExportLoading] = useState(false);
+
+  const exporterPdf = async () => {
+    setExportLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/exporter-programme-pdf`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`,
+          "apikey": import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ programme_id: programme.id }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Échec de l'export PDF");
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${programme.name || "programme"}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert(e.message);
+    }
+    setExportLoading(false);
+  };
 
   const crumbs = [{ label: programme.name, go: () => setNav({ level: 0, phase: null, semaine: null, seance: null, bloc: null }) }];
   if (nav.level >= 1 && nav.phase) crumbs.push({ label: nav.phase.nom, go: () => setNav(n => ({ ...n, level: 1, semaine: null, seance: null, bloc: null })) });
@@ -29,6 +61,14 @@ export default function ProgrammeBuilder({ programme, onBack }) {
             ))}
           </div>
         </div>
+        <button
+          onClick={exporterPdf}
+          disabled={exportLoading}
+          className="inline-flex items-center gap-1.5 border border-border text-foreground px-3 py-2 rounded-md text-sm font-medium hover:border-accent hover:text-accent transition-colors shrink-0 disabled:opacity-50"
+          title="Télécharger ce programme en PDF"
+        >
+          {exportLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />} Exporter en PDF
+        </button>
         {nav.level >= 3 && nav.seance && (
           <a
             href={`/espace-client/seance/${nav.seance.id}?preview=1`}

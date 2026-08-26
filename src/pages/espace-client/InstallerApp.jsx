@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, Smartphone } from "lucide-react";
 
-const LienSite = () => <a href="https://physis-coaching.fr" className="text-secondary underline">physis-coaching.fr</a>;
+const LienSite = () => <a href="https://www.physis-coaching.fr/espace-client" className="text-secondary underline">physis-coaching.fr</a>;
 
 const ETAPES_IOS = [
   { titre: "Ouvrez le site dans Safari", desc: <>Rendez-vous sur <LienSite />, en vous assurant d'utiliser Safari (pas Chrome sur iPhone).</> },

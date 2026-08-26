@@ -2,15 +2,17 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, Smartphone } from "lucide-react";
 
+const LienSite = () => <a href="https://physis-coaching.fr" className="text-secondary underline">physis-coaching.fr</a>;
+
 const ETAPES_IOS = [
-  { titre: "Ouvrez le site dans Safari", desc: "Rendez-vous sur physis-coaching.fr, en vous assurant d'utiliser Safari (pas Chrome sur iPhone)." },
+  { titre: "Ouvrez le site dans Safari", desc: <>Rendez-vous sur <LienSite />, en vous assurant d'utiliser Safari (pas Chrome sur iPhone).</> },
   { titre: "Appuyez sur le bouton Partager", desc: "L'icône carrée avec une flèche vers le haut, en bas de l'écran." },
   { titre: "Choisissez « Sur l'écran d'accueil »", desc: "Faites défiler la liste si besoin, puis appuyez sur « Ajouter »." },
   { titre: "C'est fait", desc: "L'icône Physis Coaching apparaît sur votre écran d'accueil, comme une vraie application." },
 ];
 
 const ETAPES_ANDROID = [
-  { titre: "Ouvrez le site dans Chrome", desc: "Rendez-vous sur physis-coaching.fr avec le navigateur Chrome." },
+  { titre: "Ouvrez le site dans Chrome", desc: <>Rendez-vous sur <LienSite /> avec le navigateur Chrome.</> },
   { titre: "Ouvrez le menu", desc: "Les trois points verticaux, en haut à droite de l'écran." },
   { titre: "Choisissez « Installer l'application »", desc: "Ou « Ajouter à l'écran d'accueil » selon la version de Chrome." },
   { titre: "Confirmez", desc: "L'icône Physis Coaching apparaît sur votre écran d'accueil, en plein écran, sans barre de navigateur." },

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Send, Loader2, CheckCircle2 } from "lucide-react";
+import { suiviEvenement } from "@/lib/analytics";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", goal: "", message: "" });
@@ -17,6 +18,7 @@ export default function Contact() {
     try {
       await base44.entities.DemandeContact.create(form);
       setSent(true);
+      suiviEvenement("generate_lead", { form_name: "contact" });
       setForm({ name: "", email: "", phone: "", goal: "", message: "" });
     } catch (err) {
       setError(err.message || "Une erreur est survenue");

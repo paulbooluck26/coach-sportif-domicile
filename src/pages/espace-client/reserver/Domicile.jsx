@@ -6,6 +6,7 @@ import { creneauxDisponibles, parseDateLocal } from "@/lib/creneaux";
 import { estPonctuel, estAbonnement, nbSeancesPourOffre } from "@/lib/carnetSeances";
 import { redirigerVersStripe } from "@/lib/stripeCheckout";
 import { redirigerVersAbonnementStripe } from "@/lib/abonnementCheckout";
+import { suiviEvenement } from "@/lib/analytics";
 import { supabase } from "@/api/supabaseClient";
 import CalendrierDispo from "@/components/CalendrierDispo";
 import { Link, useSearchParams } from "react-router-dom";
@@ -153,6 +154,11 @@ export default function Domicile() {
   const [done, setDone] = useState(null);
   const [searchParams] = useSearchParams();
   const stripeSessionId = searchParams.get("stripe_session_id");
+
+  useEffect(() => {
+    if (stripeSessionId) suiviEvenement("purchase", { transaction_id: stripeSessionId });
+  }, [stripeSessionId]);
+
   // Démarre avec le contenu codé en dur (pas d'écran de chargement), puis
   // se met à jour silencieusement avec le vrai catalogue admin dès qu'il
   // arrive — si la requête échoue pour une raison ou une autre, on garde

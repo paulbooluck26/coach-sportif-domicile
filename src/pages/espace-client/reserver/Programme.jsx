@@ -8,6 +8,7 @@ import { creneauxDisponibles, dateStr, parseDateLocal } from "@/lib/creneaux";
 import { Link, useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, CheckCircle2, Loader2, Sparkles, Check, Lock, Phone, Video, CalendarPlus } from "lucide-react";
 import { downloadICS } from "@/lib/calendarExport";
+import { suiviEvenement } from "@/lib/analytics";
 import { envoyerEmail } from "@/lib/emailSender";
 
 const OFFRES_STATIQUES = [
@@ -81,6 +82,10 @@ export default function Programme() {
   const offersScrollRef = useRef(null);
   const [searchParams] = useSearchParams();
   const stripeSessionId = searchParams.get("stripe_session_id");
+
+  useEffect(() => {
+    if (stripeSessionId) suiviEvenement("purchase", { transaction_id: stripeSessionId });
+  }, [stripeSessionId]);
 
   useEffect(() => {
     const offreParam = searchParams.get("offre");

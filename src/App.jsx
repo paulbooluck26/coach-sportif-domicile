@@ -6,6 +6,8 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+import AnalyticsTracker from '@/components/AnalyticsTracker';
+import CookieConsent from '@/components/CookieConsent';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import CoachRoute from '@/components/CoachRoute';
 import PublicLayout from '@/components/PublicLayout';
@@ -149,8 +151,10 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
+          <AnalyticsTracker />
           <AuthenticatedApp />
         </Router>
+        <CookieConsent />
         <Toaster />
       </QueryClientProvider>
     </AuthProvider>

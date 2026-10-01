@@ -12,6 +12,10 @@ import CalendrierDispo from "@/components/CalendrierDispo";
 import { Link, useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Clock, MapPin, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, CalendarPlus, Flame } from "lucide-react";
 import { downloadICS } from "@/lib/calendarExport";
+import { creerContratAvantPaiement, marquerContratPaye } from "@/lib/contratCapture";
+import ConsentementCommande from "@/components/checkout/ConsentementCommande";
+import AdressePostale, { adressePostaleVide, adressePostaleValide } from "@/components/checkout/AdressePostale";
+import { TEXTE_BOUTON_COMMANDE } from "@/lib/legalConfig";
 
 const CATALOGUE = ["essentiel", "hybrid", "performance", "signature", "bilan", "pack_intensif"];
 const SESSION_TYPE = {
@@ -45,6 +49,9 @@ const CATALOGUE_SECOURS = {
 function produitVersOffre(id, p) {
   return {
     id,
+    produitId: p.id,
+    sku: p.sku,
+    version: p.version,
     titre: p.nom,
     badge: p.metadata?.badge,
     accroche: p.metadata?.accroche,
@@ -154,10 +161,17 @@ export default function Domicile() {
   const [done, setDone] = useState(null);
   const [searchParams] = useSearchParams();
   const stripeSessionId = searchParams.get("stripe_session_id");
+  const contratIdRetour = searchParams.get("contrat_id");
+  const [cgvAcceptee, setCgvAcceptee] = useState(false);
+  const [commencementImmediat, setCommencementImmediat] = useState(false);
+  const [adressePostaleForm, setAdressePostaleForm] = useState(adressePostaleVide());
 
   useEffect(() => {
-    if (stripeSessionId) suiviEvenement("purchase", { transaction_id: stripeSessionId });
-  }, [stripeSessionId]);
+    if (stripeSessionId) {
+      suiviEvenement("purchase", { transaction_id: stripeSessionId });
+      marquerContratPaye(contratIdRetour, stripeSessionId).catch(() => {});
+    }
+  }, [stripeSessionId, contratIdRetour]);
 
   // Démarre avec le contenu codé en dur (pas d'écran de chargement), puis
   // se met à jour silencieusement avec le vrai catalogue admin dès qu'il
@@ -235,6 +249,7 @@ export default function Domicile() {
   };
 
   const payer = async () => {
+    if (!cgvAcceptee || !commencementImmediat || !adressePostaleValide(adressePostaleForm)) return;
     setPaying(true);
     try {
       // Sauvegarde l'adresse dans le profil avant de partir sur Stripe.
@@ -245,11 +260,35 @@ export default function Domicile() {
         }
       } catch (_) {}
 
-      if (estAbonnement(offreId)) {
+      const fraisDeplacement = deplacement && !deplacement.horsZone ? deplacement.frais : 0;
+      const abonnement = estAbonnement(offreId);
+      const prixDetail = {
+        base: offre.prix,
+        deplacement: fraisDeplacement,
+        reduction_code_promo: promoAppliquee ? promoAppliquee.reduction : 0,
+        mention_tva: "TVA non applicable, article 293 B du CGI",
+        total: (promoAppliquee ? promoAppliquee.montantFinal : offre.prix) + fraisDeplacement,
+        periodicite: abonnement ? "mensuelle" : null,
+        duree_engagement_mois: abonnement && (offreId === "hybrid" || offreId === "signature") ? 3 : null,
+        montant_total_engagement_minimal:
+          abonnement && (offreId === "hybrid" || offreId === "signature") ? offre.prix * 3 : null,
+      };
+      const contrat = await creerContratAvantPaiement({
+        user,
+        adresse: adressePostaleForm,
+        produit: { id: offre.produitId, sku: offre.sku || SKU_PAR_OFFRE[offreId], version: offre.version, nom: offre.titre, description: offre.description, prix_ttc: offre.prix },
+        typeContrat: abonnement ? "abonnement" : "paiement_unique",
+        prixDetail,
+        cgvAcceptee,
+        commencementImmediat,
+      });
+
+      if (abonnement) {
         await redirigerVersAbonnementStripe({
           offreId,
           adresse,
-          successPath: "/espace-client/reserver/programme?appel_abonnement=1",
+          successPath: `/espace-client/reserver/programme?appel_abonnement=1&contrat_id=${contrat.id}`,
+          contratId: contrat.id,
         });
       } else if (ponctuel) {
         await redirigerVersStripe({
@@ -265,8 +304,9 @@ export default function Domicile() {
             duration_minutes: "60",
             location: adresse || "Domicile",
             prestation_label: offre.titre,
+            contrat_id: contrat.id,
           },
-          successPath: "/espace-client/reserver/domicile",
+          successPath: `/espace-client/reserver/domicile?contrat_id=${contrat.id}`,
           codePromo: promoAppliquee ? codePromo : undefined,
         });
       } else {
@@ -281,8 +321,9 @@ export default function Domicile() {
             offre_titre: offre.titre,
             type_carnet: "pack",
             nb_seances_total: String(total),
+            contrat_id: contrat.id,
           },
-          successPath: "/espace-client/reserver/domicile",
+          successPath: `/espace-client/reserver/domicile?contrat_id=${contrat.id}`,
           codePromo: promoAppliquee ? codePromo : undefined,
         });
       }
@@ -548,8 +589,24 @@ Paul BOOLUCK - PHYSIS COACHING`,
             )}
             {promoErreur && <p className="text-xs text-destructive mt-1.5">{promoErreur}</p>}
           </div>
+
+          <AdressePostale value={adressePostaleForm} onChange={setAdressePostaleForm} disabled={paying} />
+          <ConsentementCommande
+            cgvAcceptee={cgvAcceptee}
+            onCgvChange={setCgvAcceptee}
+            commencementImmediat={commencementImmediat}
+            onCommencementChange={setCommencementImmediat}
+            disabled={paying}
+          />
+
           <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lock className="w-3.5 h-3.5" /> Paiement sécurisé via Stripe · Annulation gratuite jusqu'à 24h avant</div>
-          <button onClick={payer} disabled={paying || !adresse.trim() || deplacement?.horsZone} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">{paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> {estAbonnement(offreId) ? `S'abonner ${offre.prix}€/mois` : `Payer ${(promoAppliquee ? promoAppliquee.montantFinal : offre.prix) + (deplacement && !deplacement.horsZone ? deplacement.frais : 0)}€`}</>}</button>
+          <button
+            onClick={payer}
+            disabled={paying || !adresse.trim() || deplacement?.horsZone || !cgvAcceptee || !commencementImmediat || !adressePostaleValide(adressePostaleForm)}
+            className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> {TEXTE_BOUTON_COMMANDE}</>}
+          </button>
         </div>
       )}
     </div>

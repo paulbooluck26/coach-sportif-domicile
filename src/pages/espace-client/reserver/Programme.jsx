@@ -10,6 +10,10 @@ import { ChevronLeft, ChevronRight, CheckCircle2, Loader2, Sparkles, Check, Lock
 import { downloadICS } from "@/lib/calendarExport";
 import { suiviEvenement } from "@/lib/analytics";
 import { envoyerEmail } from "@/lib/emailSender";
+import { creerContratAvantPaiement, marquerContratPaye } from "@/lib/contratCapture";
+import ConsentementCommande from "@/components/checkout/ConsentementCommande";
+import AdressePostale, { adressePostaleVide, adressePostaleValide } from "@/components/checkout/AdressePostale";
+import { TEXTE_BOUTON_COMMANDE } from "@/lib/legalConfig";
 
 const OFFRES_STATIQUES = [
   { id: "forge", nom: "FORGE", duree: 12, prix: 149, recommande: true, desc: "Le parcours idéal pour transformer votre physique et vos habitudes.", inclus: ["Programmation personnalisée", "Progression structurée", "Messagerie avec votre coach", "Appel de bilan"] },
@@ -23,6 +27,9 @@ const SKU_PAR_OFFRE = { forge: "programme-forge", start: "programme-start", lega
 function produitVersOffre(id, p, ordre) {
   return {
     id,
+    produitId: p.id,
+    sku: p.sku,
+    version: p.version,
     nom: p.nom,
     duree: p.metadata?.duree_semaines,
     prix: p.prix_promo ?? p.prix_ttc,
@@ -82,10 +89,17 @@ export default function Programme() {
   const offersScrollRef = useRef(null);
   const [searchParams] = useSearchParams();
   const stripeSessionId = searchParams.get("stripe_session_id");
+  const contratIdRetour = searchParams.get("contrat_id");
+  const [cgvAcceptee, setCgvAcceptee] = useState(false);
+  const [commencementImmediat, setCommencementImmediat] = useState(false);
+  const [adressePostaleForm, setAdressePostaleForm] = useState(adressePostaleVide());
 
   useEffect(() => {
-    if (stripeSessionId) suiviEvenement("purchase", { transaction_id: stripeSessionId });
-  }, [stripeSessionId]);
+    if (stripeSessionId) {
+      suiviEvenement("purchase", { transaction_id: stripeSessionId });
+      marquerContratPaye(contratIdRetour, stripeSessionId).catch(() => {});
+    }
+  }, [stripeSessionId, contratIdRetour]);
 
   useEffect(() => {
     const offreParam = searchParams.get("offre");
@@ -159,12 +173,32 @@ export default function Programme() {
   };
 
   const acheter = async () => {
+    if (!cgvAcceptee || !commencementImmediat || !adressePostaleValide(adressePostaleForm)) return;
     setPaying(true);
     try {
       try {
         const profiles = await base44.entities.ClientProfile.filter({ user_id: user.id });
         if (profiles[0]) await base44.entities.ClientProfile.update(profiles[0].id, { objectif });
       } catch (_) {}
+
+      const contrat = await creerContratAvantPaiement({
+        user,
+        adresse: adressePostaleForm,
+        produit: { id: offre.produitId, sku: offre.sku || SKU_PAR_OFFRE[offre.id], version: offre.version, nom: `Programme ${offre.nom}`, description: offre.desc, prix_ttc: offre.prix, duree_semaines: offre.duree },
+        typeContrat: "paiement_unique",
+        prixDetail: {
+          base: offre.prix,
+          deplacement: 0,
+          reduction_code_promo: promoAppliquee ? promoAppliquee.reduction : 0,
+          mention_tva: "TVA non applicable, article 293 B du CGI",
+          total: promoAppliquee ? promoAppliquee.montantFinal : offre.prix,
+          periodicite: null,
+          duree_engagement_mois: null,
+          montant_total_engagement_minimal: null,
+        },
+        cgvAcceptee,
+        commencementImmediat,
+      });
 
       await redirigerVersStripe({
         nom: `Programme ${offre.nom}`,
@@ -176,8 +210,9 @@ export default function Programme() {
           offre_id: offre.id,
           duree_semaines: String(offre.duree),
           objectif,
+          contrat_id: contrat.id,
         },
-        successPath: `/espace-client/reserver/programme?offre=${offre.id}`,
+        successPath: `/espace-client/reserver/programme?offre=${offre.id}&contrat_id=${contrat.id}`,
         codePromo: promoAppliquee ? codePromo : undefined,
         cancelPath: "/espace-client/reserver/programme",
       });
@@ -370,8 +405,21 @@ export default function Programme() {
           {promoErreur && <p className="text-xs text-destructive mt-1.5">{promoErreur}</p>}
         </div>
 
-        <button onClick={acheter} disabled={paying || !objectif.trim()} className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">
-          {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> Payer {promoAppliquee ? promoAppliquee.montantFinal : offre.prix}€</>}
+        <AdressePostale value={adressePostaleForm} onChange={setAdressePostaleForm} disabled={paying} />
+        <ConsentementCommande
+          cgvAcceptee={cgvAcceptee}
+          onCgvChange={setCgvAcceptee}
+          commencementImmediat={commencementImmediat}
+          onCommencementChange={setCommencementImmediat}
+          disabled={paying}
+        />
+
+        <button
+          onClick={acheter}
+          disabled={paying || !objectif.trim() || !cgvAcceptee || !commencementImmediat || !adressePostaleValide(adressePostaleForm)}
+          className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> {TEXTE_BOUTON_COMMANDE}</>}
         </button>
       </div>
     );

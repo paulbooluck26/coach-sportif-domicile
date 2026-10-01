@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { LayoutDashboard, Users, CalendarDays, Dumbbell, Inbox, CreditCard, LogOut, Home, Clock, ShoppingBag, MessageCircle, Mail, Library, Package, Tag, ClipboardList, Award, Navigation } from "lucide-react";
+import { LayoutDashboard, Users, CalendarDays, Dumbbell, Inbox, CreditCard, LogOut, Home, Clock, ShoppingBag, MessageCircle, Mail, Library, Package, Tag, ClipboardList, Award, Navigation, RotateCcw } from "lucide-react";
 
 const nav = [
   { to: "/admin", label: "Tableau de bord", icon: LayoutDashboard, exact: true },
@@ -14,6 +14,7 @@ const nav = [
   { to: "/admin/commandes", label: "Commandes", icon: ShoppingBag, badgeKey: "commandes" },
   { to: "/admin/disponibilites", label: "Disponibilités", icon: Clock },
   { to: "/admin/paiements", label: "Paiements", icon: CreditCard },
+  { to: "/admin/retractations", label: "Rétractations", icon: RotateCcw, badgeKey: "retractations" },
   { to: "/admin/catalogue", label: "Catalogue", icon: Package },
   { to: "/admin/promotions", label: "Promotions", icon: Tag },
   { to: "/admin/diagnostics", label: "Diagnostics", icon: ClipboardList },
@@ -40,15 +41,17 @@ export default function CoachLayout() {
   useEffect(() => {
     const loadCounts = async () => {
       try {
-        const [demandes, commandes, messages] = await Promise.all([
+        const [demandes, commandes, messages, retractations] = await Promise.all([
           base44.entities.DemandeContact.filter({ statut: "nouveau" }),
           base44.entities.CommandeProgramme.list("-created_date", 200),
           base44.entities.Message.filter({ sender: "client", lu: false }),
+          base44.entities.DemandeRetractation.filter({ statut: "recue" }).catch(() => []),
         ]);
         setCounts({
           demandes: demandes.length,
           commandes: commandes.filter((c) => (c.statut || "en_preparation") === "en_preparation").length,
           messages: messages.length,
+          retractations: retractations.length,
         });
       } catch {}
     };

@@ -18,6 +18,7 @@ import Login from '@/pages/site-web/Login';
 import Diagnostic from '@/pages/site-web/Diagnostic';
 import Tarifs from '@/pages/site-web/Tarifs';
 import MentionsLegales from '@/pages/site-web/MentionsLegales';
+import CGV from '@/pages/site-web/CGV';
 import Confidentialite from '@/pages/site-web/Confidentialite';
 import Register from '@/pages/site-web/Register';
 import ForgotPassword from '@/pages/site-web/ForgotPassword';
@@ -29,6 +30,7 @@ import ReserverProgramme from '@/pages/espace-client/reserver/Programme';
 import ReserverAppel from '@/pages/espace-client/reserver/Appel';
 import Messages from '@/pages/espace-client/Messages';
 import Profil from '@/pages/espace-client/Profil';
+import Retractation from '@/pages/espace-client/Retractation';
 import InstallerApp from '@/pages/espace-client/InstallerApp';
 import MesBadges from '@/pages/espace-client/MesBadges';
 import CoachBadges from '@/pages/admin/CoachBadges';
@@ -49,6 +51,7 @@ import CoachSeances from '@/pages/admin/CoachSeances';
 import CoachClients from '@/pages/admin/CoachClients';
 import CoachProgrammes from '@/pages/admin/CoachProgrammes';
 import CoachPaiements from '@/pages/admin/CoachPaiements';
+import CoachRetractations from '@/pages/admin/CoachRetractations';
 import CoachCatalogue from '@/pages/admin/CoachCatalogue';
 import CoachPromotions from '@/pages/admin/CoachPromotions';
 import CoachDiagnostics from '@/pages/admin/CoachDiagnostics';
@@ -85,6 +88,7 @@ const AuthenticatedApp = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/diagnostic" element={<Diagnostic />} />
       <Route path="/mentions-legales" element={<MentionsLegales />} />
+      <Route path="/cgv" element={<CGV />} />
       <Route path="/confidentialite" element={<Confidentialite />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -108,6 +112,7 @@ const AuthenticatedApp = () => {
           <Route path="/espace-client/reserver/appel" element={<ReserverAppel />} />
           <Route path="/espace-client/messages" element={<Messages />} />
           <Route path="/espace-client/profil" element={<Profil />} />
+          <Route path="/espace-client/retractation/:contratId" element={<Retractation />} />
           <Route path="/espace-client/installer-app" element={<InstallerApp />} />
           <Route path="/espace-client/badges" element={<MesBadges />} />
           <Route path="/espace-client/performances" element={<MesPerformances />} />
@@ -127,6 +132,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/programmes" element={<CoachProgrammes />} />
           <Route path="/admin/commandes" element={<CoachCommandes />} />
           <Route path="/admin/paiements" element={<CoachPaiements />} />
+          <Route path="/admin/retractations" element={<CoachRetractations />} />
           <Route path="/admin/catalogue" element={<CoachCatalogue />} />
           <Route path="/admin/promotions" element={<CoachPromotions />} />
           <Route path="/admin/diagnostics" element={<CoachDiagnostics />} />

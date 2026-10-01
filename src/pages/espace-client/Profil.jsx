@@ -6,6 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { User, Mail, Phone, MapPin, CreditCard, LogOut, Edit, Save, X, Target, Dumbbell, ClipboardList, CheckCircle2, TrendingUp, AlertTriangle, Loader2, ChevronDown, Compass, Smartphone } from "lucide-react";
 import BienvenueEspaceClient from "@/components/BienvenueEspaceClient";
 import ProfilePhotoUpload from "@/components/ProfilePhotoUpload";
+import { TEXTE_POINT_ACCES_RETRACTATION } from "@/lib/legalConfig";
 
 export default function Profil() {
   const { user, logout } = useAuth();
@@ -22,6 +23,7 @@ export default function Profil() {
   const [confirmNonRenouveler, setConfirmNonRenouveler] = useState(false);
   const [nonRenouvelerLoading, setNonRenouvelerLoading] = useState(false);
   const [nonRenouvelerErreur, setNonRenouvelerErreur] = useState("");
+  const [contratsEligibles, setContratsEligibles] = useState([]);
   const [showDelete, setShowDelete] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -52,6 +54,18 @@ export default function Profil() {
       } else {
         setAbonnement(null);
       }
+      // filter() ne fait que l'égalité stricte — la comparaison avec la
+      // date limite de rétractation se fait donc côté client ci-dessous.
+      const contrats = await base44.entities.Contrat.filter({ client_id: user.id }).catch(() => []);
+      const maintenant = new Date();
+      setContratsEligibles(
+        contrats.filter(
+          (c) =>
+            ["payee", "en_execution"].includes(c.statut) &&
+            c.date_limite_retractation &&
+            new Date(c.date_limite_retractation) > maintenant
+        )
+      );
     } catch {}
   };
 
@@ -240,6 +254,27 @@ export default function Profil() {
           </div>
         </div>
       )}
+
+      <div className="bg-card border border-border rounded-2xl p-5">
+        <h2 className="font-heading font-semibold text-foreground mb-3">Droit de rétractation</h2>
+        {contratsEligibles.length > 0 ? (
+          <div className="space-y-2">
+            {contratsEligibles.map((c) => (
+              <div key={c.id} className="flex items-center justify-between gap-3 border border-border rounded-lg p-3">
+                <div>
+                  <p className="text-sm text-foreground">{c.offre_snapshot?.nom}</p>
+                  <p className="text-xs text-muted-foreground">Commandé le {new Date(c.created_date).toLocaleDateString("fr-FR")} — rétractation possible jusqu'au {new Date(c.date_limite_retractation).toLocaleDateString("fr-FR")}</p>
+                </div>
+                <Link to={`/espace-client/retractation/${c.id}`} className="text-accent text-xs font-semibold whitespace-nowrap">
+                  {TEXTE_POINT_ACCES_RETRACTATION} →
+                </Link>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Vous n'avez actuellement aucune commande éligible au droit de rétractation.</p>
+        )}
+      </div>
 
       <div className="bg-card border border-border rounded-2xl p-5">
         <button onClick={() => setPaiementsOuvert((o) => !o)} className="w-full flex items-center justify-between">

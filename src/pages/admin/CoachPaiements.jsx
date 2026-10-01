@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { CreditCard, TrendingUp, Filter, Search, Download } from "lucide-react";
+// Usage limité à l'export (écriture) de données internes, jamais à la lecture de fichiers externes :
+// limite l'exposition aux vulnérabilités connues de ce package (prototype pollution / ReDoS au parsing).
 import * as XLSX from "xlsx";
 
 const STATUTS = {

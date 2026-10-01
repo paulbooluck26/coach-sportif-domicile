@@ -1,14 +1,28 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
+// Unsplash sert déjà des formats modernes (WebP/AVIF) via
+// négociation de contenu (`auto=format`) et redimensionne à la volée
+// (`w=`) — inutile de re-générer des fichiers locaux pour cette image.
+// C'est l'élément LCP de la page d'accueil : chargement prioritaire
+// (fetchPriority) + preload dans index.html (voir HERO_IMG_BASE).
+const HERO_IMG_BASE = "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b";
+const HERO_SRCSET = [640, 1024, 1536, 1920]
+  .map((w) => `${HERO_IMG_BASE}?w=${w}&q=75&auto=format&fit=crop ${w}w`)
+  .join(", ");
+
 export default function Hero() {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1920&q=80"
+          src={`${HERO_IMG_BASE}?w=1920&q=75&auto=format&fit=crop`}
+          srcSet={HERO_SRCSET}
+          sizes="100vw"
           alt="Coaching sportif à domicile"
           className="w-full h-full object-cover"
+          fetchPriority="high"
+          decoding="sync"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/20" />
       </div>

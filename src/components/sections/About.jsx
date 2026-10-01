@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import ResponsivePicture from "@/components/ResponsivePicture";
 
 export default function About() {
   return (
@@ -7,9 +8,12 @@ export default function About() {
       <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
         <div className="relative">
           <div className="aspect-[4/5] rounded-2xl overflow-hidden">
-            <img
-              src="/coach-paul.png"
+            <ResponsivePicture
+              basePath="/img/coach-paul"
+              widths={[480, 800, 1200]}
               alt="Paul Booluck, coach PHYSIS COACHING"
+              sizes="(min-width: 1024px) 550px, 90vw"
+              loading="lazy"
               className="w-full h-full object-cover"
             />
           </div>

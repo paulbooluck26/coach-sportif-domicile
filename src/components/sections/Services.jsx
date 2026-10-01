@@ -1,12 +1,13 @@
 import { ArrowRight, Home, Laptop, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import ResponsivePicture from "@/components/ResponsivePicture";
 
 const accompagnements = [
   {
     icon: Home,
     title: "Coaching à domicile",
     desc: "Séances individuelles chez vous ou en extérieur. Matériel fourni.",
-    image: "/photo-domicile.png",
+    imageBase: "/img/photo-domicile",
     cta: "Voir les tarifs",
     link: "/tarifs",
   },
@@ -14,7 +15,7 @@ const accompagnements = [
     icon: Laptop,
     title: "Programmes en ligne",
     desc: "Un plan d'entraînement structuré, à suivre en autonomie via l'application, avec un suivi de votre coach.",
-    image: "/photo-programme.png",
+    imageBase: "/img/photo-programme",
     cta: "Voir les programmes",
     link: "/achat-programme",
   },
@@ -22,7 +23,7 @@ const accompagnements = [
     icon: Users,
     title: "Clubs & entreprises",
     desc: "Préparation physique et interventions collectives pour les structures qui veulent un accompagnement sur mesure.",
-    image: "/photo-club.png",
+    imageBase: "/img/photo-club",
     cta: "En savoir plus",
     link: "#clubs",
   },
@@ -48,9 +49,12 @@ export default function Services() {
           {accompagnements.map((s, i) => (
             <div key={i} className="group bg-background rounded-2xl overflow-hidden border border-accent/20 hover:shadow-xl transition-all duration-500 shrink-0 w-[82%] sm:w-[380px] lg:w-auto snap-start">
               <div className="aspect-[16/10] overflow-hidden">
-                <img
-                  src={s.image}
+                <ResponsivePicture
+                  basePath={s.imageBase}
+                  widths={[480, 900, 1400]}
                   alt={s.title}
+                  sizes="(min-width: 1024px) 400px, (min-width: 640px) 380px, 82vw"
+                  loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
               </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { Menu, X } from "lucide-react";
+import ResponsivePicture from "@/components/ResponsivePicture";
 
 const navLinks = [
   { label: "Le Coach", href: "/#coach" },
@@ -40,9 +41,13 @@ export default function PublicNavbar() {
     >
       <nav className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between">
         <Link to="/" className="flex items-center">
-          <img
-            src="/logo-physis.png"
+          <ResponsivePicture
+            basePath="/img/logo-physis"
+            widths={[120, 240, 360]}
+            fallbackExt="png"
             alt="Physis Coaching"
+            sizes="60px"
+            loading="eager"
             className="h-12 md:h-14 w-auto"
           />
         </Link>

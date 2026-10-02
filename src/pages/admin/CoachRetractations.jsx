@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { RotateCcw, Loader2 } from "lucide-react";
+import { RotateCcw, Loader2, Info } from "lucide-react";
 import { calculerPropositionRemboursement } from "@/lib/calculRetractation";
 import JournalExecutionContrat from "@/components/admin/JournalExecutionContrat";
 
@@ -60,6 +60,21 @@ export default function CoachRetractations() {
     }
   };
 
+  // Après une modification du journal (ajout ou annulation d'une entrée),
+  // la proposition est recalculée ; un montant déjà modifié à la main
+  // par l'admin n'est pas écrasé.
+  const recalculer = async () => {
+    if (!detail?.demande) return;
+    const [contrat, evenements] = await Promise.all([
+      base44.entities.Contrat.get(detail.demande.contrat_id),
+      base44.entities.EvenementExecution.filter({ contrat_id: detail.demande.contrat_id }),
+    ]);
+    const proposition = calculerPropositionRemboursement(contrat, evenements);
+    const ancienne = detail.proposition?.montantRembourseProposePar;
+    setDetail((d) => ({ ...d, contrat, evenements, proposition }));
+    if (Number(montantSaisi) === ancienne) setMontantSaisi(String(proposition.montantRembourseProposePar));
+  };
+
   const fermer = () => { setDetail(null); setMontantSaisi(""); setMotif(""); };
 
   const valider = async () => {
@@ -103,6 +118,19 @@ export default function CoachRetractations() {
         <h1 className="font-heading text-3xl font-bold text-foreground">Rétractations</h1>
         <p className="text-sm text-muted-foreground mt-1">Demandes de rétractation légale — calcul indicatif, validation manuelle obligatoire. Aucun remboursement Stripe n'est déclenché depuis cet écran.</p>
       </div>
+
+      <details className="group bg-secondary/10 border border-secondary/30 rounded-lg px-5 py-3 text-sm">
+        <summary className="flex items-center gap-2 cursor-pointer font-medium text-foreground select-none">
+          <Info className="w-4 h-4 text-secondary" /> Comment fonctionne cet écran ?
+        </summary>
+        <ul className="mt-3 space-y-2 text-foreground/80 leading-relaxed list-disc pl-5">
+          <li><strong>Statut du contrat</strong> : « payée » après le paiement ; dès qu'un client confirme sa rétractation, il passe en « rétractation demandée » et l'exécution est suspendue. Le dossier n'est clôturé qu'après votre instruction ici, jamais automatiquement.</li>
+          <li><strong>Journal d'exécution</strong> : liste datée de ce qui a réellement été fourni (bilan, séances, suivi...). Vous la complétez avec « Marquer un événement ». Elle n'est jamais effacée : une erreur se corrige avec « Annuler / corriger », qui ajoute une ligne de correction avec motif ; l'entrée annulée reste visible mais n'est plus valorisée.</li>
+          <li><strong>Grille de valorisation</strong> : le calcul applique la grille interne (poids par offre) aux seules entrées valides du journal, jamais un prorata de temps. C'est une proposition indicative, à faire valider par un juriste avant mise en production.</li>
+          <li><strong>Validation manuelle</strong> : vous fixez le montant retenu (la proposition peut être corrigée) avec un motif obligatoire, conservé dans l'historique, puis vous clôturez le dossier.</li>
+          <li><strong>Aucun remboursement Stripe automatique</strong> : cet écran n'envoie rien à Stripe ni au client ; un remboursement éventuel se fait à la main dans Stripe.</li>
+        </ul>
+      </details>
 
       <div className="flex gap-1 border-b border-border">
         {ONGLETS.map((o) => (
@@ -171,11 +199,14 @@ export default function CoachRetractations() {
                   <p className="text-sm text-foreground">Montant payé : <strong>{detail.proposition.montantPaye}€</strong></p>
                   <p className="text-sm text-foreground">Valeur du service fourni (estimée) : <strong>{detail.proposition.montantConsomme}€</strong></p>
                   <p className="text-sm text-foreground">Remboursement proposé : <strong>{detail.proposition.montantRembourseProposePar}€</strong></p>
+                  {detail.proposition.nbEvenementsAnnules > 0 && (
+                    <p className="text-xs text-muted-foreground">{detail.proposition.nbEvenementsAnnules} entrée(s) annulée(s) du journal ignorée(s) dans ce calcul.</p>
+                  )}
                   <p className="text-xs text-muted-foreground">{detail.proposition.avertissement}</p>
                   <pre className="text-xs text-muted-foreground bg-card rounded p-3 overflow-x-auto">{JSON.stringify(detail.proposition.detail, null, 2)}</pre>
                 </div>
 
-                <JournalExecutionContrat contratId={detail.contrat.id} />
+                <JournalExecutionContrat contratId={detail.contrat.id} onChange={recalculer} />
 
                 {detail.demande.statut === "recue" || detail.demande.statut === "instruite" ? (
                   <div className="space-y-3 border-t border-border pt-4">

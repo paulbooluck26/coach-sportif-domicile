@@ -12,6 +12,8 @@
 // produit jamais une décision : uniquement une proposition indicative
 // que l'admin valide ou corrige, avec motif conservé.
 
+import { evenementsEffectifs, debutExecution, TYPE_CORRECTION } from "@/lib/journalCorrections";
+
 // --- Bilan Physis — calcul par PALIER, pas une somme pondérée
 // d'événements indépendants (grille §Bilan Physis).
 export function calculerValeurBilan(prixCatalogue, evenements) {
@@ -118,7 +120,11 @@ const SKUS_PROGRAMME = ["programme-forge", "programme-start", "programme-legacy"
 // Point d'entrée UNIQUE utilisé par l'écran admin (étape 6). Ne fait
 // JAMAIS de choix définitif — retourne toujours une proposition
 // indicative que l'admin valide ou corrige.
-export function calculerPropositionRemboursement(contrat, evenements) {
+export function calculerPropositionRemboursement(contrat, evenementsBruts) {
+  // Les entrées annulées par une ligne de correction (et les lignes de
+  // correction elles-mêmes) ne sont jamais valorisées.
+  const evenements = evenementsEffectifs(evenementsBruts);
+  const nbEvenementsAnnules = evenementsBruts.filter((e) => e.type_evenement === TYPE_CORRECTION).length;
   const montantPaye = contrat.prix_detail?.total ?? 0;
   const sku = contrat.produit_sku;
   let resultat;
@@ -129,7 +135,7 @@ export function calculerPropositionRemboursement(contrat, evenements) {
     resultat = calculerValeurPackIntensif(montantPaye, evenements);
   } else if (SKUS_ABONNEMENT.includes(sku)) {
     const offreId = sku.replace("coaching-", "").replace("-abo", "");
-    resultat = calculerValeurAbonnement(offreId, montantPaye, contrat.date_debut_execution, evenements);
+    resultat = calculerValeurAbonnement(offreId, montantPaye, contrat.date_debut_execution || debutExecution(evenements), evenements);
   } else if (SKUS_PROGRAMME.includes(sku)) {
     resultat = calculerValeurProgrammeLigne(montantPaye, contrat.offre_snapshot?.duree_semaines, evenements);
   } else {
@@ -141,6 +147,7 @@ export function calculerPropositionRemboursement(contrat, evenements) {
     montantConsomme: resultat.montant,
     montantRembourseProposePar: Math.max(0, +(montantPaye - resultat.montant).toFixed(2)),
     detail: resultat,
+    nbEvenementsAnnules,
     avertissement:
       "Proposition indicative calculée à partir du journal d'exécution — à valider par un professionnel du droit avant mise en production. Ne constitue jamais une décision automatique.",
   };

@@ -4,35 +4,85 @@
 // en cas de rétractation. Convention applicative stricte : ce
 // journal est append-only — aucun code ne doit jamais appeler
 // EvenementExecution.update()/.delete(). Un événement enregistré par
-// erreur se corrige en ajoutant un événement compensatoire, jamais
-// en modifiant/supprimant l'original.
+// erreur s'ANNULE en ajoutant une ligne de correction explicite
+// (annulerEvenementExecution), jamais en modifiant/supprimant l'original.
 import { base44 } from "@/api/base44Client";
+import {
+  TYPE_CORRECTION,
+  TYPES_NON_ANNULABLES,
+  TYPES_NON_PRESTATION,
+  debutExecution,
+} from "@/lib/journalCorrections";
 
 export async function enregistrerEvenementExecution(
   contratId,
   typeEvenement,
-  { valeurAssociee, description, detail, creePar } = {}
+  { valeurAssociee, description, detail, creePar, dateEvenement, corrigeEvenementId } = {}
 ) {
   const evenement = await base44.entities.EvenementExecution.create({
     contrat_id: contratId,
     type_evenement: typeEvenement,
-    date_evenement: new Date().toISOString(),
+    date_evenement: dateEvenement || new Date().toISOString(),
     valeur_associee: valeurAssociee,
     description,
     detail,
     cree_par: creePar,
+    ...(corrigeEvenementId ? { corrige_evenement_id: corrigeEvenementId } : {}),
   });
 
-  // date_debut_execution est déterminée par le PREMIER événement
-  // réellement enregistré — jamais par la date de commande — car
-  // c'est ce moment qui fait juridiquement courir l'exécution de la
-  // prestation (cahier des charges §3 : "Date de début d'exécution —
-  // Moment précis où la prestation commence réellement").
-  const contrat = await base44.entities.Contrat.get(contratId);
-  if (contrat && !contrat.date_debut_execution) {
-    await base44.entities.Contrat.update(contratId, { date_debut_execution: new Date().toISOString() });
+  // date_debut_execution est déterminée par le PREMIER événement de
+  // prestation réellement enregistré — jamais par la date de commande —
+  // car c'est ce moment qui fait juridiquement courir l'exécution
+  // (cahier des charges §3). Les événements qui ne sont pas une
+  // prestation (demande de rétractation, remboursement, correction) ne
+  // la font pas démarrer.
+  if (!TYPES_NON_PRESTATION.includes(typeEvenement)) {
+    const contrat = await base44.entities.Contrat.get(contratId);
+    if (contrat && !contrat.date_debut_execution) {
+      await base44.entities.Contrat.update(contratId, { date_debut_execution: evenement.date_evenement });
+    }
   }
   return evenement;
+}
+
+// Annule une entrée du journal SANS la supprimer : ajoute une ligne de
+// correction (motif obligatoire) qui la référence. Option : enregistrer
+// dans la foulée l'entrée correcte (même date que l'originale, car c'est
+// le type qui était faux, pas le moment).
+export async function annulerEvenementExecution(
+  contratId,
+  evenement,
+  { motif, remplacerPar, creePar } = {}
+) {
+  if (!motif || !motif.trim()) throw new Error("Un motif est obligatoire pour annuler une entrée du journal.");
+  if (TYPES_NON_ANNULABLES.includes(evenement.type_evenement)) {
+    throw new Error("Cette entrée ne peut pas être annulée.");
+  }
+
+  const correction = await enregistrerEvenementExecution(contratId, TYPE_CORRECTION, {
+    description: motif.trim(),
+    creePar,
+    corrigeEvenementId: evenement.id,
+    detail: { type_annule: evenement.type_evenement, date_annulee: evenement.date_evenement },
+  });
+
+  let remplacante = null;
+  if (remplacerPar) {
+    remplacante = await enregistrerEvenementExecution(contratId, remplacerPar, {
+      description: `Remplace l'entrée « ${evenement.type_evenement} » annulée : ${motif.trim()}`,
+      creePar,
+      dateEvenement: evenement.date_evenement,
+      detail: { remplace_evenement_id: evenement.id, correction_id: correction.id },
+    });
+  }
+
+  // La date de début d'exécution du contrat suit les seules entrées
+  // effectives : si l'entrée annulée était la première, elle est
+  // recalculée (ou remise à vide s'il ne reste aucune prestation).
+  const tous = await base44.entities.EvenementExecution.filter({ contrat_id: contratId });
+  await base44.entities.Contrat.update(contratId, { date_debut_execution: debutExecution(tous) });
+
+  return { correction, remplacante };
 }
 
 // À appeler avant tout nouveau point d'exécution (réservation de

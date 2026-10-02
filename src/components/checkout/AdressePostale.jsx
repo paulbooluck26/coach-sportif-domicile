@@ -1,16 +1,42 @@
+import { useState } from "react";
+import ChampAdresseAutocomplete from "@/components/checkout/ChampAdresseAutocomplete";
+
 // Adresse postale structurée du Client, capturée une fois par
 // commande et figée sur le contrat (cahier des charges §3 : "Identité
 // du Client — Nom, email, adresse postale, identifiant compte").
-// Distincte de l'adresse d'intervention à domicile (ClientProfile.adresse,
-// ou le champ "Adresse de la séance" du flux Domicile) : cette
-// adresse-ci n'est jamais réutilisée pour localiser le coach, elle ne
-// sert qu'à identifier le Client dans la preuve de commande.
-export default function AdressePostale({ value, onChange, disabled = false }) {
-  const set = (field) => (e) => onChange({ ...value, [field]: e.target.value });
+// Une recherche avec propositions (API Adresse data.gouv.fr) remplit
+// les trois champs ; ils restent modifiables à la main (adresse hors
+// France, numéro absent de la base...).
+//
+// onChange(valeur, depuisSuggestion) : le second argument vaut true
+// quand l'adresse vient d'une proposition sélectionnée (donc fiable),
+// false quand elle a été tapée/corrigée à la main.
+export default function AdressePostale({
+  value,
+  onChange,
+  disabled = false,
+  titre = "Votre adresse",
+  aide = "Utilisée pour identifier votre commande (preuve d'achat).",
+}) {
+  const [recherche, setRecherche] = useState("");
+  const set = (field) => (e) => onChange({ ...value, [field]: e.target.value }, false);
+
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Adresse postale</label>
+        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{titre}</label>
+        <ChampAdresseAutocomplete
+          value={recherche}
+          onChange={setRecherche}
+          disabled={disabled}
+          onSelect={(s) => {
+            setRecherche(s.label);
+            onChange({ ...value, rue: s.rue, codePostal: s.codePostal, ville: s.ville, pays: "France" }, true);
+          }}
+        />
+        <p className="text-xs text-muted-foreground mt-1.5">Tapez votre adresse puis choisissez une proposition : les champs ci-dessous se remplissent automatiquement.</p>
+      </div>
+      <div>
         <input
           required
           disabled={disabled}
@@ -38,7 +64,7 @@ export default function AdressePostale({ value, onChange, disabled = false }) {
           className="w-full border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-accent"
         />
       </div>
-      <p className="text-xs text-muted-foreground">Utilisée uniquement pour l'identification de votre commande (preuve d'achat) — pas pour localiser vos séances.</p>
+      {aide && <p className="text-xs text-muted-foreground">{aide}</p>}
     </div>
   );
 }

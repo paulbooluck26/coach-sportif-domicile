@@ -10,8 +10,9 @@ import { ChevronLeft, ChevronRight, CheckCircle2, Loader2, Sparkles, Check, Lock
 import { downloadICS } from "@/lib/calendarExport";
 import { suiviEvenement } from "@/lib/analytics";
 import { envoyerEmail } from "@/lib/emailSender";
-import { creerContratAvantPaiement, marquerContratPaye } from "@/lib/contratCapture";
+import { creerContratAvantPaiement, marquerContratPaye, derniereAdressePostale } from "@/lib/contratCapture";
 import ConsentementCommande from "@/components/checkout/ConsentementCommande";
+import RecapCommande from "@/components/checkout/RecapCommande";
 import AdressePostale, { adressePostaleVide, adressePostaleValide } from "@/components/checkout/AdressePostale";
 import { TEXTE_BOUTON_COMMANDE } from "@/lib/legalConfig";
 
@@ -143,6 +144,7 @@ export default function Programme() {
       if (p?.telephone) setTelephone(p.telephone);
       if (p?.objectif) setObjectif(p.objectif);
     }).catch(() => {});
+    derniereAdressePostale(user.id).then((a) => { if (a) setAdressePostaleForm(a); });
     base44.entities.Programme.filter({ statut: "actif" }).then((progs) => {
       const mien = progs.find((p) => !p.est_modele && (p.client_ids || []).includes(user.id));
       setProgrammeActif(mien || null);
@@ -406,6 +408,14 @@ export default function Programme() {
         </div>
 
         <AdressePostale value={adressePostaleForm} onChange={setAdressePostaleForm} disabled={paying} />
+        <RecapCommande
+          lignes={[
+            { label: `Programme ${offre.nom} (${offre.duree} semaines)`, valeur: `${offre.prix}€` },
+            ...(promoAppliquee ? [{ label: `Code promo ${codePromo.toUpperCase()}`, valeur: `-${promoAppliquee.reduction}€` }] : []),
+          ]}
+          total={promoAppliquee ? promoAppliquee.montantFinal : offre.prix}
+          notes={["Paiement unique, sans abonnement."]}
+        />
         <ConsentementCommande
           cgvAcceptee={cgvAcceptee}
           onCgvChange={setCgvAcceptee}

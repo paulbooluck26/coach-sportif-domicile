@@ -78,3 +78,22 @@ export async function marquerContratPaye(contratId, stripeSessionId) {
   await envoyerEmailConfirmationCommande(maj);
   return maj;
 }
+
+// Adresse postale du dernier contrat du Client, pour pré-remplir le
+// formulaire de commande (évite de retaper la même adresse à chaque
+// achat). Silencieux en cas d'erreur : le formulaire reste simplement vide.
+export async function derniereAdressePostale(userId) {
+  try {
+    const contrats = await base44.entities.Contrat.filter({ client_id: userId }, "-created_date");
+    const c = contrats[0];
+    if (!c?.client_adresse_rue) return null;
+    return {
+      rue: c.client_adresse_rue,
+      codePostal: c.client_adresse_code_postal,
+      ville: c.client_adresse_ville,
+      pays: c.client_adresse_pays || "France",
+    };
+  } catch {
+    return null;
+  }
+}

@@ -12,8 +12,11 @@ import CalendrierDispo from "@/components/CalendrierDispo";
 import { Link, useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Clock, MapPin, CreditCard, Lock, Loader2, CheckCircle2, CalendarDays, CalendarPlus, Flame } from "lucide-react";
 import { downloadICS } from "@/lib/calendarExport";
-import { creerContratAvantPaiement, marquerContratPaye } from "@/lib/contratCapture";
+import { creerContratAvantPaiement, marquerContratPaye, derniereAdressePostale } from "@/lib/contratCapture";
+import { formaterAdresse, geocoderTexte } from "@/lib/adresseBan";
 import ConsentementCommande from "@/components/checkout/ConsentementCommande";
+import RecapCommande from "@/components/checkout/RecapCommande";
+import ChampAdresseAutocomplete from "@/components/checkout/ChampAdresseAutocomplete";
 import AdressePostale, { adressePostaleVide, adressePostaleValide } from "@/components/checkout/AdressePostale";
 import { TEXTE_BOUTON_COMMANDE } from "@/lib/legalConfig";
 
@@ -165,6 +168,28 @@ export default function Domicile() {
   const [cgvAcceptee, setCgvAcceptee] = useState(false);
   const [commencementImmediat, setCommencementImmediat] = useState(false);
   const [adressePostaleForm, setAdressePostaleForm] = useState(adressePostaleVide());
+  // Par défaut l'adresse des séances est l'adresse de la commande (une
+  // seule saisie) ; la case "autre adresse" ne sert qu'aux cas où elles
+  // diffèrent (ex. séances chez un proche, en extérieur).
+  const [memeAdresse, setMemeAdresse] = useState(true);
+  const [adresseVerifiee, setAdresseVerifiee] = useState(false);
+
+  useEffect(() => {
+    if (!memeAdresse) return;
+    setAdresse(formaterAdresse(adressePostaleForm));
+    setDeplacement(null);
+    setDeplacementErreur("");
+  }, [memeAdresse, adressePostaleForm.rue, adressePostaleForm.codePostal, adressePostaleForm.ville]);
+
+  // Calcul des frais dès qu'une adresse vient d'une proposition
+  // sélectionnée (donc fiable) — plus besoin de cliquer, et on évite de
+  // payer sans que les frais aient été calculés. Une adresse tapée à la
+  // main garde le bouton "Vérifier les frais de déplacement".
+  useEffect(() => {
+    if (step !== "paiement" || !adresseVerifiee || !adresse.trim()) return;
+    const t = setTimeout(() => { verifierDeplacement(); }, 300);
+    return () => clearTimeout(t);
+  }, [step, adresseVerifiee, adresse]);
 
   useEffect(() => {
     if (stripeSessionId) {
@@ -204,12 +229,32 @@ export default function Domicile() {
     if (!user) return;
     (async () => {
       try {
-        const [seances, profiles] = await Promise.all([
+        const [seances, profiles, derniere] = await Promise.all([
           base44.entities.Seance.filter({ client_id: user.id }, "date"),
           base44.entities.ClientProfile.filter({ user_id: user.id }),
+          derniereAdressePostale(user.id),
         ]);
         setDiagDone(seances.some(s => s.session_type === "evaluation" && s.status !== "cancelled"));
-        if (profiles[0]?.adresse) setAdresse(profiles[0].adresse);
+
+        // Pré-remplissage : adresse du dernier contrat, sinon adresse de
+        // profil géocodée. Si l'adresse de profil (séances) est
+        // différente de l'adresse postale connue, on garde les deux.
+        const adresseProfil = profiles[0]?.adresse || "";
+        const normaliser = (t) => t.toLowerCase().replace(/[^a-z0-9]/g, "");
+        let postale = derniere;
+        if (!postale && adresseProfil) {
+          const g = await geocoderTexte(adresseProfil);
+          if (g) postale = { rue: g.rue, codePostal: g.codePostal, ville: g.ville, pays: "France" };
+        }
+        if (postale) {
+          setAdressePostaleForm(postale);
+          const differente = derniere && adresseProfil && normaliser(adresseProfil) !== normaliser(formaterAdresse(postale));
+          if (differente) { setMemeAdresse(false); setAdresse(adresseProfil); }
+          else setAdresseVerifiee(true);
+        } else if (adresseProfil) {
+          setMemeAdresse(false);
+          setAdresse(adresseProfil);
+        }
       } catch {
         setDiagDone(false);
       }
@@ -527,18 +572,43 @@ Paul BOOLUCK - PHYSIS COACHING`,
             </div>
             {(
             <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Adresse de la séance</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <div className="space-y-4">
+                <AdressePostale
+                  value={adressePostaleForm}
+                  onChange={(v, depuisProposition) => { setAdressePostaleForm(v); setAdresseVerifiee(!!depuisProposition); }}
+                  disabled={paying}
+                  titre={memeAdresse ? "Votre adresse (commande et séances)" : "Votre adresse postale"}
+                  aide={memeAdresse
+                    ? "Les séances auront lieu à cette adresse ; elle sert aussi à identifier votre commande (preuve d'achat)."
+                    : "Utilisée uniquement pour identifier votre commande (preuve d'achat)."}
+                />
+                <label className="flex items-start gap-2.5 text-sm text-foreground/80">
                   <input
-                    required
-                    value={adresse}
-                    onChange={(e) => { setAdresse(e.target.value); setDeplacement(null); setDeplacementErreur(""); }}
-                    placeholder="12 rue Exemple, 68000 Colmar"
-                    className="w-full border border-border rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-accent"
+                    type="checkbox"
+                    checked={!memeAdresse}
+                    disabled={paying}
+                    onChange={(e) => {
+                      setMemeAdresse(!e.target.checked);
+                      setAdresseVerifiee(false);
+                      setDeplacement(null);
+                      setDeplacementErreur("");
+                      if (e.target.checked) setAdresse("");
+                    }}
+                    className="mt-0.5 w-4 h-4 flex-shrink-0"
                   />
-                </div>
+                  <span>Les séances auront lieu à une autre adresse</span>
+                </label>
+                {!memeAdresse && (
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Adresse des séances</label>
+                    <ChampAdresseAutocomplete
+                      value={adresse}
+                      disabled={paying}
+                      onChange={(t) => { setAdresse(t); setAdresseVerifiee(false); setDeplacement(null); setDeplacementErreur(""); }}
+                      onSelect={(s) => { setAdresse(formaterAdresse(s)); setAdresseVerifiee(true); setDeplacement(null); setDeplacementErreur(""); }}
+                    />
+                  </div>
+                )}
                 <button
                   onClick={verifierDeplacement}
                   disabled={!adresse.trim() || verifDeplacement}
@@ -590,7 +660,25 @@ Paul BOOLUCK - PHYSIS COACHING`,
             {promoErreur && <p className="text-xs text-destructive mt-1.5">{promoErreur}</p>}
           </div>
 
-          <AdressePostale value={adressePostaleForm} onChange={setAdressePostaleForm} disabled={paying} />
+          {(() => {
+            const frais = deplacement && !deplacement.horsZone ? deplacement.frais : 0;
+            const abo = estAbonnement(offreId);
+            const engage = offreId === "hybrid" || offreId === "signature";
+            const lignes = [{ label: offre.titre, valeur: `${offre.prix}€${abo ? "/mois" : ""}` }];
+            if (promoAppliquee) lignes.push({ label: `Code promo ${codePromo.toUpperCase()}`, valeur: `-${promoAppliquee.reduction}€` });
+            if (deplacement && !deplacement.horsZone) lignes.push({ label: "Frais de déplacement", valeur: frais > 0 ? `+${frais}€` : "Gratuit" });
+            const notes = [];
+            if (abo && engage) notes.push(`Abonnement mensuel avec engagement initial de 3 mois, soit un montant total minimal de ${offre.prix * 3}€ sur la période d'engagement. Résiliation hors cas légaux : voir l'article 6.2 des CGV.`);
+            else if (abo) notes.push("Abonnement mensuel sans engagement, reconduit chaque mois. Vous pouvez arrêter le renouvellement à tout moment depuis votre espace client.");
+            return (
+              <RecapCommande
+                lignes={lignes}
+                total={(promoAppliquee ? promoAppliquee.montantFinal : offre.prix) + frais}
+                suffixeTotal={abo ? "/mois" : ""}
+                notes={notes}
+              />
+            );
+          })()}
           <ConsentementCommande
             cgvAcceptee={cgvAcceptee}
             onCgvChange={setCgvAcceptee}
@@ -602,7 +690,7 @@ Paul BOOLUCK - PHYSIS COACHING`,
           <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lock className="w-3.5 h-3.5" /> Paiement sécurisé via Stripe · Annulation gratuite jusqu'à 24h avant</div>
           <button
             onClick={payer}
-            disabled={paying || !adresse.trim() || deplacement?.horsZone || !cgvAcceptee || !commencementImmediat || !adressePostaleValide(adressePostaleForm)}
+            disabled={paying || verifDeplacement || !adresse.trim() || deplacement?.horsZone || !cgvAcceptee || !commencementImmediat || !adressePostaleValide(adressePostaleForm)}
             className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {paying ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirection vers le paiement...</> : <><Lock className="w-4 h-4" /> {TEXTE_BOUTON_COMMANDE}</>}

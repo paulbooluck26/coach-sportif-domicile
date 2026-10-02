@@ -28,7 +28,7 @@ export default function Confidentialite() {
         <section>
           <h2 className="font-heading font-semibold text-primary text-lg mb-2">Sous-traitants</h2>
           <p>
-            Vos données sont hébergées et traitées par : Supabase (base de données, authentification), Vercel (hébergement du site), Stripe (paiements), Resend (envoi d'emails), Google (synchronisation d'agenda, connexion). Chacun de ces prestataires applique ses propres mesures de sécurité et de conformité.
+            Vos données sont hébergées et traitées par : Supabase (base de données, authentification), Vercel (hébergement du site), Stripe (paiements), Resend (envoi d'emails), Google (synchronisation d'agenda, connexion), API Adresse de l'État — data.gouv.fr (suggestions d'adresse pendant la saisie, aucune donnée n'est conservée par PHYSIS COACHING à ce titre). Chacun de ces prestataires applique ses propres mesures de sécurité et de conformité.
           </p>
         </section>
 
